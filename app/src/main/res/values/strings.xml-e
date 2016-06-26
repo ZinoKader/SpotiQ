@@ -1,0 +1,20 @@
+<resources>
+    <string name="app_name">SpotiQ</string>
+
+    <!--LOGIN-->
+    <string name="spotify_account_name">Account name or email</string>
+    <string name="spotify_account_password">Password</string>
+    <string name="log_in">Connect to Spotify</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="spotiq">SpotiQ</string>
+    <string name="create_party">Create party</string>
+    <string name="join_party">Join party</string>
+    <string name="party_name_dialog">Give your party a name</string>
+    <string name="party_name_hint">Party name</string>
+    <string name="party_password_hint">Party password</string>
+    <string name="cancel">Cancel</string>
+    <string name="search_for_songs">Search for songs</string>
+
+</resources>

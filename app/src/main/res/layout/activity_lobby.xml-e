@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:id="@+id/activity_lobby_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingLeft="16dp"
+                android:paddingRight="16dp"
+                android:background="@color/colorAccent">
+
+    <TextView
+        android:transitionName="logoTransition"
+        android:text="@string/spotiq"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/logoTextViewHome"
+        android:textColor="#FAFAFA"
+        android:textSize="38sp"
+        android:layout_marginTop="32dp"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"/>
+
+    <Button
+        android:id="@+id/create_party_button"
+        android:text="@string/create_party"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        style="@style/Widget.AppCompat.Button.Colored"
+        android:textColor="#fafafa"
+        android:elevation="4dp"
+        android:textSize="24sp"
+        android:padding="25dp"
+        android:layout_marginTop="89dp"
+        android:layout_below="@+id/logoTextViewHome"
+        android:layout_centerHorizontal="true"/>
+
+    <Button
+        android:id="@+id/join_party_button"
+        android:text="@string/join_party"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        style="@style/Widget.AppCompat.Button.Colored"
+        android:textColor="#fafafa"
+        android:elevation="4dp"
+        android:textSize="16sp"
+        android:padding="25dp"
+        android:layout_marginTop="9dp"
+        android:layout_below="@+id/create_party_button"
+        android:layout_centerHorizontal="true"/>
+
+    <Button
+        android:text="PAUSE"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/pause_button"
+        android:layout_alignBaseline="@+id/play_button"
+        android:layout_alignBottom="@+id/play_button"
+        android:layout_alignEnd="@+id/create_party_button"/>
+
+    <Button
+        android:text="PLAY"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="93dp"
+        android:id="@+id/play_button"
+        android:layout_below="@+id/join_party_button"
+        android:layout_alignStart="@+id/create_party_button"/>
+
+    <Button
+        android:text="Next song"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:id="@+id/next_button"
+        android:layout_below="@+id/pause_button"
+        android:layout_centerHorizontal="true"/>
+
+</RelativeLayout>

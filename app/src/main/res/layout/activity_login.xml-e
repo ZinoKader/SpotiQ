@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                android:id="@+id/activity_login_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingLeft="16dp"
+                android:paddingRight="16dp"
+                android:background="@color/colorAccent">
+
+    <TextView
+        android:transitionName="logoTransition"
+        android:text="@string/spotiq"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/logoTextView"
+        android:textColor="#FAFAFA"
+        android:textSize="@dimen/loginLogoTextViewSize"
+        android:layout_marginTop="134dp"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"/>
+
+    <Button
+        android:text="@string/log_in"
+        android:layout_width="350dp"
+        android:layout_height="wrap_content"
+        android:id="@+id/loginButton"
+        style="@style/Widget.AppCompat.Button.Colored"
+        android:textColor="#fafafa"
+        android:elevation="4dp"
+        android:textSize="22sp"
+        android:padding="25dp"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true"/>
+
+</RelativeLayout>
