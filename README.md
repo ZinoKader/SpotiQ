@@ -13,4 +13,4 @@ Built using:
 
 [SpotiQ on the Play Store](https://play.google.com/store/apps/details?id=se.zinokader.spotiq "SpotiQ on the Play Store")
 
-![]({{site.baseurl}}//spotiqbanner.png)
+![](https://github.com/ZinoKader/SpotiQ/blob/master/spotiqbanner.png?raw=true)
