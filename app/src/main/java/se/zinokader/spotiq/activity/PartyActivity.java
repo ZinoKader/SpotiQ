@@ -83,7 +83,6 @@ public class PartyActivity extends BaseActivity implements PartyView, SheetLayou
     IntentFilter broadcastfilter = new IntentFilter(Constants.NOTIFICATION_PLAYPAUSE_ACTION);
 
     private Snackbar snackbar;
-
     private MaterialDialog sessionexpireddialog;
     private PlaylistRecyclerViewAdapter playlistadapter;
     private Animatable playpauseicon;
