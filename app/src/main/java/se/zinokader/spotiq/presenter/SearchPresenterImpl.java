@@ -34,7 +34,7 @@ import static se.zinokader.spotiq.constants.Constants.SNACKBAR_LENGTH_INDEFINITE
 import static se.zinokader.spotiq.constants.Constants.SNACKBAR_LENGTH_LONG;
 import static se.zinokader.spotiq.constants.Constants.SNACKBAR_LENGTH_SHORT;
 
-
+ 
 public class SearchPresenterImpl implements SearchPresenter {
 
     private SearchView view;
