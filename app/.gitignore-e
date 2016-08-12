@@ -6,5 +6,5 @@
 .DS_Store
 /build
 /captures
-google-services.json
-Constants.java
+/google-services.json
+/src/main/java/se/zinokader/spotiq/constants/Constants.java
