@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                xmlns:autofit="http://schemas.android.com/tools"
+                android:clipChildren="false"
+                android:clipToPadding="false"
+                android:gravity="center"
+                android:clickable="true"
+                android:longClickable="true"
+                android:foreground="?android:attr/selectableItemBackground"
+                android:id="@+id/recyclerview_item_holder_normal"
+                android:layout_width="match_parent"
+                android:layout_height="150dp">
+
+    <RelativeLayout
+        android:gravity="start"
+        android:layout_marginTop="-5dp"
+        android:layout_marginStart="20dp"
+        android:layout_width="match_parent"
+        android:layout_height="40dp">
+
+        <com.mikhaellopez.circularimageview.CircularImageView
+            android:id="@+id/profilePicture"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            app:civ_border_color="@color/materialWhiteTransparent"
+            app:civ_border_width="1dp"
+            app:civ_shadow="true"
+            app:civ_shadow_radius="5"
+            app:civ_shadow_color="@color/materialGrayDark"/>
+
+        <TextView
+            android:id="@+id/profileName"
+            android:layout_toEndOf="@id/profilePicture"
+            android:layout_marginTop="10dp"
+            android:layout_marginStart="3dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="12sp"
+            android:textColor="@color/materialWhite"/>
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:gravity="end"
+        android:clipChildren="false"
+        android:clipToPadding="false"
+        android:layout_marginEnd="20dp"
+        android:layout_width="match_parent"
+        android:layout_height="40dp">
+
+        <com.varunest.sparkbutton.SparkButton
+            android:visibility="gone"
+            android:id="@+id/likeButton"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            app:sparkbutton_activeImage="@drawable/ic_heart_enabled"
+            app:sparkbutton_inActiveImage="@drawable/ic_heart_disabled"
+            app:sparkbutton_iconSize="40dp"
+            app:sparkbutton_primaryColor="@color/heart_light"
+            app:sparkbutton_secondaryColor="@color/heart_dark" />
+
+    </RelativeLayout>
+
+
+    <RelativeLayout
+        android:gravity="center"
+        android:paddingStart="15dp"
+        android:paddingEnd="15dp"
+        android:layout_marginTop="18dp"
+        android:layout_width="match_parent"
+        android:layout_height="100dp">
+
+        <TextView
+            android:id="@+id/songName"
+            android:gravity="center"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textColor="@color/materialWhite"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="20sp"
+            android:shadowColor="@color/materialGrayDark"
+            android:shadowDx="8"
+            android:shadowDy="4"
+            android:shadowRadius="15"/>
+
+        <TextView
+            android:id="@+id/artistName"
+            android:gravity="center"
+            android:layout_marginTop="30dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textColor="@color/materialWhite"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="17sp"
+            android:shadowColor="@color/materialGrayDark"
+            android:shadowDx="8"
+            android:shadowDy="4"
+            android:shadowRadius="15"/>
+
+        <TextView
+            android:id="@+id/runTime"
+            android:gravity="center"
+            android:layout_marginTop="57dp"
+            android:textColor="@color/materialWhite"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:shadowColor="@color/materialGrayDark"
+            android:shadowDx="8"
+            android:shadowDy="4"
+            android:shadowRadius="15"/>
+
+
+    </RelativeLayout>
+
+
+</RelativeLayout>

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             android:layout_height="wrap_content" android:orientation="vertical"
+             android:layout_width="match_parent"
+             android:background="?attr/selectableItemBackground"
+             android:paddingTop="2dp"
+             android:paddingBottom="2dp">
+
+
+    <TableRow android:layout_height="wrap_content"
+              android:layout_width="wrap_content">
+
+        <TextView android:id="@+id/songName"
+                  android:ellipsize="end"
+                  android:maxLines="1"
+                  android:textColor="@color/materialWhite"
+                  android:gravity="center"
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:layout_weight="1"
+                  android:paddingStart="20dp"
+                  android:paddingEnd="20dp"
+                  android:textSize="17sp"/>
+
+    </TableRow>
+
+    <TableRow android:layout_height="wrap_content"
+              android:layout_width="wrap_content">
+
+        <TextView android:id="@+id/artistName"
+                  android:ellipsize="end"
+                  android:maxLines="1"
+                  android:textColor="@color/materialWhite"
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:gravity="center"
+                  android:layout_weight="1"
+                  android:paddingStart="20dp"
+                  android:paddingEnd="20dp"
+                  android:textSize="15sp" />
+
+    </TableRow>
+
+    <TableRow android:layout_height="wrap_content"
+              android:layout_width="wrap_content">
+
+        <TextView android:id="@+id/runTime"
+                  android:textColor="@color/materialWhite"
+                  android:layout_height="wrap_content"
+                  android:layout_width="wrap_content"
+                  android:layout_weight="1"
+                  android:gravity="center"
+                  android:textSize="12sp" />
+
+    </TableRow>
+
+
+
+
+</TableLayout>

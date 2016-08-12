@@ -1,19 +1,12 @@
 package se.zinokader.spotiq.presenter;
-import android.content.Context;
-import android.content.Intent;
-
-
-import se.zinokader.spotiq.model.Party;
+import com.mukesh.tinydb.TinyDB;
+import com.spotify.sdk.android.authentication.AuthenticationResponse;
 import se.zinokader.spotiq.view.LobbyView;
-
 
 public interface LobbyPresenter {
     void setView(LobbyView view);
     void detach();
-    void setupPlayer(Context context, Intent intent, int resultCode, int requestCode);
-    void showPartyDialog();
-    void createParty(Party party);
-    void playSong(String songURI);
-    void pauseSong();
-    void nextSong();
+    void setUserId(TinyDB datastore, AuthenticationResponse response);
+    void createParty(String partyname, String partypassword, String userid, AuthenticationResponse response);
+    void joinParty(String partyname, String partypassword, AuthenticationResponse response);
 }

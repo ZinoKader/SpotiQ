@@ -5,75 +5,126 @@
                 android:id="@+id/activity_lobby_view"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:paddingLeft="16dp"
-                android:paddingRight="16dp"
-                android:background="@color/colorAccent">
+                android:background="@color/colorPrimary">
 
-    <TextView
-        android:transitionName="logoTransition"
-        android:text="@string/spotiq"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/logoTextViewHome"
-        android:textColor="#FAFAFA"
-        android:textSize="38sp"
-        android:layout_marginTop="32dp"
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <com.mikhaellopez.circularimageview.CircularImageView
+            android:id="@+id/lobby_user_profile_image"
+            android:background="?selectableItemBackground"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="10dp"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            app:civ_border_color="@color/materialWhiteTransparent"
+            app:civ_border_width="1dp"
+            app:civ_shadow="true"
+            app:civ_shadow_radius="15"
+            app:civ_shadow_color="@color/colorPrimaryDarker"/>
+
+        <TextView
+            android:id="@+id/lobby_user_profile_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="34dp"
+            android:layout_marginStart="4dp"
+            android:textSize="12sp"
+            android:textColor="@color/materialWhite"/>
+
+    </LinearLayout>
+
+    <ImageView
+        android:src="@drawable/spotiq_logo"
+        android:transitionName="@string/logo_transition_name"
+        android:contentDescription="@string/spotiq_logo"
+        android:layout_width="150dp"
+        android:layout_height="84dp"
+        android:id="@+id/spotiq_logo"
         android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"/>
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="95dp"/>
 
-    <Button
-        android:id="@+id/create_party_button"
-        android:text="@string/create_party"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:gravity="center"
+        android:layout_centerInParent="true"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        style="@style/Widget.AppCompat.Button.Colored"
-        android:textColor="#fafafa"
-        android:elevation="4dp"
-        android:textSize="24sp"
-        android:padding="25dp"
-        android:layout_marginTop="89dp"
-        android:layout_below="@+id/logoTextViewHome"
-        android:layout_centerHorizontal="true"/>
+        android:id="@+id/linearLayout">
 
-    <Button
-        android:id="@+id/join_party_button"
-        android:text="@string/join_party"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        style="@style/Widget.AppCompat.Button.Colored"
-        android:textColor="#fafafa"
-        android:elevation="4dp"
-        android:textSize="16sp"
-        android:padding="25dp"
-        android:layout_marginTop="9dp"
-        android:layout_below="@+id/create_party_button"
-        android:layout_centerHorizontal="true"/>
+        <RelativeLayout
+            android:id="@+id/create_party_layout"
+            android:background="?attr/selectableItemBackground"
+            android:clickable="true"
+            android:layout_marginEnd="30dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
 
-    <Button
-        android:text="PAUSE"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/pause_button"
-        android:layout_alignBaseline="@+id/play_button"
-        android:layout_alignBottom="@+id/play_button"
-        android:layout_alignEnd="@+id/create_party_button"/>
+            <ImageView
+                android:clickable="false"
+                android:src="@drawable/create_party"
+                android:transitionName="@string/create_party_button_transition"
+                android:id="@+id/create_party_button"
+                android:layout_width="128dp"
+                android:layout_height="128dp"
+                android:contentDescription="@string/create_a_party"/>
 
-    <Button
-        android:text="PLAY"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="93dp"
-        android:id="@+id/play_button"
-        android:layout_below="@+id/join_party_button"
-        android:layout_alignStart="@+id/create_party_button"/>
+            <TextView
+                android:id="@+id/create_party_text"
+                android:text="@string/create_party"
+                android:textSize="18sp"
+                android:textColor="@color/materialWhite"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:layout_below="@id/create_party_button"/>
 
-    <Button
-        android:text="Next song"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="30dp"
-        android:id="@+id/next_button"
-        android:layout_below="@+id/pause_button"
-        android:layout_centerHorizontal="true"/>
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/join_party_layout"
+            android:background="?attr/selectableItemBackground"
+            android:clickable="true"
+            android:layout_marginStart="30dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:clickable="false"
+                android:src="@drawable/join_party"
+                android:transitionName="@string/join_party_button_transition"
+                android:id="@+id/join_party_button"
+                android:layout_gravity="end"
+                android:layout_width="128dp"
+                android:layout_height="128dp"
+                android:contentDescription="@string/join_a_party"/>
+
+            <TextView
+                android:id="@+id/join_party_text"
+                android:text="@string/join_party"
+                android:textSize="18sp"
+                android:textColor="@color/materialWhite"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:layout_below="@id/join_party_button"/>
+
+        </RelativeLayout>
+
+
+    </LinearLayout>
+
+    <uk.co.barbuzz.beerprogressview.BeerProgressView
+        android:id="@+id/beer_progress_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:beerColor="#EFA601"
+        app:bubbleColor="#B67200"
+        app:beerProgress="0"
+        app:waveMax="100"
+        app:waveAmplitude="5dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true"/>
 
 </RelativeLayout>

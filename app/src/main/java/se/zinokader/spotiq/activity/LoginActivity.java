@@ -3,24 +3,39 @@ package se.zinokader.spotiq.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.ActivityOptionsCompat;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.util.Pair;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
-import android.widget.TextView;
+import android.widget.ImageView;
 
+import com.dd.processbutton.iml.ActionProcessButton;
+import com.spotify.sdk.android.authentication.AuthenticationClient;
+import com.spotify.sdk.android.authentication.AuthenticationRequest;
+import com.spotify.sdk.android.authentication.AuthenticationResponse;
 import com.spotify.sdk.android.player.ConnectionStateCallback;
-import com.spotify.sdk.android.player.Spotify;
 
 import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import se.zinokader.spotiq.MvpApplication;
 import se.zinokader.spotiq.R;
+import se.zinokader.spotiq.SpotiqApplication;
 import se.zinokader.spotiq.presenter.LoginPresenter;
 import se.zinokader.spotiq.view.LoginView;
+
+import static se.zinokader.spotiq.constants.Constants.REQUEST_CODE;
+import static se.zinokader.spotiq.constants.Constants.SPOTIFY_CLIENT_ID;
+import static se.zinokader.spotiq.constants.Constants.SPOTIFY_PERMISSION_MODIFYPRIVATEPLAYLIST;
+import static se.zinokader.spotiq.constants.Constants.SPOTIFY_PERMISSION_MODIFYPUBLICPLAYLIST;
+import static se.zinokader.spotiq.constants.Constants.SPOTIFY_PERMISSION_READ_PRIVATE;
+import static se.zinokader.spotiq.constants.Constants.SPOTIFY_PERMISSION_STREAMING;
+import static se.zinokader.spotiq.constants.Constants.SPOTIFY_REDIRECT_URI;
 
 public class LoginActivity extends BaseActivity implements LoginView, ConnectionStateCallback {
 
@@ -29,21 +44,28 @@ public class LoginActivity extends BaseActivity implements LoginView, Connection
 
     @BindView(R.id.activity_login_view)
     View mainview;
-    @BindView(R.id.logoTextView)
-    TextView logoTextView;
+    @BindView(R.id.spotiq_logo)
+    ImageView spotiqlogo;
     @BindView(R.id.loginButton)
-    Button loginButton;
-
+    ActionProcessButton loginbutton;
+    @BindView(R.id.create_party_button)
+    ImageView createpartybutton;
+    @BindView(R.id.join_party_button)
+    ImageView joinpartybutton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setTheme(R.style.LoginTheme);
         setContentView(R.layout.activity_login);
-        ((MvpApplication)getApplication()).getComponent().inject(this);
+        ((SpotiqApplication)getApplication()).getComponent().inject(this);
         ButterKnife.bind(this);
-        logoTextView.setTypeface(BACKTOBLACK);
-        loginButton.setTypeface(ROBOTOLIGHT);
+
+        loginbutton.setTypeface(ROBOTOLIGHT);
+        loginbutton.setMode(ActionProcessButton.Mode.ENDLESS);
+        loginbutton.setColorScheme(ContextCompat.getColor(this, R.color.colorPrimaryTransparent), ContextCompat.getColor(this, R.color.materialWhite),
+                ContextCompat.getColor(this, R.color.colorPrimary), ContextCompat.getColor(this, R.color.colorLightTint));
+
     }
 
     @Override
@@ -55,13 +77,18 @@ public class LoginActivity extends BaseActivity implements LoginView, Connection
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Spotify.destroyPlayer(this);
     }
 
     @OnClick(R.id.loginButton)
     @Override
     public void loginPressed() {
-        loginPresenter.login(this);
+        AuthenticationRequest.Builder builder = new AuthenticationRequest.Builder(SPOTIFY_CLIENT_ID, AuthenticationResponse.Type.TOKEN, SPOTIFY_REDIRECT_URI);
+        builder.setScopes(new String[]{SPOTIFY_PERMISSION_READ_PRIVATE, SPOTIFY_PERMISSION_STREAMING,
+                SPOTIFY_PERMISSION_MODIFYPUBLICPLAYLIST, SPOTIFY_PERMISSION_MODIFYPRIVATEPLAYLIST});
+        AuthenticationRequest request = builder.build();
+        AuthenticationClient.openLoginActivity(this, REQUEST_CODE, request);
+
+        loginbutton.setProgress(1);
     }
 
     @Override
@@ -93,13 +120,57 @@ public class LoginActivity extends BaseActivity implements LoginView, Connection
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
         super.onActivityResult(requestCode, resultCode, intent);
+
         if (requestCode == REQUEST_CODE) {
-            LobbyActivity.resultCode = resultCode;
-            LobbyActivity.requestCode = requestCode;
-            LobbyActivity.intent = intent;
-            Intent i = new Intent(LoginActivity.this, LobbyActivity.class);
-            startActivity(i);
+
+            final AuthenticationResponse response = AuthenticationClient.getResponse(resultCode, intent);
+
+            switch (response.getType()) {
+                case TOKEN:
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+
+                            Intent i = new Intent(LoginActivity.this, LobbyActivity.class);
+                            Bundle responsebundle = new Bundle();
+                            responsebundle.putParcelable("response", response);
+                            i.putExtra("responsebundle", responsebundle);
+
+                            Pair<View, String> p1 = Pair.create((View)spotiqlogo, getString(R.string.logo_transition_name));
+                            Pair<View, String> p2 = Pair.create((View)createpartybutton, getString(R.string.create_party_button_transition));
+                            Pair<View, String> p3 = Pair.create((View)joinpartybutton, getString(R.string.join_party_button_transition));
+
+                            ActivityOptionsCompat sharedtransition = ActivityOptionsCompat.
+                                    makeSceneTransitionAnimation(LoginActivity.this, p1, p2, p3);
+                            ActivityCompat.startActivity(LoginActivity.this, i, sharedtransition.toBundle());
+
+                            loginbutton.setProgress(100);
+
+                            new Handler().postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    loginbutton.setProgress(0);
+                                }
+                            }, 2000);
+                        }
+                    }, 800); //delay så att lobbyactivity hinner beräkna nya bounds på logo i transition
+                    break;
+                case ERROR:
+                    Snackbar.make(mainview, "Something went wrong, that's all we know", Snackbar.LENGTH_LONG)
+                            .setAction("Retry", new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {loginPressed();}}).show();
+                    Log.d("LOGIN ERROR", response.getError());
+                    loginbutton.setProgress(-1);
+                    break;
+                //Användaren tryckte bak medan auth pågick
+                default:
+                    Snackbar.make(mainview, "Authentication cancelled", Snackbar.LENGTH_LONG).show();
+                    loginbutton.setProgress(0);
+            }
+
         }
+
     }
 }
 

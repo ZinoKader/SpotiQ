@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:tools="http://schemas.android.com/tools"
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              android:background="@color/colorPrimary"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content">
+
+    <TextView
+        android:id="@+id/dialogContent"
+        android:textSize="12sp"
+        android:fontFamily="sans-serif-condensed"
+        android:textColor="@color/materialWhite"
+        android:textAlignment="center"
+        android:layout_marginBottom="5dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        />
+
+    <LinearLayout
+        android:background="@color/materialWhiteTransparent"
+        android:layout_marginBottom="4dp"
+        android:layout_gravity="center"
+        android:layout_width="170dp"
+        android:layout_height="1dp">
+    </LinearLayout>
+
+    <com.github.florent37.materialtextfield.MaterialTextField
+        android:layout_gravity="center"
+        android:padding="5dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:mtf_image="@drawable/ic_pencil"
+        app:mtf_labelColor="@color/materialWhite"
+        app:mtf_cardCollapsedHeight="1dp"
+        app:mtf_openKeyboardOnFocus="true"
+        app:mtf_animationDuration="350">
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textPersonName|textCapWords|textFilter|textNoSuggestions"
+            android:textSize="19sp"
+            android:id="@+id/partyName"
+            android:hint="@string/party_name_hint"
+            android:textColor="@color/materialWhite"
+            android:textColorHint="@color/materialWhite"/>
+
+    </com.github.florent37.materialtextfield.MaterialTextField>
+
+    <com.github.florent37.materialtextfield.MaterialTextField
+        android:layout_gravity="center"
+        android:padding="5dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:mtf_image="@drawable/ic_key"
+        app:mtf_labelColor="@color/materialWhite"
+        app:mtf_cardCollapsedHeight="1dp"
+        app:mtf_openKeyboardOnFocus="true"
+        app:mtf_animationDuration="350">
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textFilter|textNoSuggestions"
+            android:textSize="19sp"
+            android:id="@+id/partyPassword"
+            android:hint="@string/party_password_hint"
+            android:textColor="@color/materialWhite"
+            android:textColorHint="@color/materialWhite"/>
+
+    </com.github.florent37.materialtextfield.MaterialTextField>
+
+</LinearLayout>

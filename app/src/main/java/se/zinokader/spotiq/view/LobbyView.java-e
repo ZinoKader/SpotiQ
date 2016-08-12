@@ -1,17 +1,15 @@
 package se.zinokader.spotiq.view;
 
 
-/*
---- showSnackbar lengths ---
-LENGTH_LONG = 0
-LENGTH_SHORT = -1
-LENGTH_INDEFENITE = -2
-*/
+import com.spotify.sdk.android.authentication.AuthenticationResponse;
 
 import se.zinokader.spotiq.model.Party;
 
 public interface LobbyView {
     void showSnackbar(String snacktext, int length);
-    void showPartyDialog();
-    void goToParty(Party party);
+    void showSetUserInformationPrompt();
+    void showCreatePartyDialog();
+    void showJoinPartyDialog();
+    void goToParty(Party party, AuthenticationResponse response);
+    void setBeerProgress(int progress);
 }

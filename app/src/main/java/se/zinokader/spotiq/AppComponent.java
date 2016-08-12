@@ -2,6 +2,7 @@ package se.zinokader.spotiq;
 
 import javax.inject.Singleton;
 import dagger.Component;
+import se.zinokader.spotiq.activity.BaseActivity;
 import se.zinokader.spotiq.activity.LoginActivity;
 import se.zinokader.spotiq.activity.LobbyActivity;
 import se.zinokader.spotiq.activity.PartyActivity;

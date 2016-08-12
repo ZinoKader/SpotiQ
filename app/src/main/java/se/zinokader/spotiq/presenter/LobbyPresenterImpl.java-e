@@ -1,49 +1,27 @@
 package se.zinokader.spotiq.presenter;
 
-import android.content.Context;
-import android.content.Intent;
-import android.util.Log;
-
+import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.spotify.sdk.android.authentication.AuthenticationClient;
+import com.google.firebase.database.ValueEventListener;
+import com.mukesh.tinydb.TinyDB;
 import com.spotify.sdk.android.authentication.AuthenticationResponse;
-import com.spotify.sdk.android.player.Config;
-import com.spotify.sdk.android.player.ConnectionStateCallback;
-import com.spotify.sdk.android.player.Player;
-import com.spotify.sdk.android.player.PlayerNotificationCallback;
-import com.spotify.sdk.android.player.PlayerState;
-import com.spotify.sdk.android.player.Spotify;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.Callable;
-
-import rx.Single;
-import rx.SingleSubscriber;
+import kaaes.spotify.webapi.android.models.UserPrivate;
+import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
-import se.zinokader.spotiq.activity.LobbyActivity;
-import se.zinokader.spotiq.activity.PartyActivity;
+import se.zinokader.spotiq.constants.Constants;
+import se.zinokader.spotiq.misc.BeerProgress;
 import se.zinokader.spotiq.model.Party;
-import se.zinokader.spotiq.spotify.TrackInfoParser;
+import se.zinokader.spotiq.spotify.SpotifyWebAPIHelper;
 import se.zinokader.spotiq.view.LobbyView;
 
-import static android.os.Build.VERSION_CODES.M;
 
-
-public class LobbyPresenterImpl implements LobbyPresenter, ConnectionStateCallback, PlayerNotificationCallback {
+public class LobbyPresenterImpl implements LobbyPresenter, Constants {
 
     private LobbyView view;
-    private Player mPlayer;
-    private Boolean mPlayerIsReady = false;
-    private TrackInfoParser trackInfo = new TrackInfoParser();
-
-    List<String> songList = new ArrayList<String>();
-
-    static final String CLIENT_ID = "5646444c2abc4d8299ee3f2cb274f0b6";
-    static final int REQUEST_CODE = 1337;
 
     @Override
     public void setView(LobbyView view) {
@@ -52,152 +30,140 @@ public class LobbyPresenterImpl implements LobbyPresenter, ConnectionStateCallba
 
     @Override
     public void detach() {
-        Spotify.destroyPlayer(this);
     }
 
     @Override
-    public void setupPlayer(Context context, Intent intent, int resultCode, int requestCode) {
-        if (requestCode == REQUEST_CODE) {
-            AuthenticationResponse response = AuthenticationClient.getResponse(resultCode, intent);
-            if (response.getType() == AuthenticationResponse.Type.TOKEN) {
-                Config playerConfig = new Config(context, response.getAccessToken(), CLIENT_ID);
-                Spotify.getPlayer(playerConfig, this, new Player.InitializationObserver() {
+    public void setUserId(final TinyDB datastore, AuthenticationResponse response) {
+        SpotifyWebAPIHelper spotifywebapihelper = new SpotifyWebAPIHelper(response.getAccessToken());
+        spotifywebapihelper.getUser()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Subscriber<UserPrivate>() {
                     @Override
-                    public void onInitialized(Player player) {
-                        mPlayer = player;
-                        mPlayer.addConnectionStateCallback(LobbyPresenterImpl.this);
-                        mPlayer.addPlayerNotificationCallback(LobbyPresenterImpl.this);
-                        mPlayerIsReady = true;
-
-                        songList.add("spotify:track:2714ySK1pbOIGZwABmRyAz");
-                        songList.add("spotify:track:6Hr77eZSmaVGgH0vVulMUH");
-                        songList.add("spotify:track:5UQ1cDe7Bb9OB9ZQcUvoS1");
-                        songList.add("spotify:track:6rqj2zeKhLy3exkuFi6mSz");
-                        songList.add("spotify:track:6oSnzvS5OxzwxSpkJrak3Z");
+                    public void onNext(UserPrivate userinformation) {
+                        datastore.putString(Constants.USER_ID, userinformation.id);
                     }
-
                     @Override
-                    public void onError(Throwable throwable) {
-                        Log.e("Play error", "Could not initialize player: " + throwable.getMessage());
+                    public void onCompleted() {
+                    }
+                    @Override
+                    public void onError(Throwable e) {
                     }
                 });
-            }
-        }
     }
 
     @Override
-    public void showPartyDialog() {
-        view.showPartyDialog();
-    }
+    public void createParty(String partyname, String partypassword, String userid, final AuthenticationResponse response) {
 
-    @Override
-    public void createParty(final Party party) {
+        final Party party = new Party();
+        party.setPartyName(partyname.trim());
+        party.setPartyPassword(partypassword.trim());
+        party.setPartyHost(userid);
 
-        Boolean inputsanitized = party.getPartyname().length() >= 3 && party.getPartypassword().length() >= 3;
+        final BeerProgress beerprogress = new BeerProgress();
 
-        if(inputsanitized) {
-            view.showSnackbar("New party \"" + party.getPartyname() + "\" created", 0);
+        if(party.getPartyName().length() >= 3 && party.getPartyPassword().length() >= 3 && party.getPartyName().length() <= 16) {
 
-            FirebaseDatabase database = FirebaseDatabase.getInstance();
-            DatabaseReference dbref = database.getReference(party.getPartyname());
+            beerprogress.startPouring(view);
 
-            dbref.setValue(party, new DatabaseReference.CompletionListener() {
+            view.showSnackbar("Creating \"" + party.getPartyName() + "\"...", SNACKBAR_LENGTH_LONG);
+            final DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
+            final DatabaseReference partyReference = FirebaseDatabase.getInstance().getReference(party.getPartyName());
+
+            databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
-                public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-                    view.goToParty(party);
+                public void onDataChange(DataSnapshot dataSnapshot) {
 
-                    //TODO: Move this test into real function that updates the tracklist
-                    trackInfo.getSearchedTracks("hey", party);
+                    beerprogress.stopPouring(view);
+
+                    if(dataSnapshot.hasChild(party.getPartyName())) {
+                        view.showSnackbar("Party already exists, try joining it instead", SNACKBAR_LENGTH_LONG);
+                    }
+                    else {
+                        partyReference.setValue(party, new DatabaseReference.CompletionListener() {
+                            @Override
+                            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                                view.goToParty(party, response);
+                            }
+                        });
+                    }
+
                 }
-            });
-        }
-        else {
-            view.showSnackbar("Failed to create party: name or password too short", 0);
-        }
 
-    }
-
-    @Override
-    public void playSong(final String songURI) {
-        if (mPlayerIsReady) {
-            mPlayer.play(songURI);
-            mPlayer.play(songList);
-        }
-    }
-
-    @Override
-    public void pauseSong() {
-        if (mPlayerIsReady) {
-            mPlayer.pause();
-        }
-    }
-
-    @Override
-    public void nextSong() {
-        if (mPlayerIsReady) {
-            mPlayer.skipToNext();
-        }
-    }
-
-    @Override
-    public void onLoggedIn() {
-
-    }
-
-    @Override
-    public void onLoggedOut() {
-
-    }
-
-    @Override
-    public void onLoginFailed(Throwable throwable) {
-
-    }
-
-    @Override
-    public void onTemporaryError() {
-
-    }
-
-    @Override
-    public void onConnectionMessage(String s) {
-    }
-
-    @Override
-    public void onPlaybackEvent(EventType eventType, PlayerState playerState) {
-
-        trackInfo.setSpotifyURI(playerState.trackUri);
-
-        if (eventType == EventType.PLAY || eventType == EventType.TRACK_CHANGED) {
-
-            Single<String> trackNameSingle = Single.fromCallable(new Callable<String>() {
                 @Override
-                public String call() throws Exception {
-                    return trackInfo.getTrackName();
+                public void onCancelled(DatabaseError databaseError) {
+                    beerprogress.stopPouring(view);
                 }
             });
 
-            trackNameSingle
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(new SingleSubscriber<String>() {
-                        @Override
-                        public void onSuccess(String trackname) {
-                            view.showSnackbar("Now playing " + trackname, 0);
-                        }
-
-                        @Override
-                        public void onError(Throwable error) {
-                        }
-                    });
-
+        } else if(party.getPartyName().length() >= 16) {
+            view.showSnackbar("Failed to create party: name too long", SNACKBAR_LENGTH_LONG);
+        } else {
+            view.showSnackbar("Failed to create party: name or password too short", SNACKBAR_LENGTH_LONG);
         }
 
     }
 
     @Override
-    public void onPlaybackError(ErrorType errorType, String s) {
-        view.showSnackbar("Playback error: " + s, 0);
-        Log.d("PlaybackError", "Error msg: " + s);
+    public void joinParty(String partyname, String partypassword, final AuthenticationResponse response) {
+
+        final String partynamesanitized = partyname.trim();
+        final String partypasswordsanitized = partypassword.trim();
+
+        final BeerProgress beerprogress = new BeerProgress();
+
+        if(partynamesanitized.length() >= 3 && partypasswordsanitized.length() >= 3) {
+
+            beerprogress.startPouring(view);
+
+            view.showSnackbar("Joining \"" + partynamesanitized + "\"...", SNACKBAR_LENGTH_LONG);
+            final DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
+            final DatabaseReference partyReference = FirebaseDatabase.getInstance().getReference(partynamesanitized);
+
+            databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+
+                    if(dataSnapshot.hasChild(partynamesanitized)) {
+                        partyReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+
+                                beerprogress.stopPouring(view);
+
+                                Party dbparty = new Party();
+                                dbparty.setPartyName(dataSnapshot.child("partyName").getValue().toString());
+                                dbparty.setPartyPassword(dataSnapshot.child("partyPassword").getValue().toString());
+
+                                if(dbparty.getPartyName().contentEquals(partynamesanitized) && dbparty.getPartyPassword().contentEquals(partypasswordsanitized)) {
+                                    view.goToParty(dbparty, response);
+                                } else {
+                                    view.showSnackbar("Invalid password", SNACKBAR_LENGTH_LONG);
+                                }
+                            }
+
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+                                beerprogress.stopPouring(view);
+                            }
+                        });
+                    } else {
+                        beerprogress.stopPouring(view);
+                        view.showSnackbar("Party doesn't exist, try creating it instead", SNACKBAR_LENGTH_LONG);
+                    }
+
+                }
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    beerprogress.stopPouring(view);
+                }
+            });
+
+        } else {
+            view.showSnackbar("Failed to join party: name or password too short", SNACKBAR_LENGTH_LONG);
+        }
+
     }
+
+
 }

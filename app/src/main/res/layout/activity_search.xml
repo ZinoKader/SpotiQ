@@ -1,5 +1,6 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
              xmlns:tools="http://schemas.android.com/tools"
+             android:id="@+id/activity_search_view"
              android:layout_width="match_parent"
              android:layout_height="match_parent"
              android:background="@color/colorPrimary"
@@ -22,10 +23,48 @@
 
         </android.support.v7.widget.Toolbar>
 
+
+    <ProgressBar
+        android:theme="@style/SearchProgressBar"
+        android:id="@+id/searchProgressBar"
+        style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+        android:visibility="invisible"
+        android:indeterminate="true"
+        android:layout_width="match_parent"
+        android:layout_height="3.7dp"
+        android:background="@color/colorPrimary"
+        android:layout_alignParentStart="true"
+        android:indeterminateTint="@color/materialWhite"
+        android:layout_below="@+id/toolbar_search"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center_horizontal"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/searchProgressBar">
+
+        <ListView
+            android:id="@+id/searchListView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fastScrollEnabled="true"
+            android:divider="@null"
+            android:scrollbarThumbVertical="@color/materialWhite"
+            android:scrollbarSize="1dp"
+            android:scrollbarDefaultDelayBeforeFade="@integer/anim_duration"
+            android:background="@color/colorPrimary"/>
+
+    </LinearLayout>
+
+
     <com.miguelcatalan.materialsearchview.MaterialSearchView
         android:id="@+id/songSearchView"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        style="@style/MaterialSearchViewStyle"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true"/>
 
 
 </RelativeLayout>

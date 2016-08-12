@@ -5,20 +5,118 @@
                 android:id="@+id/activity_party_view"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="@color/colorAccent">
+                android:background="@color/colorPrimary">
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar_party"
+        android:background="@color/colorPrimary"
+        android:gravity="top"
+        android:elevation="4dp"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:minHeight="?attr/actionBarSize"
+        app:contentInsetStart="0dp">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentTop="true">
+
+                <com.mikhaellopez.circularimageview.CircularImageView
+                    android:id="@+id/toolbar_user_profile_image"
+                    android:background="?selectableItemBackground"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    app:civ_border_color="@color/materialWhiteTransparent"
+                    app:civ_border_width="1dp"
+                    app:civ_shadow="true"
+                    app:civ_shadow_radius="15"
+                    app:civ_shadow_color="@color/colorPrimaryDarker"/>
+
+                <TextView
+                    android:id="@+id/toolbar_user_profile_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_toEndOf="@id/toolbar_user_profile_image"
+                    android:layout_marginTop="26dp"
+                    android:layout_marginStart="4dp"
+                    android:textSize="12sp"
+                    android:textColor="@color/materialWhite"/>
+
+        </RelativeLayout>
+
+    </android.support.v7.widget.Toolbar>
+
+    <TextView
+        android:id="@+id/toolbar_party_title"
+        android:elevation="5dp"
+        android:textSize="26sp"
+        android:text="@string/party_name_placeholder"
+        android:textColor="@color/materialWhite"
+        android:gravity="center"
+        android:layout_alignBottom="@+id/toolbar_party"
+        android:layout_centerInParent="true"
+        android:layout_width="250dp"
+        android:layout_height="40dp"
+        android:layout_marginBottom="25dp"
+        android:shadowColor="@color/text_shadow"
+        android:shadowDx="8"
+        android:shadowDy="4"
+        android:shadowRadius="15"/>
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fab_play_pause"
+        app:fabSize="normal"
+        app:useCompatPadding="true"
+        app:rippleColor="@color/colorPrimaryDarker"
+        app:elevation="8dp"
+        app:backgroundTint="@color/playpausefabstate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/toolbar_party"
+        android:layout_alignParentStart="true"
+        android:layout_marginStart="15dp"
+        android:layout_marginBottom="-47dp"/>
+
+    <ProgressBar
+        android:id="@+id/songProgressBar"
+        style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+        android:max="10000"
+        android:layout_width="match_parent"
+        android:layout_height="3.7dp"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/toolbar_party"
+        android:background="@color/colorPrimaryDark"
+        android:progressTint="@color/materialWhite"/>
+
+    <se.zinokader.spotiq.custom.RecyclerViewZ
+        android:id="@+id/recyclerview_playlist"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/songProgressBar">
+    </se.zinokader.spotiq.custom.RecyclerViewZ>
+
+    <include
+        android:id="@+id/empty_recyclerview_playlist"
+        layout="@layout/empty_recyclerview_playlist"
+        android:visibility="gone">
+    </include>
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab_add_song"
+        app:fabSize="normal"
+        app:rippleColor="@color/colorPrimaryDarker"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true"
         android:layout_marginBottom="30dp"
         android:layout_marginEnd="30dp"
-        android:src="@drawable/fab_music_note"
-        app:borderWidth="0dp"
-        app:fabSize="normal"
-        app:rippleColor="@color/colorPrimaryDark"/>
+        android:src="@drawable/fab_music_note"/>
 
     <com.github.fabtransitionactivity.SheetLayout
         android:id="@+id/fab_add_song_sheet"
@@ -27,7 +125,9 @@
         android:layout_gravity="bottom"
         app:ft_container_gravity="center"
         app:ft_color="@color/colorPrimary"
-        android:elevation="2dp"/>
+        android:elevation="10dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true"/>
 
 
 </RelativeLayout>

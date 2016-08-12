@@ -14,14 +14,28 @@
         <item name="android:windowContentTransitions">true</item>
     </style>
 
-
     <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
-        <item name="android:windowContentTransitions">true</item>
         <item name="colorControlNormal">@color/materialWhite</item>
+        <item name="android:windowContentTransitions">true</item>
     </style>
 
+    <style name="SearchProgressBar" parent="Theme.AppCompat.Light">
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:progressBackgroundTint">@color/colorLightTint</item>
+        <item name="android:windowContentTransitions">true</item>
+    </style>
+
+    <style name="MaterialSearchViewStyle">
+        <item name="android:hint">@string/search_for_songs</item>
+        <item name="android:windowContentTransitions">true</item>
+    </style>
+
+    <style name="NotificationBackgroundImageView">
+        <item name="android:alpha">0.5</item>
+        <item name="android:scaleType">fitXY</item>
+    </style>
 
 </resources>
