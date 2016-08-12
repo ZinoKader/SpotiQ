@@ -36,11 +36,6 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import jp.wasabeef.recyclerview.animators.LandingAnimator;
-import kaaes.spotify.webapi.android.models.Pager;
-import kaaes.spotify.webapi.android.models.PlaylistSimple;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
-import rx.schedulers.Schedulers;
 import se.zinokader.spotiq.R;
 import se.zinokader.spotiq.SpotiqApplication;
 import se.zinokader.spotiq.adapter.PlaylistRecyclerViewAdapter;
@@ -53,7 +48,6 @@ import se.zinokader.spotiq.model.Stickynotification;
 import se.zinokader.spotiq.model.User;
 import se.zinokader.spotiq.presenter.PartyPresenter;
 import se.zinokader.spotiq.service.NotificationControlService;
-import se.zinokader.spotiq.spotify.SpotifyWebAPIHelper;
 import se.zinokader.spotiq.util.ImageUtils;
 import se.zinokader.spotiq.view.PartyView;
 
@@ -188,16 +182,6 @@ public class PartyActivity extends BaseActivity implements PartyView, SheetLayou
                 })
                 .build();
 
-        SpotifyWebAPIHelper test = new SpotifyWebAPIHelper( ((AuthenticationResponse) bundle.getParcelable("response")).getAccessToken());
-        test.getUserPlaylists()
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeOn(Schedulers.io())
-                .subscribe(new Action1<Pager<PlaylistSimple>>() {
-                    @Override
-                    public void call(Pager<PlaylistSimple> playlistSimplePager) {
-
-                    }
-                });
     }
 
     @Override
