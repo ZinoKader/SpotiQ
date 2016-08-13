@@ -169,6 +169,7 @@ public class SearchPresenterImpl implements SearchPresenter {
     @Override
     public void searchPlaylist(final Playlist playlist) {
 
+        view.showProgressBar();
         final ArrayList<Song> songarray = new ArrayList<>();
 
         SpotifyWebAPIHelper spotifyWebAPIHelper = new SpotifyWebAPIHelper(response.getAccessToken());
@@ -188,6 +189,12 @@ public class SearchPresenterImpl implements SearchPresenter {
                     public void onCompleted() {
                         view.showSnackbar("Found " + songarray.size() + " playable songs in the playlist", SNACKBAR_LENGTH_SHORT);
                         view.updateSearchList(songarray);
+                        new Handler().postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                view.hideProgressBar();
+                            }
+                        }, 1000);
                     }
 
                     @Override

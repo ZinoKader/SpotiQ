@@ -61,6 +61,10 @@
     <string name="overflow_menu">Menu</string>
     <string name="add_music_from">Your playlists</string>
     <string name="add_music_from_below">Find inspiration in your own playlists</string>
+    <string name="on_back_pressed_dialog_party_title">Are you sure?</string>
+    <string name="on_back_pressed_dialog_party_content_host">Going back to the lobby will pause the music. Your party will still exist and you will still be the host.</string>
+    <string name="on_back_pressed_dialog_party_content_guest">Are you sure you want to go back to the lobby?</string>
+    <string name="yes">Yes</string>
 
     <!--ARRAYS-->
     <string-array name="search_for_suggestions">

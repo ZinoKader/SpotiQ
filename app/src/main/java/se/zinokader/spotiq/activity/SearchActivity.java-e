@@ -1,6 +1,7 @@
 package se.zinokader.spotiq.activity;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.speech.RecognizerIntent;
@@ -62,6 +63,8 @@ public class SearchActivity extends BaseActivity implements SearchView {
     private String handlerquerytext;
     private Handler searchHandler = new Handler();
     private Snackbar snackbar;
+
+    private Boolean useraddedsong = false;
     private Boolean inplaylistsearch = false;
 
     @Override
@@ -166,6 +169,7 @@ public class SearchActivity extends BaseActivity implements SearchView {
                         .setAction("Confirm", new View.OnClickListener() {
                             @Override
                             public void onClick(View view) {
+                                useraddedsong = true;
                                 searchPresenter.songSelected(selectedsong);
                             }
                         })
@@ -211,6 +215,11 @@ public class SearchActivity extends BaseActivity implements SearchView {
 
     @Override
     public void finish() {
+        //avsluta med data om användaren la till en låt eller inte
+        Intent finishintent = new Intent();
+        if(useraddedsong) finishintent.setData(Uri.parse(Constants.USER_ADDED_SONG));
+        else finishintent.setData(Uri.parse(""));
+        setResult(RESULT_OK, finishintent);
         super.finish();
     }
 

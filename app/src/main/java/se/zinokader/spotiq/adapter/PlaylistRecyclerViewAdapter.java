@@ -139,7 +139,7 @@ public class PlaylistRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerVi
             normalitemholder.likebutton.setEventListener(new SparkEventListener() {
                 @Override
                 public void onEvent(ImageView button, boolean pressedlike) {
-                    activity.onItemLikePressed(songs.get(normalitemholder.getAdapterPosition()), pressedlike);
+                    activity.onItemLikeClicked(songs.get(normalitemholder.getAdapterPosition()), pressedlike);
                 }
             });
 

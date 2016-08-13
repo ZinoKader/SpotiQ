@@ -98,8 +98,7 @@ public class PartyActivity extends BaseActivity implements PartyView, SheetLayou
         partyPresenter.setView(this);
         final Bundle bundle = getIntent().getBundleExtra("lobbybundle");
         partyPresenter.setParty((Party) bundle.getParcelable("party"));
-        partyPresenter.authenticate(this, (AuthenticationResponse) bundle.getParcelable("response"));
-        partyPresenter.setUserType(datastore.getString(Constants.USER_ID));
+        partyPresenter.authenticate(this, datastore.getString(Constants.USER_ID), (AuthenticationResponse) bundle.getParcelable("response"));
         partyPresenter.startPlaylistListener();
 
         setSupportActionBar(toolbar);
@@ -138,7 +137,7 @@ public class PartyActivity extends BaseActivity implements PartyView, SheetLayou
                     }
                 }
                 //om recyclerview inte går att scrolla (för få låtar), visa addsongfab igen
-                if(!(recyclerView.computeHorizontalScrollRange() > recyclerView.getWidth() || recyclerView.computeVerticalScrollRange() > recyclerView.getHeight())) {
+                if(recyclerView.computeVerticalScrollRange() < recyclerView.getHeight()) {
                     addsongfab.show();
                 }
             }
@@ -289,11 +288,15 @@ public class PartyActivity extends BaseActivity implements PartyView, SheetLayou
     @Override
     public void onItemLongClickEnded() {
         partyPresenter.pausePreview();
-        if(snackbar.isShownOrQueued()) { snackbar.dismiss(); }
+        if(snackbar != null) {
+            if (snackbar.isShownOrQueued()) {
+                snackbar.dismiss();
+            }
+        }
     }
 
     @Override
-    public void onItemLikePressed(Song song, Boolean liked) {
+    public void onItemLikeClicked(Song song, Boolean liked) {
         partyPresenter.setSongLiked(song, liked);
     }
 
@@ -323,15 +326,48 @@ public class PartyActivity extends BaseActivity implements PartyView, SheetLayou
     }
 
     @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
+    public void onBackPressed() {
+        String dialogcontent;
+        String positivetext;
+        if(partyPresenter.isHost()) {
+            dialogcontent = getString(R.string.on_back_pressed_dialog_party_content_host);
+            positivetext = getString(R.string.ok);
+        } else {
+            dialogcontent = getString(R.string.on_back_pressed_dialog_party_content_guest);
+            positivetext = getString(R.string.yes);
+        }
+        new MaterialDialog.Builder(this)
+                .title(R.string.on_back_pressed_dialog_party_title)
+                .titleColorRes(R.color.materialWhite)
+                .content(dialogcontent)
+                .contentColorRes(R.color.materialWhite)
+                .backgroundColorRes(R.color.colorPrimary)
+                .positiveColorRes(R.color.materialWhite)
+                .negativeColorRes(R.color.materialWhite)
+                .negativeText(R.string.cancel)
+                .positiveText(positivetext)
+                .onPositive(new MaterialDialog.SingleButtonCallback() {
+                    @Override
+                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                        PartyActivity.super.onBackPressed();
+                    }
+                })
+                .show();
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent finishintent) {
+        super.onActivityResult(requestCode, resultCode, finishintent);
         sheetlayout.contractFab();
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                recyclerview.smoothScrollToPosition(playlistadapter.getItemCount());
-            }
-        }, 900);
+        //scrolla ned till den tillagda låten om användaren la till en låt
+        if(finishintent.getData().toString().contentEquals(Constants.USER_ADDED_SONG)) {
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    recyclerview.smoothScrollToPosition(playlistadapter.getItemCount());
+                }
+            }, 900);
+        }
     }
 
     @Override
@@ -346,8 +382,8 @@ public class PartyActivity extends BaseActivity implements PartyView, SheetLayou
     }
 
     @Override
-    public void removePlayPauseButton() {
-        playpausefab.setVisibility(View.INVISIBLE);
+    public void enablePlayPauseButton() {
+        playpausefab.setVisibility(View.VISIBLE);
     }
 
 }
