@@ -70,6 +70,7 @@
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab_play_pause"
+        android:visibility="gone"
         app:fabSize="normal"
         app:useCompatPadding="true"
         app:rippleColor="@color/colorPrimaryDarker"

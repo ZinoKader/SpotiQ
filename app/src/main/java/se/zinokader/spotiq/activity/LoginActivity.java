@@ -12,30 +12,21 @@ import android.support.v4.util.Pair;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
-
 import com.dd.processbutton.iml.ActionProcessButton;
 import com.spotify.sdk.android.authentication.AuthenticationClient;
 import com.spotify.sdk.android.authentication.AuthenticationRequest;
 import com.spotify.sdk.android.authentication.AuthenticationResponse;
 import com.spotify.sdk.android.player.ConnectionStateCallback;
-
 import javax.inject.Inject;
-
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import se.zinokader.spotiq.R;
 import se.zinokader.spotiq.SpotiqApplication;
+import se.zinokader.spotiq.constants.Constants;
 import se.zinokader.spotiq.presenter.LoginPresenter;
 import se.zinokader.spotiq.view.LoginView;
 
-import static se.zinokader.spotiq.constants.Constants.REQUEST_CODE;
-import static se.zinokader.spotiq.constants.Constants.SPOTIFY_CLIENT_ID;
-import static se.zinokader.spotiq.constants.Constants.SPOTIFY_PERMISSION_MODIFYPRIVATEPLAYLIST;
-import static se.zinokader.spotiq.constants.Constants.SPOTIFY_PERMISSION_MODIFYPUBLICPLAYLIST;
-import static se.zinokader.spotiq.constants.Constants.SPOTIFY_PERMISSION_READ_PRIVATE;
-import static se.zinokader.spotiq.constants.Constants.SPOTIFY_PERMISSION_STREAMING;
-import static se.zinokader.spotiq.constants.Constants.SPOTIFY_REDIRECT_URI;
 
 public class LoginActivity extends BaseActivity implements LoginView, ConnectionStateCallback {
 
@@ -82,11 +73,11 @@ public class LoginActivity extends BaseActivity implements LoginView, Connection
     @OnClick(R.id.loginButton)
     @Override
     public void loginPressed() {
-        AuthenticationRequest.Builder builder = new AuthenticationRequest.Builder(SPOTIFY_CLIENT_ID, AuthenticationResponse.Type.TOKEN, SPOTIFY_REDIRECT_URI);
-        builder.setScopes(new String[]{SPOTIFY_PERMISSION_READ_PRIVATE, SPOTIFY_PERMISSION_STREAMING,
-                SPOTIFY_PERMISSION_MODIFYPUBLICPLAYLIST, SPOTIFY_PERMISSION_MODIFYPRIVATEPLAYLIST});
+        AuthenticationRequest.Builder builder = new AuthenticationRequest.Builder(Constants.SPOTIFY_CLIENT_ID, AuthenticationResponse.Type.TOKEN, Constants.SPOTIFY_REDIRECT_URI);
+        builder.setScopes(new String[]{Constants.SPOTIFY_PERMISSION_READ_PRIVATE, Constants.SPOTIFY_PERMISSION_STREAMING,
+                Constants.SPOTIFY_PERMISSION_MODIFYPUBLICPLAYLIST, Constants.SPOTIFY_PERMISSION_MODIFYPRIVATEPLAYLIST});
         AuthenticationRequest request = builder.build();
-        AuthenticationClient.openLoginActivity(this, REQUEST_CODE, request);
+        AuthenticationClient.openLoginActivity(this, Constants.REQUEST_CODE, request);
 
         loginbutton.setProgress(1);
     }
@@ -121,8 +112,7 @@ public class LoginActivity extends BaseActivity implements LoginView, Connection
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
         super.onActivityResult(requestCode, resultCode, intent);
 
-        if (requestCode == REQUEST_CODE) {
-
+        if (requestCode == Constants.REQUEST_CODE) {
             final AuthenticationResponse response = AuthenticationClient.getResponse(resultCode, intent);
 
             switch (response.getType()) {

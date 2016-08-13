@@ -74,7 +74,6 @@ public class PartyPresenterImpl implements PartyPresenter, PlayerNotificationCal
 
     @Override
     public void wentToBackground() {
-
         if(playerstate.playing) {
             SpotifyWebAPIHelper spotifyWebApiHelper = new SpotifyWebAPIHelper();
             spotifyWebApiHelper.getStickyNotification(playerstate.trackUri)
@@ -108,54 +107,64 @@ public class PartyPresenterImpl implements PartyPresenter, PlayerNotificationCal
     }
 
     @Override
-    public void authenticate(Context context, AuthenticationResponse response) {
+    public void authenticate(final Context context, final String userid, final AuthenticationResponse response) {
 
         this.response = response;
 
-        if (player == null) {
-            Config playerConfig = new Config(context, response.getAccessToken(), Constants.SPOTIFY_CLIENT_ID);
-            player = Spotify.getPlayer(playerConfig, this, new Player.InitializationObserver() {
-                @Override
-                public void onInitialized(Player player) {
-                    player.addConnectionStateCallback(PartyPresenterImpl.this);
-                    player.addPlayerNotificationCallback(PartyPresenterImpl.this);
-                    player.setPlaybackBitrate(PlaybackBitrate.BITRATE_HIGH);
-                }
-
-                @Override
-                public void onError(Throwable error) {
-                    Log.d("Error in initialization", error.getMessage());
-                }
-            });
-        } else {
-            player.login(response.getAccessToken());
-        }
-
-    }
-
-    @Override
-    public void setUserType(final String userid) {
         DatabaseReference partyReference = FirebaseDatabase.getInstance().getReference(party.getPartyName());
         partyReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 Party dbparty = dataSnapshot.getValue(Party.class);
 
-                if( ! dbparty.getPartyHost().contentEquals(userid)) {
-                    ishost = false;
-                    view.removePlayPauseButton();
-                    view.showSnackbar("Connected as a guest", Constants.SNACKBAR_LENGTH_LONG);
-                } else {
+                //kolla typ av användare
+                if(dbparty.getPartyHost().contentEquals(userid)) {
                     ishost = true;
+                    view.enablePlayPauseButton();
                     view.showSnackbar("Connected as a host", Constants.SNACKBAR_LENGTH_LONG);
+
+                } else {
+                    ishost = false;
+                    view.showSnackbar("Connected as a guest", Constants.SNACKBAR_LENGTH_LONG);
                 }
+
+                //starta player om användaren är host
+                if(ishost) {
+                    if (player == null) {
+                        Config playerConfig = new Config(context, response.getAccessToken(), Constants.SPOTIFY_CLIENT_ID);
+                        playerConfig.useCache(false); //använd inte cache för tillfället då gränserna är FINAL och lite galna
+                        player = Spotify.getPlayer(playerConfig, PartyPresenterImpl.this, new Player.InitializationObserver() {
+                            @Override
+                            public void onInitialized(Player player) {
+                                player.addConnectionStateCallback(PartyPresenterImpl.this);
+                                player.addPlayerNotificationCallback(PartyPresenterImpl.this);
+                                player.setPlaybackBitrate(PlaybackBitrate.BITRATE_HIGH);
+                            }
+
+                            @Override
+                            public void onError(Throwable error) {
+                                Log.d("Error in initialization", error.getMessage());
+                            }
+                        });
+                    } else {
+                        player.login(response.getAccessToken());
+                    }
+
+                }
+
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-
             }
         });
+
+
+    }
+
+    @Override
+    public Boolean isHost() {
+        return ishost;
     }
 
     @Override

@@ -15,8 +15,8 @@ public interface PartyPresenter {
     void wentToBackground();
     Party getParty();
     void setParty(Party party);
-    void authenticate(Context context, AuthenticationResponse response);
-    void setUserType(String userid);
+    void authenticate(Context context, String userid, AuthenticationResponse response);
+    Boolean isHost();
     void playOrPauseEvent();
     void previewSong(Song song);
     void pausePreview();

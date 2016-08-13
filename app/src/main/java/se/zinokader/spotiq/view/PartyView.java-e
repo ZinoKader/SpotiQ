@@ -14,10 +14,10 @@ public interface PartyView {
     void onPlayPauseFabClick();
     void onItemLongClicked(Song song);
     void onItemLongClickEnded();
-    void onItemLikePressed(Song song, Boolean liked);
+    void onItemLikeClicked(Song song, Boolean liked);
     void updateSongProgress(int progress);
     void onAddSongFabClick();
     void showSnackbar(String snacktext, int length);
     void showSessionExpired();
-    void removePlayPauseButton();
+    void enablePlayPauseButton();
 }
