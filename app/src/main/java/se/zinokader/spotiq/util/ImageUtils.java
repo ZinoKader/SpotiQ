@@ -42,5 +42,11 @@ public class ImageUtils {
         return bytearrayoutputstream.toByteArray();
     }
 
+    public static Bitmap compressBitmap(Bitmap bitmap, Bitmap.CompressFormat format, int quality) {
+        ByteArrayOutputStream byteoutputstream = new ByteArrayOutputStream();
+        bitmap.compress(format, quality, byteoutputstream);
+        byte[] bytearray = byteoutputstream.toByteArray();
+        return BitmapFactory.decodeByteArray(bytearray, 0, bytearray.length);
+    }
 
 }
