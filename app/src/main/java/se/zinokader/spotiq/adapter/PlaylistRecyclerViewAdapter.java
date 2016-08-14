@@ -154,7 +154,7 @@ public class PlaylistRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerVi
 
             //Skapa transformklasser till albumart
             normalitemholder.croptransform = new CropTransformation(context, 600, 200, CropTransformation.CropType.CENTER); //width, height
-            normalitemholder.blurtransform = new BlurTransformation(context, 15, 1); //blurradius, downsampling (scale, 1 == ingen downsampling)
+            normalitemholder.blurtransform = new BlurTransformation(context, 15, 2); //blurradius, downsampling
             normalitemholder.colorfiltertransform = new ColorFilterTransformation(context, R.color.colorPrimary);
 
             //Ladda albumart och croppa/blurra
@@ -167,7 +167,6 @@ public class PlaylistRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerVi
                         .into(new SimpleTarget<Bitmap>(600, 100) {
                             @Override
                             public void onResourceReady(Bitmap bitmap, GlideAnimation glideAnimation) {
-                                bitmap = ImageUtils.compressBitmap(bitmap, Bitmap.CompressFormat.WEBP, 75);
                                 normalitemholder.albumartdrawable = new BitmapDrawable(context.getResources(), bitmap);
                                 normalitemholder.rowview.setBackground(normalitemholder.albumartdrawable);
                             }
@@ -211,7 +210,7 @@ public class PlaylistRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerVi
 
             //Skapa transformklasser till albumart
             headerholder.croptransform = new CropTransformation(context, 600, 300, CropTransformation.CropType.CENTER); //width, height
-            headerholder.blurtransform = new BlurTransformation(context, 15, 1); //blurradius, downsampling (scale, 1 == ingen downsampling)
+            headerholder.blurtransform = new BlurTransformation(context, 15, 2); //blurradius, downsampling
             headerholder.colorfiltertransform = new ColorFilterTransformation(context, R.color.colorPrimary);
 
             //Ladda albumart och croppa/blurrra
@@ -224,7 +223,6 @@ public class PlaylistRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerVi
                         .into(new SimpleTarget<Bitmap>(600, 400) {
                             @Override
                             public void onResourceReady(Bitmap bitmap, GlideAnimation glideAnimation) {
-                                bitmap = ImageUtils.compressBitmap(bitmap, Bitmap.CompressFormat.WEBP, 75);
                                 headerholder.albumartdrawable = new BitmapDrawable(context.getResources(), bitmap);
                                 headerholder.rowview.setBackground(headerholder.albumartdrawable);
                             }

@@ -43,10 +43,11 @@ public class ImageUtils {
     }
 
     public static Bitmap compressBitmap(Bitmap bitmap, Bitmap.CompressFormat format, int quality) {
+        BitmapFactory.Options compressoptions = new BitmapFactory.Options();
         ByteArrayOutputStream byteoutputstream = new ByteArrayOutputStream();
         bitmap.compress(format, quality, byteoutputstream);
         byte[] bytearray = byteoutputstream.toByteArray();
-        return BitmapFactory.decodeByteArray(bytearray, 0, bytearray.length);
+        return BitmapFactory.decodeByteArray(bytearray, 0, bytearray.length, compressoptions);
     }
 
 }
