@@ -36,6 +36,7 @@ import se.zinokader.spotiq.spotify.SpotifyWebAPIHelper;
 import se.zinokader.spotiq.view.PartyView;
 
 import static se.zinokader.spotiq.constants.Constants.SNACKBAR_LENGTH_INDEFINITE;
+import static se.zinokader.spotiq.constants.Constants.SNACKBAR_LENGTH_LONG;
 
 public class PartyPresenterImpl implements PartyPresenter, PlayerNotificationCallback, ConnectionStateCallback {
 
@@ -91,6 +92,7 @@ public class PartyPresenterImpl implements PartyPresenter, PlayerNotificationCal
 
                         @Override
                         public void onError(Throwable e) {
+                            e.printStackTrace();
                         }
                     });
         }
@@ -156,6 +158,7 @@ public class PartyPresenterImpl implements PartyPresenter, PlayerNotificationCal
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
+
             }
         });
 
@@ -203,7 +206,7 @@ public class PartyPresenterImpl implements PartyPresenter, PlayerNotificationCal
         view.showSnackbar("Previewing " + song.getSongName(), SNACKBAR_LENGTH_INDEFINITE);
 
         if(playerstate.playing) { //pausa låt om något spelas
-            view.onPlayPauseFabClick();
+            view.onPlayPauseFabClick(true);
             resumeafterpreview = true;
         }
     }
@@ -213,7 +216,7 @@ public class PartyPresenterImpl implements PartyPresenter, PlayerNotificationCal
         previewPlayer.resetPlayer();
 
         if(resumeafterpreview) { //återuppta låt om något spelades
-            view.onPlayPauseFabClick();
+            view.onPlayPauseFabClick(true);
             resumeafterpreview = false; //återställ bool till nästa event
         }
     }
@@ -343,6 +346,7 @@ public class PartyPresenterImpl implements PartyPresenter, PlayerNotificationCal
 
                         @Override
                         public void onError(Throwable e) {
+                            e.printStackTrace();
                         }
                     });
 
@@ -374,6 +378,12 @@ public class PartyPresenterImpl implements PartyPresenter, PlayerNotificationCal
             progressUpdateTimer.cancel();
         }
 
+        //oftast när Spotify-kontot används från någon annanstans
+        if(eventType.equals(EventType.LOST_PERMISSION)) {
+            view.onPlayPauseFabClick(false); //återställ till pausknapp, shouldplay false
+            view.showSnackbar("Spotify is being used from somewhere else, music paused", SNACKBAR_LENGTH_LONG);
+        }
+
         if (eventType.equals(EventType.TRACK_END)) {
 
             final DatabaseReference partyReference = FirebaseDatabase.getInstance().getReference(party.getPartyName());
@@ -401,7 +411,7 @@ public class PartyPresenterImpl implements PartyPresenter, PlayerNotificationCal
                                     } else { //inga fler låtar i listan
                                         player.clearQueue();
                                         view.updateSongProgress(0);
-                                        view.onPlayPauseFabClick(); //resetta fab till att visa playikon
+                                        view.onPlayPauseFabClick(false); //resetta fab till att visa playikon
                                         view.showSnackbar("Looks like we're outta' songs", Constants.SNACKBAR_LENGTH_LONG);
                                     }
                                 }
@@ -450,7 +460,7 @@ public class PartyPresenterImpl implements PartyPresenter, PlayerNotificationCal
     @Override
     public void onTemporaryError() {
         if(playerstate.playing) {
-            view.onPlayPauseFabClick();
+            view.onPlayPauseFabClick(true);
             view.showSnackbar("Connection error, pausing song", Constants.SNACKBAR_LENGTH_LONG);
         } else {
             view.showSnackbar("Connection error, please check your internet connection", Constants.SNACKBAR_LENGTH_LONG);

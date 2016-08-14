@@ -11,7 +11,7 @@ public interface PartyView {
     void attachPlaylist(ArrayList<Song> songs);
     void updateEmptyView();
     void updateNotificationService(Stickynotification stickynotification);
-    void onPlayPauseFabClick();
+    void onPlayPauseFabClick(Boolean shouldplay);
     void onItemLongClicked(Song song);
     void onItemLongClickEnded();
     void onItemLikeClicked(Song song, Boolean liked);

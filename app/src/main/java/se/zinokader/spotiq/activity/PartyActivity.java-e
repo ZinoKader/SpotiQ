@@ -115,6 +115,13 @@ public class PartyActivity extends BaseActivity implements PartyView, SheetLayou
         sheetlayout.setFab(addsongfab);
         sheetlayout.setFabAnimationEndListener(this);
 
+        playpausefab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                onPlayPauseFabClick(true);
+            }
+        });
+
         recyclerview.setLayoutManager(new PreCachingLayoutManager(this));
         LandingAnimator itemanimator = new LandingAnimator();
         itemanimator.setInterpolator(new FastOutSlowInInterpolator());
@@ -205,7 +212,7 @@ public class PartyActivity extends BaseActivity implements PartyView, SheetLayou
         broadcastreceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                onPlayPauseFabClick(); //simulera pause/play vid broadcast av click från notificationcontrolservice
+                onPlayPauseFabClick(true); //simulera pause/play vid broadcast av click från notificationcontrolservice
             }
         };
         this.registerReceiver(broadcastreceiver, broadcastfilter);
@@ -261,9 +268,9 @@ public class PartyActivity extends BaseActivity implements PartyView, SheetLayou
         updateEmptyView();
     }
 
-    @OnClick(R.id.fab_play_pause)
-    public void onPlayPauseFabClick() {
-        partyPresenter.playOrPauseEvent();
+    @Override
+    public void onPlayPauseFabClick(Boolean shouldplay) {
+        if(shouldplay) partyPresenter.playOrPauseEvent();
         //animera play->pause och vice versa
         if (playpauseicon != null) {
             if(showplayicon) { //play->pause

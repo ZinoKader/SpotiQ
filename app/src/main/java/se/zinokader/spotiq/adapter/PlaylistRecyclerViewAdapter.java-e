@@ -154,22 +154,26 @@ public class PlaylistRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerVi
 
             //Skapa transformklasser till albumart
             normalitemholder.croptransform = new CropTransformation(context, 600, 200, CropTransformation.CropType.CENTER); //width, height
-            normalitemholder.blurtransform = new BlurTransformation(context, 15, 1); //blurradius, downsampling (scale, 1 == ingen downsampling)
+            normalitemholder.blurtransform = new BlurTransformation(context, 15, 2); //blurradius, downsampling
             normalitemholder.colorfiltertransform = new ColorFilterTransformation(context, R.color.colorPrimary);
 
             //Ladda albumart och croppa/blurra
-            Glide.with(context)
-                    .load(songs.get(position).getAlbumArtUrl())
-                    .asBitmap()
-                    .diskCacheStrategy(DiskCacheStrategy.ALL)
-                    .transform(normalitemholder.croptransform, normalitemholder.blurtransform, normalitemholder.colorfiltertransform)
-                    .into(new SimpleTarget<Bitmap>(600,100) {
-                        @Override
-                        public void onResourceReady(Bitmap resource, GlideAnimation glideAnimation) {
-                            normalitemholder.albumartdrawable = new BitmapDrawable(context.getResources(), resource);
-                            normalitemholder.rowview.setBackground(normalitemholder.albumartdrawable);
-                        }
-                    });
+            if(songs.get(position).getAlbumArtUrl() != null) {
+                Glide.with(context)
+                        .load(songs.get(position).getAlbumArtUrl())
+                        .asBitmap()
+                        .diskCacheStrategy(DiskCacheStrategy.RESULT)
+                        .transform(normalitemholder.croptransform, normalitemholder.blurtransform, normalitemholder.colorfiltertransform)
+                        .into(new SimpleTarget<Bitmap>(600, 100) {
+                            @Override
+                            public void onResourceReady(Bitmap bitmap, GlideAnimation glideAnimation) {
+                                normalitemholder.albumartdrawable = new BitmapDrawable(context.getResources(), bitmap);
+                                normalitemholder.rowview.setBackground(normalitemholder.albumartdrawable);
+                            }
+                        });
+            } else {
+                Glide.clear(normalitemholder.rowview);
+            }
         }
 
         if(holder instanceof HeaderViewHolder) {
@@ -206,22 +210,26 @@ public class PlaylistRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerVi
 
             //Skapa transformklasser till albumart
             headerholder.croptransform = new CropTransformation(context, 600, 300, CropTransformation.CropType.CENTER); //width, height
-            headerholder.blurtransform = new BlurTransformation(context, 15, 1); //blurradius, downsampling (scale, 1 == ingen downsampling)
+            headerholder.blurtransform = new BlurTransformation(context, 15, 2); //blurradius, downsampling
             headerholder.colorfiltertransform = new ColorFilterTransformation(context, R.color.colorPrimary);
 
             //Ladda albumart och croppa/blurrra
-            Glide.with(context)
-                    .load(songs.get(position).getAlbumArtUrl())
-                    .asBitmap()
-                    .diskCacheStrategy(DiskCacheStrategy.ALL)
-                    .transform(headerholder.croptransform, headerholder.blurtransform, headerholder.colorfiltertransform)
-                    .into(new SimpleTarget<Bitmap>(600,400) {
-                        @Override
-                        public void onResourceReady(Bitmap resource, GlideAnimation glideAnimation) {
-                            headerholder.albumartdrawable = new BitmapDrawable(context.getResources(), resource);
-                            headerholder.rowview.setBackground(headerholder.albumartdrawable);
-                        }
-                    });
+            if(songs.get(position).getAlbumArtUrl() != null) {
+                Glide.with(context)
+                        .load(songs.get(position).getAlbumArtUrl())
+                        .asBitmap()
+                        .diskCacheStrategy(DiskCacheStrategy.RESULT)
+                        .transform(headerholder.croptransform, headerholder.blurtransform, headerholder.colorfiltertransform)
+                        .into(new SimpleTarget<Bitmap>(600, 400) {
+                            @Override
+                            public void onResourceReady(Bitmap bitmap, GlideAnimation glideAnimation) {
+                                headerholder.albumartdrawable = new BitmapDrawable(context.getResources(), bitmap);
+                                headerholder.rowview.setBackground(headerholder.albumartdrawable);
+                            }
+                        });
+            } else {
+                Glide.clear(headerholder.rowview);
+            }
         }
 
     }
