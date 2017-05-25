@@ -9,17 +9,19 @@ import com.evernote.android.job.JobRequest;
 
 import java.util.concurrent.TimeUnit;
 
-import se.zinokader.spotiq.model.SpotifyAuthenticator;
-import se.zinokader.spotiq.ui.login.AuthenticationActivity;
+import javax.inject.Singleton;
+
 import se.zinokader.spotiq.constants.LogTag;
 import se.zinokader.spotiq.constants.ServiceConstants;
+import se.zinokader.spotiq.model.SpotifyAuthenticator;
+import se.zinokader.spotiq.ui.login.AuthenticationActivity;
 
+@Singleton
 public class SpotifyAuthenticationService extends Job {
 
     private static final long TOKEN_EXPIRY_OFFSET = TimeUnit.MINUTES.toSeconds(15);
     private static final long TOKEN_EXPIRY_CUTOFF = TimeUnit.MINUTES.toSeconds(20);
     private static final SpotifyAuthenticator spotifyAuthenticator = new SpotifyAuthenticator();
-
 
     @NonNull
     @Override

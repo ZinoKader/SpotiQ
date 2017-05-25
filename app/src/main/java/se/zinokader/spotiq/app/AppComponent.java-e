@@ -5,10 +5,12 @@ import javax.inject.Singleton;
 import dagger.Component;
 import se.zinokader.spotiq.ui.login.AuthenticationActivity;
 import se.zinokader.spotiq.ui.login.StartupActivity;
+import se.zinokader.spotiq.ui.login.StartupPresenter;
 
 @Singleton
 @Component(modules = { AppModule.class })
 public interface AppComponent {
-    void inject(AuthenticationActivity activity);
-    void inject(StartupActivity activity);
+    void inject(AuthenticationActivity target);
+    void inject(StartupActivity target);
+    void inject(StartupPresenter target);
 }

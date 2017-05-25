@@ -1,5 +1,6 @@
 package se.zinokader.spotiq.ui.login;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -52,6 +53,8 @@ public class AuthenticationActivity extends NucleusAppCompatActivity<BasePresent
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
         super.onActivityResult(requestCode, resultCode, intent);
 
+        Intent returnIntent = new Intent();
+
         if (requestCode == SpotifyConstants.LOGIN_REQUEST_CODE) {
             AuthenticationResponse response = AuthenticationClient.getResponse(resultCode, intent);
             switch (response.getType()) {
@@ -65,13 +68,16 @@ public class AuthenticationActivity extends NucleusAppCompatActivity<BasePresent
                     //schedule our token renewal job
                     spotifyAuthenticationService.scheduleTokenRenewal();
 
+                    setResult(Activity.RESULT_OK, returnIntent);
                     break;
                 default:
                     Log.d(LogTag.LOG_LOGIN, "Something went wrong on login");
+                    setResult(Activity.RESULT_CANCELED, returnIntent);
             }
         }
         else {
             Log.d(LogTag.LOG_LOGIN, "Wrong request code for Spotify login");
+            setResult(Activity.RESULT_CANCELED, returnIntent);
         }
 
         this.finish();

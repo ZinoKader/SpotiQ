@@ -1,7 +1,6 @@
 package se.zinokader.spotiq.ui.login;
 
 import android.os.Bundle;
-import android.util.Log;
 
 import javax.inject.Inject;
 
@@ -9,7 +8,7 @@ import se.zinokader.spotiq.service.SpotifyAuthenticationService;
 import se.zinokader.spotiq.ui.base.BasePresenter;
 
 
-public class StartupPresenter extends BasePresenter {
+public class StartupPresenter extends BasePresenter<StartupActivity> {
 
     @Inject
     SpotifyAuthenticationService spotifyAuthenticationService;
@@ -17,10 +16,9 @@ public class StartupPresenter extends BasePresenter {
     @Override
     protected void onCreate(Bundle savedState) {
         super.onCreate(savedState);
-        Log.d("wow", "he");
     }
 
-    void test() {
-        Log.d("SHIT", spotifyAuthenticationService.getAuthenticator().getAccessToken());
+    public void logIn() {
+        getView().goToAuthentication();
     }
 }

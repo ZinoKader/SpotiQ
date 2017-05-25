@@ -11,8 +11,13 @@
         android:supportsRtl="false"
         android:theme="@style/AppTheme">
 
+        <activity android:name=".ui.base.BaseActivity" >
+
+        </activity>
+
         <activity android:name=".ui.login.StartupActivity">
             <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>

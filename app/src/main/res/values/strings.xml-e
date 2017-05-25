@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">SpotiQ</string>
+    <string name="connect_to_spotify">Connect to Spotify</string>
 </resources>
