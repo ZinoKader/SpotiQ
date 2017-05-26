@@ -4,15 +4,15 @@ import javax.inject.Singleton;
 
 import dagger.Module;
 import dagger.Provides;
-import se.zinokader.spotiq.service.SpotifyAuthenticationService;
+import se.zinokader.spotiq.service.SpotifyService;
 
 @Module
 class AppModule {
 
     @Provides
     @Singleton
-    SpotifyAuthenticationService provideSpotifyAuthenticationService() {
-        return new SpotifyAuthenticationService();
+    SpotifyService provideSpotifyService() {
+        return new SpotifyService();
     }
 
 }
