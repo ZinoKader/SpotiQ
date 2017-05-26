@@ -42,6 +42,9 @@ repositories {
     maven {
         url 'https://clojars.org/repo/'
     }
+    maven {
+        url 'https://jitpack.io'
+    }
     flatDir {
         dirs 'libs'
     }
@@ -50,9 +53,12 @@ repositories {
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     compile 'com.android.support:appcompat-v7:26.0.0-beta1'
+    compile 'com.android.support:design:26.0.0-beta1'
     compile 'com.google.android.gms:play-services-gcm:10.2.6'
     compile 'com.android.support:customtabs:26.0.0-beta1'
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
+    compile 'com.github.andrewlord1990:snackbarbuilder:0.8.0'
+    compile 'com.github.ZinoKader:LoadingButtonAndroid:1.7.2'
     compile 'com.jakewharton.threetenabp:threetenabp:1.0.5'
     compile 'com.evernote:android-job:1.1.10'
     compile 'com.spotify.android:auth:1.0.0-alpha'
@@ -61,6 +67,8 @@ dependencies {
     compile 'info.android15.nucleus5:nucleus-support-v7:5.0.0-beta1'
     compile 'frankiesardo:icepick:3.2.0'
     compile "com.google.dagger:dagger:2.9"
+    compile 'io.reactivex.rxjava2:rxandroid:2.0.1'
+    compile "io.reactivex.rxjava2:rxjava:2.1.0"
     annotationProcessor 'frankiesardo:icepick-processor:3.2.0'
     annotationProcessor "com.google.dagger:dagger-compiler:2.9"
     annotationProcessor 'javax.annotation:jsr250-api:1.0'

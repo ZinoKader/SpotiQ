@@ -17,7 +17,7 @@ import nucleus5.view.NucleusAppCompatActivity;
 import se.zinokader.spotiq.R;
 import se.zinokader.spotiq.constants.LogTag;
 import se.zinokader.spotiq.constants.SpotifyConstants;
-import se.zinokader.spotiq.service.SpotifyAuthenticationService;
+import se.zinokader.spotiq.service.SpotifyService;
 import se.zinokader.spotiq.ui.base.BasePresenter;
 import se.zinokader.spotiq.util.Injector;
 
@@ -28,7 +28,7 @@ import se.zinokader.spotiq.util.Injector;
 public class AuthenticationActivity extends NucleusAppCompatActivity<BasePresenter> implements ConnectionStateCallback {
 
     @Inject
-    SpotifyAuthenticationService spotifyAuthenticationService;
+    SpotifyService spotifyService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,11 +62,11 @@ public class AuthenticationActivity extends NucleusAppCompatActivity<BasePresent
                     Log.d(LogTag.LOG_LOGIN, "Logged in successfully!");
 
                     //refresh our authentication token
-                    spotifyAuthenticationService.getAuthenticator().setExpiryTimeStamp(response.getExpiresIn());
-                    spotifyAuthenticationService.getAuthenticator().setAccessToken(response.getAccessToken());
+                    spotifyService.getAuthenticator().setExpiryTimeStamp(response.getExpiresIn());
+                    spotifyService.getAuthenticator().setAccessToken(response.getAccessToken());
 
                     //schedule our token renewal job
-                    spotifyAuthenticationService.scheduleTokenRenewal();
+                    spotifyService.scheduleTokenRenewal();
 
                     setResult(Activity.RESULT_OK, returnIntent);
                     break;

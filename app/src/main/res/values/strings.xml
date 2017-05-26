@@ -1,4 +1,6 @@
 <resources>
     <string name="app_name">SpotiQ</string>
-    <string name="connect_to_spotify">Connect to Spotify</string>
+    <string name="connect_to_spotify">Connect to</string>
+    <string name="log_in_success">Logged in successfully</string>
+    <string name="log_in_failed">Something went wrong, try again</string>
 </resources>

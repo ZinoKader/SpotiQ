@@ -17,7 +17,7 @@ import se.zinokader.spotiq.model.SpotifyAuthenticator;
 import se.zinokader.spotiq.ui.login.AuthenticationActivity;
 
 @Singleton
-public class SpotifyAuthenticationService extends Job {
+public class SpotifyService extends Job {
 
     private static final long TOKEN_EXPIRY_OFFSET = TimeUnit.MINUTES.toSeconds(15);
     private static final long TOKEN_EXPIRY_CUTOFF = TimeUnit.MINUTES.toSeconds(20);
@@ -55,7 +55,6 @@ public class SpotifyAuthenticationService extends Job {
 
         Log.d(LogTag.LOG_TOKEN_SERVICE, "Token renewal job scheduled");
     }
-
 
     public SpotifyAuthenticator getAuthenticator() {
         return spotifyAuthenticator;
