@@ -11,13 +11,14 @@ import com.github.andrewlord1990.snackbarbuilder.SnackbarBuilder;
 
 import nucleus5.factory.RequiresPresenter;
 import se.zinokader.spotiq.R;
+import se.zinokader.spotiq.constants.SpotifyConstants;
 import se.zinokader.spotiq.databinding.ActivityStartupBinding;
 import se.zinokader.spotiq.ui.base.BaseActivity;
+import se.zinokader.spotiq.ui.lobby.LobbyActivity;
 
 @RequiresPresenter(StartupPresenter.class)
 public class StartupActivity extends BaseActivity<StartupPresenter> {
 
-    private static final int LOGIN_REQUEST = 2157;
     private ActivityStartupBinding binding;
 
     @Override
@@ -36,19 +37,24 @@ public class StartupActivity extends BaseActivity<StartupPresenter> {
                 BitmapFactory.decodeResource(getResources(), R.drawable.ic_finished_white));
     }
 
+    public void resetProgress() {
+        binding.logInButton.revertAnimation();
+    }
+
     public void goToAuthentication() {
-        startActivityForResult(new Intent(this, AuthenticationActivity.class), LOGIN_REQUEST);
+        startActivityForResult(new Intent(this, AuthenticationActivity.class), SpotifyConstants.LOGIN_REQUEST_CODE);
     }
 
     public void goToLobby() {
-        //startActivityForResult(); TODO: Redirect to next activity
+        startActivity(new Intent(this, LobbyActivity.class));
+        binding.logInButton.revertAnimation();
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode != LOGIN_REQUEST) return;
+        if (requestCode != SpotifyConstants.LOGIN_REQUEST_CODE) return;
 
         if (resultCode == RESULT_OK) {
             new SnackbarBuilder(binding.getRoot())
@@ -62,6 +68,7 @@ public class StartupActivity extends BaseActivity<StartupPresenter> {
             new SnackbarBuilder(binding.getRoot())
                     .duration(Snackbar.LENGTH_LONG)
                     .message(R.string.log_in_failed)
+                    .timeoutDismissCallback(snackbar -> getPresenter().logInFailed())
                     .build()
                     .show();
         }

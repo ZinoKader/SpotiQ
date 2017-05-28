@@ -6,8 +6,8 @@ import com.evernote.android.job.JobManager;
 import com.jakewharton.threetenabp.AndroidThreeTen;
 
 import se.zinokader.spotiq.service.JobMapper;
-import se.zinokader.spotiq.util.ComponentInjector;
-import se.zinokader.spotiq.util.Injector;
+import se.zinokader.spotiq.util.di.ComponentInjector;
+import se.zinokader.spotiq.util.di.Injector;
 
 public class SpotiqApplication extends Application implements Injector {
 

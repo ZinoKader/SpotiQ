@@ -23,8 +23,6 @@
 
     <br.com.simplepass.loading_button_lib.customViews.CircularProgressButton
         android:id="@+id/logInButton"
-        android:backgroundTint="@color/colorAccent"
-        android:foreground="?android:attr/selectableItemBackground"
         android:layout_width="240dp"
         android:layout_height="70dp"
         android:layout_marginEnd="8dp"
@@ -39,15 +37,15 @@
         android:onClick="@{ () -> presenter.logIn() }"
         android:text="@string/connect_to_spotify"
         android:textAllCaps="false"
-        android:textColor="@color/colorTextNormal"
+        android:textColor="@color/colorMaterialWhite"
         android:textSize="16sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/spotiqLogo"
-        app:spinning_bar_color="#FFF"
-        app:spinning_bar_padding="5dp"
-        app:spinning_bar_width="3dp" />
+        app:spinning_bar_color="@color/colorMaterialWhite"
+        app:spinning_bar_padding="10dp"
+        app:spinning_bar_width="4dp" />
 
 
 </android.support.constraint.ConstraintLayout>

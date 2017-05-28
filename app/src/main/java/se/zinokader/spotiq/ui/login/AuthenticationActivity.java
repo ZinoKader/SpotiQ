@@ -19,7 +19,7 @@ import se.zinokader.spotiq.constants.LogTag;
 import se.zinokader.spotiq.constants.SpotifyConstants;
 import se.zinokader.spotiq.service.SpotifyService;
 import se.zinokader.spotiq.ui.base.BasePresenter;
-import se.zinokader.spotiq.util.Injector;
+import se.zinokader.spotiq.util.di.Injector;
 
 /**
  * Unfortunately the Spotify Android SDK forces us to use an Activity to authenticate users

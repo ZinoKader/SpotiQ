@@ -7,6 +7,7 @@ import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 
 import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import se.zinokader.spotiq.service.SpotifyService;
 import se.zinokader.spotiq.ui.base.BasePresenter;
 
@@ -35,6 +36,12 @@ public class StartupPresenter extends BasePresenter<StartupActivity> {
         getView().finishProgress();
         Observable.just(FINISH_DELAY)
                 .delay(FINISH_DELAY, TimeUnit.SECONDS)
+                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe( success -> getView().goToLobby());
     }
+
+    public void logInFailed() {
+        getView().resetProgress();
+    }
+
 }

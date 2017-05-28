@@ -3,5 +3,5 @@
     <color name="colorPrimary">#222326</color>
     <color name="colorPrimaryDark">#101112</color>
     <color name="colorAccent">#00B648</color>
-    <color name="colorTextNormal">#fafafa</color>
+    <color name="colorMaterialWhite">#fafafa</color>
 </resources>

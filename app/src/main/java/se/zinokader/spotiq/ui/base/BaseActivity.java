@@ -5,7 +5,7 @@ import android.os.Bundle;
 import nucleus5.factory.PresenterFactory;
 import nucleus5.presenter.Presenter;
 import nucleus5.view.NucleusAppCompatActivity;
-import se.zinokader.spotiq.util.Injector;
+import se.zinokader.spotiq.util.di.Injector;
 
 public class BaseActivity<T extends Presenter> extends NucleusAppCompatActivity<T> {
 

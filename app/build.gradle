@@ -58,7 +58,7 @@ dependencies {
     compile 'com.android.support:customtabs:26.0.0-beta1'
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
     compile 'com.github.andrewlord1990:snackbarbuilder:0.8.0'
-    compile 'com.github.ZinoKader:LoadingButtonAndroid:1.7.2'
+    compile 'com.github.ZinoKader:LoadingButtonAndroid:1.7.5'
     compile 'com.jakewharton.threetenabp:threetenabp:1.0.5'
     compile 'com.evernote:android-job:1.1.10'
     compile 'com.spotify.android:auth:1.0.0-alpha'

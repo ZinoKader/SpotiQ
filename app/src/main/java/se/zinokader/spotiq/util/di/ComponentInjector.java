@@ -1,4 +1,4 @@
-package se.zinokader.spotiq.util;
+package se.zinokader.spotiq.util.di;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
