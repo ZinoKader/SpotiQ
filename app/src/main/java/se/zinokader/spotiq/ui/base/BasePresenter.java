@@ -3,9 +3,9 @@ package se.zinokader.spotiq.ui.base;
 import android.os.Bundle;
 
 import icepick.Icepick;
-import nucleus5.presenter.Presenter;
+import nucleus5.presenter.RxPresenter;
 
-public class BasePresenter<ViewType> extends Presenter<ViewType> {
+public class BasePresenter<ViewType> extends RxPresenter<ViewType> {
 
     @Override
     protected void onCreate(Bundle savedState) {

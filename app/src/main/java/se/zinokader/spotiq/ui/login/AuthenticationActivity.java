@@ -1,6 +1,5 @@
 package se.zinokader.spotiq.ui.login;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -17,9 +16,9 @@ import nucleus5.view.NucleusAppCompatActivity;
 import se.zinokader.spotiq.R;
 import se.zinokader.spotiq.constants.LogTag;
 import se.zinokader.spotiq.constants.SpotifyConstants;
-import se.zinokader.spotiq.service.SpotifyService;
+import se.zinokader.spotiq.service.SpotifyAuthenticationService;
 import se.zinokader.spotiq.ui.base.BasePresenter;
-import se.zinokader.spotiq.util.di.Injector;
+import se.zinokader.spotiq.util.Injector;
 
 /**
  * Unfortunately the Spotify Android SDK forces us to use an Activity to authenticate users
@@ -28,7 +27,7 @@ import se.zinokader.spotiq.util.di.Injector;
 public class AuthenticationActivity extends NucleusAppCompatActivity<BasePresenter> implements ConnectionStateCallback {
 
     @Inject
-    SpotifyService spotifyService;
+    SpotifyAuthenticationService spotifyAuthenticationService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,8 +52,6 @@ public class AuthenticationActivity extends NucleusAppCompatActivity<BasePresent
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
         super.onActivityResult(requestCode, resultCode, intent);
 
-        Intent returnIntent = new Intent();
-
         if (requestCode == SpotifyConstants.LOGIN_REQUEST_CODE) {
             AuthenticationResponse response = AuthenticationClient.getResponse(resultCode, intent);
             switch (response.getType()) {
@@ -62,22 +59,19 @@ public class AuthenticationActivity extends NucleusAppCompatActivity<BasePresent
                     Log.d(LogTag.LOG_LOGIN, "Logged in successfully!");
 
                     //refresh our authentication token
-                    spotifyService.getAuthenticator().setExpiryTimeStamp(response.getExpiresIn());
-                    spotifyService.getAuthenticator().setAccessToken(response.getAccessToken());
+                    spotifyAuthenticationService.getAuthenticator().setExpiryTimeStamp(response.getExpiresIn());
+                    spotifyAuthenticationService.getAuthenticator().setAccessToken(response.getAccessToken());
 
                     //schedule our token renewal job
-                    spotifyService.scheduleTokenRenewal();
+                    spotifyAuthenticationService.scheduleTokenRenewal();
 
-                    setResult(Activity.RESULT_OK, returnIntent);
                     break;
                 default:
                     Log.d(LogTag.LOG_LOGIN, "Something went wrong on login");
-                    setResult(Activity.RESULT_CANCELED, returnIntent);
             }
         }
         else {
             Log.d(LogTag.LOG_LOGIN, "Wrong request code for Spotify login");
-            setResult(Activity.RESULT_CANCELED, returnIntent);
         }
 
         this.finish();

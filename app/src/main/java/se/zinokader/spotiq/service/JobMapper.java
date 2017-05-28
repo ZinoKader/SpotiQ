@@ -7,11 +7,12 @@ import se.zinokader.spotiq.constants.ServiceConstants;
 
 public class JobMapper implements JobCreator {
 
+
     @Override
     public Job create(String tag) {
         switch (tag) {
             case ServiceConstants.TOKEN_RENEWAL_JOB_TAG:
-                return new SpotifyService();
+                return new SpotifyAuthenticationService();
             default:
                 return null;
         }
