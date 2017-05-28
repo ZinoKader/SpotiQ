@@ -6,35 +6,49 @@
             name="presenter"
             type="se.zinokader.spotiq.ui.login.StartupPresenter" />
     </data>
+
 <android.support.constraint.ConstraintLayout
+    android:id="@+id/root"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
+
+    <android.support.constraint.Guideline
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/logoGuideline"
+        app:layout_constraintGuide_percent="0.09"
+        android:orientation="horizontal" />
 
     <ImageView
         android:id="@+id/spotiqLogo"
         android:layout_width="wrap_content"
-        android:layout_height="70dp"
-        android:layout_marginTop="50dp"
+        android:layout_height="85dp"
         android:src="@drawable/image_spotiq_logo"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintTop_toTopOf="@+id/logoGuideline"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <android.support.constraint.Guideline
+        android:id="@+id/buttonGuideline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.44" />
 
     <br.com.simplepass.loading_button_lib.customViews.CircularProgressButton
         android:id="@+id/logInButton"
-        android:layout_width="240dp"
+        android:layout_width="250dp"
         android:layout_height="70dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="90dp"
-        android:padding="7dp"
+        android:layout_marginTop="0dp"
+        android:foreground="?selectableItemBackground"
         android:background="@drawable/button_shape_material"
-        android:drawableEnd="@drawable/image_spotify_logo_white"
+        android:drawableEnd="@drawable/ic_spotify_logo"
         android:drawablePadding="-10dp"
         android:elevation="8dp"
         android:fontFamily="@font/spotify"
         android:onClick="@{ () -> presenter.logIn() }"
+        android:padding="7dp"
         android:text="@string/connect_to_spotify"
         android:textAllCaps="false"
         android:textColor="@color/colorMaterialWhite"
@@ -42,7 +56,8 @@
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/spotiqLogo"
+        app:layout_constraintTop_toTopOf="@+id/buttonGuideline"
+        app:initialCornerAngle="6dp"
         app:spinning_bar_color="@color/colorMaterialWhite"
         app:spinning_bar_padding="10dp"
         app:spinning_bar_width="4dp" />
