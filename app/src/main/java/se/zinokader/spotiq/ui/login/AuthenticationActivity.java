@@ -65,12 +65,14 @@ public class AuthenticationActivity extends NucleusAppCompatActivity<BasePresent
                     //schedule our token renewal job
                     spotifyService.scheduleTokenRenewal();
 
+                    setResult(RESULT_OK);
                     break;
                 default:
                     Log.d(LogTag.LOG_LOGIN, "Something went wrong on login");
             }
         }
         else {
+            setResult(RESULT_CANCELED);
             Log.d(LogTag.LOG_LOGIN, "Wrong request code for Spotify login");
         }
 
