@@ -10,9 +10,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:theme="@style/AppTheme">
 
-        <activity android:name=".ui.base.BaseActivity" >
-
-        </activity>
+        <activity android:name=".ui.base.BaseActivity" android:theme="@style/AppThemeNoActionBar"/>
 
         <activity android:name=".ui.login.StartupActivity" android:theme="@style/AppThemeNoActionBar">
             <intent-filter>
@@ -22,8 +20,9 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".ui.login.AuthenticationActivity" android:theme="@style/AppThemeNoActionBar">
-        </activity>
+        <activity android:name=".ui.login.AuthenticationActivity" android:theme="@style/AppThemeNoActionBar" />
+
+        <activity android:name=".ui.lobby.LobbyActivity" android:theme="@style/AppThemeNoActionBar" />
 
         <meta-data
             android:name="preloaded_fonts"

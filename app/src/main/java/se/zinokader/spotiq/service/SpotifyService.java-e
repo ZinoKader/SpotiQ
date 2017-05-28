@@ -40,8 +40,7 @@ public class SpotifyService extends Job {
     }
 
     public void scheduleTokenRenewal() {
-        long updatePeriodMillis = TimeUnit.SECONDS.toMillis(
-                spotifyAuthenticator.getExpiresIn() - TOKEN_EXPIRY_OFFSET);
+        long updatePeriodMillis = TimeUnit.SECONDS.toMillis(spotifyAuthenticator.getExpiresIn() - TOKEN_EXPIRY_OFFSET);
         long updatePeriodFlexMillis = TimeUnit.MINUTES.toMillis(5);
 
         new JobRequest.Builder(ServiceConstants.TOKEN_RENEWAL_JOB_TAG)
