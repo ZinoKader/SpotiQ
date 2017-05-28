@@ -54,7 +54,7 @@ public class StartupActivity extends BaseActivity<StartupPresenter> {
     }
 
     public void goToLobby() {
-        Animator activityTransition = getCircularRevealAnimation();
+        Animator activityTransition = prepareCircularRevealAnimation();
         activityTransition.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
@@ -67,7 +67,9 @@ public class StartupActivity extends BaseActivity<StartupPresenter> {
         activityTransition.start();
     }
 
-    private Animator getCircularRevealAnimation() {
+    private Animator prepareCircularRevealAnimation() {
+        Animator circularRevealAnimation;
+
         //calculate bounds
         int x = binding.root.getWidth() / 2;
         int y = binding.root.getHeight() / 2;
@@ -79,19 +81,20 @@ public class StartupActivity extends BaseActivity<StartupPresenter> {
         binding.logInButton.setVisibility(View.GONE);
         binding.spotiqLogo.setVisibility(View.GONE);
 
-        Animator circularRevealAnimation = ViewAnimationUtils.createCircularReveal(binding.root,
-                x, y, startRadius, endRadius);
-        circularRevealAnimation.setInterpolator(new AccelerateDecelerateInterpolator());
-
         //prepare root view color
         binding.root.setBackgroundColor(ContextCompat.getColor(this, R.color.colorAccent));
         binding.root.setVisibility(View.VISIBLE);
+
+        circularRevealAnimation = ViewAnimationUtils.createCircularReveal(binding.root,
+                x, y, startRadius, endRadius);
+        circularRevealAnimation.setInterpolator(new AccelerateDecelerateInterpolator());
 
         return circularRevealAnimation;
     }
 
     private void delayResetAnimatedChanges() {
         new Handler().postDelayed( () -> {
+            //unhide views that were hidden on animation
             binding.logInButton.revertAnimation();
             binding.root.setVisibility(View.VISIBLE);
             binding.logInButton.setVisibility(View.VISIBLE);
