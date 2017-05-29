@@ -14,7 +14,7 @@ import se.zinokader.spotiq.ui.base.BasePresenter;
 
 public class StartupPresenter extends BasePresenter<StartupActivity> {
 
-    private static final int LOG_IN_DELAY = 2;
+    private static final int LOG_IN_DELAY = 1;
     private static final int FINISH_DELAY = 1;
 
     @Inject

@@ -5,4 +5,9 @@
     <string name="log_in_failed">Something went wrong, try again</string>
     <string name="join_party">Join party</string>
     <string name="create_party">Create party</string>
+    <string name="party_title">Party title</string>
+    <string name="password">Password</string>
+    <string name="create_party_dialog_title">Create a party for others to join</string>
+    <string name="join_party_dialog_title">Join somebody else\'s party</string>
+    <string name="submit">Submit</string>
 </resources>
