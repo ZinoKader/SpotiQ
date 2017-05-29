@@ -18,6 +18,11 @@ public class LobbyPresenter extends BasePresenter<LobbyActivity> {
         super.onCreate(savedState);
     }
 
+    void joinParty(String partyTitle, String partyPassword) {
 
+    }
 
+    void createParty(String partyTitle, String partyPassword) {
+
+    }
 }

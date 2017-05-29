@@ -32,6 +32,7 @@ public class StartupActivity extends BaseActivity<StartupPresenter> {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_startup);
         binding.setPresenter(getPresenter());
+        binding.logInButton.setOnClickListener(c -> getPresenter().logIn());
     }
 
     public void startProgress() {

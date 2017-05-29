@@ -39,7 +39,7 @@
     <br.com.simplepass.loading_button_lib.customViews.CircularProgressButton
         android:id="@+id/logInButton"
         android:layout_width="280dp"
-        android:layout_height="80dp"
+        android:layout_height="75dp"
         android:layout_marginTop="0dp"
         android:background="@drawable/button_shape_material"
         android:drawableEnd="@drawable/ic_spotify_logo"
@@ -47,7 +47,6 @@
         android:elevation="8dp"
         android:fontFamily="@font/spotify"
         android:foreground="?selectableItemBackground"
-        android:onClick="@{ () -> presenter.logIn() }"
         android:padding="7dp"
         android:paddingEnd="30dp"
         android:text="@string/connect_to_spotify"

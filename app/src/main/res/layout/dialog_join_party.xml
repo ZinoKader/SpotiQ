@@ -23,7 +23,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/dialogGuideline"
-        app:layout_constraintGuide_percent="0.3"
+        app:layout_constraintGuide_percent="0.2"
         android:orientation="horizontal" />
 
     <TextView
@@ -42,12 +42,14 @@
 
     <com.rengwuxian.materialedittext.MaterialEditText
         android:id="@+id/partyTitle"
-        android:layout_width="200dp"
-        android:layout_height="60dp"
+        android:layout_width="250dp"
+        android:layout_height="80dp"
         android:hint="@string/party_title"
         android:inputType="textNoSuggestions"
         tools:layout_editor_absoluteX="80dp"
         android:layout_marginTop="16dp"
+        app:met_bottomTextSize="10sp"
+        app:met_minBottomTextLines="2"
         app:met_floatingLabel="highlight"
         app:met_primaryColor="@color/colorMaterialWhite"
         app:met_baseColor="@color/colorMaterialWhite"
@@ -59,12 +61,14 @@
 
     <com.rengwuxian.materialedittext.MaterialEditText
         android:id="@+id/partyPassword"
-        android:layout_width="200dp"
-        android:layout_height="60dp"
+        android:layout_width="250dp"
+        android:layout_height="80dp"
         android:hint="@string/password"
         android:inputType="textPassword"
         tools:layout_editor_absoluteX="80dp"
         android:layout_marginTop="16dp"
+        app:met_bottomTextSize="10sp"
+        app:met_minBottomTextLines="2"
         app:met_floatingLabel="highlight"
         app:met_primaryColor="@color/colorMaterialWhite"
         app:met_baseColor="@color/colorMaterialWhite"

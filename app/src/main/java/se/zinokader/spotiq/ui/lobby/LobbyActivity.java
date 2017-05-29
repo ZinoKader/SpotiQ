@@ -12,10 +12,14 @@ import android.view.ViewAnimationUtils;
 import android.view.Window;
 import android.view.animation.AccelerateDecelerateInterpolator;
 
+import com.rengwuxian.materialedittext.MaterialEditText;
+
 import nucleus5.factory.RequiresPresenter;
 import se.zinokader.spotiq.R;
 import se.zinokader.spotiq.databinding.ActivityLobbyBinding;
 import se.zinokader.spotiq.ui.base.BaseActivity;
+import se.zinokader.spotiq.util.helper.PartyPasswordValidator;
+import se.zinokader.spotiq.util.helper.PartyTitleValidator;
 
 @RequiresPresenter(LobbyPresenter.class)
 public class LobbyActivity extends BaseActivity<LobbyPresenter> {
@@ -40,6 +44,10 @@ public class LobbyActivity extends BaseActivity<LobbyPresenter> {
         binding.createPartyButton.setOnClickListener( c -> showDialog(DialogType.CREATE_DIALOG));
     }
 
+    public void goToParty() {
+
+    }
+
     private void showDialog(DialogType dialogType) {
 
         View dialogView;
@@ -59,6 +67,23 @@ public class LobbyActivity extends BaseActivity<LobbyPresenter> {
         mockDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         mockDialog.setContentView(dialogView);
 
+        MaterialEditText partyTitle = mockDialog.findViewById(R.id.partyTitle);
+        MaterialEditText partyPassword = mockDialog.findViewById(R.id.partyPassword);
+        partyTitle.addValidator(new PartyTitleValidator());
+        partyPassword.addValidator(new PartyPasswordValidator());
+
+        mockDialog.findViewById(R.id.submitButton).setOnClickListener(c -> {
+            switch (dialogType) {
+                case JOIN_DIALOG:
+                    if(!(partyTitle.validate() && partyPassword.validate())) return;
+                    getPresenter().joinParty(partyTitle.getText().toString(), partyPassword.getText().toString());
+                    break;
+                case CREATE_DIALOG:
+                    if(!(partyTitle.validate() && partyPassword.validate())) return;
+                    getPresenter().createParty(partyTitle.getText().toString(), partyPassword.getText().toString());
+                    break;
+            }
+        });
 
         mockDialog.findViewById(R.id.closeDialogButton).setOnClickListener(c ->
                 animateDialog(DialogAction.CLOSE, dialogType, dialogView, mockDialog));

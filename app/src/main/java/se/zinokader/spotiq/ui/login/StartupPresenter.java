@@ -25,14 +25,14 @@ public class StartupPresenter extends BasePresenter<StartupActivity> {
         super.onCreate(savedState);
     }
 
-    public void logIn() {
+    void logIn() {
         getView().startProgress();
         Observable.just(LOG_IN_DELAY)
                 .delay(LOG_IN_DELAY, TimeUnit.SECONDS)
                 .subscribe( success -> getView().goToAuthentication());
     }
 
-    public void logInFinished() {
+    void logInFinished() {
         getView().finishProgress();
         Observable.just(FINISH_DELAY)
                 .delay(FINISH_DELAY, TimeUnit.SECONDS)
@@ -40,7 +40,7 @@ public class StartupPresenter extends BasePresenter<StartupActivity> {
                 .subscribe( success -> getView().goToLobby());
     }
 
-    public void logInFailed() {
+    void logInFailed() {
         getView().resetProgress();
     }
 
