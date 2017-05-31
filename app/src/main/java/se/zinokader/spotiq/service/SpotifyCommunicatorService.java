@@ -11,23 +11,27 @@ import java.util.concurrent.TimeUnit;
 
 import javax.inject.Singleton;
 
+import kaaes.spotify.webapi.android.SpotifyApi;
+import kaaes.spotify.webapi.android.SpotifyService;
 import se.zinokader.spotiq.constants.LogTag;
 import se.zinokader.spotiq.constants.ServiceConstants;
 import se.zinokader.spotiq.model.SpotifyAuthenticator;
-import se.zinokader.spotiq.ui.login.AuthenticationActivity;
+import se.zinokader.spotiq.ui.login.SpotifyAuthenticationActivity;
 
 @Singleton
-public class SpotifyService extends Job {
+public class SpotifyCommunicatorService extends Job {
 
     private static final long TOKEN_EXPIRY_OFFSET = TimeUnit.MINUTES.toSeconds(15);
     private static final long TOKEN_EXPIRY_CUTOFF = TimeUnit.MINUTES.toSeconds(20);
+
     private static final SpotifyAuthenticator spotifyAuthenticator = new SpotifyAuthenticator();
+    private static final SpotifyApi spotifyWebApi = new SpotifyApi();
 
     @NonNull
     @Override
     protected Result onRunJob(Params params) {
         if (spotifyAuthenticator.getExpiresIn() < TOKEN_EXPIRY_CUTOFF) {
-            Intent loginIntent = new Intent(getContext(), AuthenticationActivity.class);
+            Intent loginIntent = new Intent(getContext(), SpotifyAuthenticationActivity.class);
             loginIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             getContext().startActivity(loginIntent);
             Log.d(LogTag.LOG_TOKEN_SERVICE, "Ran token renewal job successfully");
@@ -59,4 +63,7 @@ public class SpotifyService extends Job {
         return spotifyAuthenticator;
     }
 
+    public SpotifyService getWebApi() {
+        return spotifyWebApi.setAccessToken(getAuthenticator().getAccessToken()).getService();
+    }
 }

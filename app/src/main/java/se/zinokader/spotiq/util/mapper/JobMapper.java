@@ -1,9 +1,10 @@
-package se.zinokader.spotiq.service;
+package se.zinokader.spotiq.util.mapper;
 
 import com.evernote.android.job.Job;
 import com.evernote.android.job.JobCreator;
 
 import se.zinokader.spotiq.constants.ServiceConstants;
+import se.zinokader.spotiq.service.SpotifyCommunicatorService;
 
 public class JobMapper implements JobCreator {
 
@@ -11,7 +12,7 @@ public class JobMapper implements JobCreator {
     public Job create(String tag) {
         switch (tag) {
             case ServiceConstants.TOKEN_RENEWAL_JOB_TAG:
-                return new SpotifyService();
+                return new SpotifyCommunicatorService();
             default:
                 return null;
         }

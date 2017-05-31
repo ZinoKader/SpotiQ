@@ -48,7 +48,7 @@
         android:fontFamily="@font/spotify"
         android:foreground="?selectableItemBackground"
         android:padding="7dp"
-        android:paddingEnd="30dp"
+        android:paddingEnd="25dp"
         android:text="@string/connect_to_spotify"
         android:textAllCaps="false"
         android:textColor="@color/colorMaterialWhite"

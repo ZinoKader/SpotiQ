@@ -6,12 +6,16 @@ import android.app.Dialog;
 import android.databinding.DataBindingUtil;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.view.Window;
 import android.view.animation.AccelerateDecelerateInterpolator;
 
+import com.bumptech.glide.Glide;
+import com.github.andrewlord1990.snackbarbuilder.SnackbarBuilder;
 import com.rengwuxian.materialedittext.MaterialEditText;
 
 import nucleus5.factory.RequiresPresenter;
@@ -42,10 +46,21 @@ public class LobbyActivity extends BaseActivity<LobbyPresenter> {
         binding.setPresenter(getPresenter());
         binding.joinPartyButton.setOnClickListener( c -> showDialog(DialogType.JOIN_DIALOG));
         binding.createPartyButton.setOnClickListener( c -> showDialog(DialogType.CREATE_DIALOG));
+        getPresenter().loadUser();
     }
 
-    public void goToParty() {
+    public void setUserDetails(String userName, String userImageUrl) {
+        binding.userName.setText(userName);
+        Glide.with(this).load(userImageUrl).into(binding.userImage);
+    }
 
+    public void goToParty(String partyTitle) {
+        new SnackbarBuilder(binding.getRoot())
+                .duration(Snackbar.LENGTH_SHORT)
+                .message(getString(R.string.navigating_to_party) + " " + partyTitle)
+                .timeoutDismissCallback(snackbar -> Log.d("", "")) //TODO: Navigate to PartyActivity
+                .build()
+                .show();
     }
 
     private void showDialog(DialogType dialogType) {
@@ -75,11 +90,13 @@ public class LobbyActivity extends BaseActivity<LobbyPresenter> {
         mockDialog.findViewById(R.id.submitButton).setOnClickListener(c -> {
             switch (dialogType) {
                 case JOIN_DIALOG:
-                    if(!(partyTitle.validate() && partyPassword.validate())) return;
+                    if(!(partyTitle.validate() & partyPassword.validate())) return;
+                    animateDialog(DialogAction.CLOSE, dialogType, dialogView, mockDialog);
                     getPresenter().joinParty(partyTitle.getText().toString(), partyPassword.getText().toString());
                     break;
                 case CREATE_DIALOG:
-                    if(!(partyTitle.validate() && partyPassword.validate())) return;
+                    if(!(partyTitle.validate() & partyPassword.validate())) return;
+                    animateDialog(DialogAction.CLOSE, dialogType, dialogView, mockDialog);
                     getPresenter().createParty(partyTitle.getText().toString(), partyPassword.getText().toString());
                     break;
             }

@@ -16,7 +16,7 @@ import nucleus5.view.NucleusAppCompatActivity;
 import se.zinokader.spotiq.R;
 import se.zinokader.spotiq.constants.LogTag;
 import se.zinokader.spotiq.constants.SpotifyConstants;
-import se.zinokader.spotiq.service.SpotifyService;
+import se.zinokader.spotiq.service.SpotifyCommunicatorService;
 import se.zinokader.spotiq.ui.base.BasePresenter;
 import se.zinokader.spotiq.util.di.Injector;
 
@@ -24,10 +24,10 @@ import se.zinokader.spotiq.util.di.Injector;
  * Unfortunately the Spotify Android SDK forces us to use an Activity to authenticate users
  * This activity's sole purpose is authenticating users
  */
-public class AuthenticationActivity extends NucleusAppCompatActivity<BasePresenter> implements ConnectionStateCallback {
+public class SpotifyAuthenticationActivity extends NucleusAppCompatActivity<BasePresenter> implements ConnectionStateCallback {
 
     @Inject
-    SpotifyService spotifyService;
+    SpotifyCommunicatorService spotifyCommunicatorService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,11 +59,11 @@ public class AuthenticationActivity extends NucleusAppCompatActivity<BasePresent
                     Log.d(LogTag.LOG_LOGIN, "Logged in successfully!");
 
                     //refresh our authentication token
-                    spotifyService.getAuthenticator().setExpiryTimeStamp(response.getExpiresIn());
-                    spotifyService.getAuthenticator().setAccessToken(response.getAccessToken());
+                    spotifyCommunicatorService.getAuthenticator().setExpiryTimeStamp(response.getExpiresIn());
+                    spotifyCommunicatorService.getAuthenticator().setAccessToken(response.getAccessToken());
 
                     //schedule our token renewal job
-                    spotifyService.scheduleTokenRenewal();
+                    spotifyCommunicatorService.scheduleTokenRenewal();
 
                     setResult(RESULT_OK);
                     break;

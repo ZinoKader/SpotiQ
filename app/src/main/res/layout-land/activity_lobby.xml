@@ -15,7 +15,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/logoGuideline"
-        app:layout_constraintGuide_percent="0.05"
+        app:layout_constraintGuide_percent="0.02"
         android:orientation="horizontal" />
 
     <ImageView
@@ -30,18 +30,19 @@
 
     <com.mikhaellopez.circularimageview.CircularImageView
         android:id="@+id/userImage"
-        android:layout_width="95dp"
-        android:layout_height="95dp"
+        android:layout_width="75dp"
+        android:layout_height="75dp"
+        android:layout_marginTop="20dp"
         app:civ_border="true"
         app:civ_border_color="@color/colorMaterialWhite"
         app:civ_border_width="1dp"
         app:civ_shadow="true"
         app:civ_shadow_color="@color/colorPrimaryDark"
         app:civ_shadow_radius="4"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="20dp"
-        app:layout_constraintTop_toBottomOf="@+id/spotiqLogo" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/spotiqLogo"
+        app:layout_constraintHorizontal_bias="0.5" />
 
     <TextView
         android:id="@+id/userName"
@@ -86,11 +87,10 @@
         android:textColor="@color/colorMaterialWhite"
         android:textSize="16sp"
         android:textStyle="bold"
-        tools:layout_editor_absoluteY="214dp"
-        tools:layout_editor_absoluteX="60dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintEnd_toEndOf="parent" />
+        android:layout_marginTop="64dp"
+        app:layout_constraintEnd_toStartOf="@+id/createPartyButton"
+        android:layout_marginEnd="8dp" />
 
     <Button
         android:id="@+id/createPartyButton"
@@ -108,12 +108,11 @@
         android:textColor="@color/colorMaterialWhite"
         android:textSize="16sp"
         android:textStyle="bold"
-        tools:layout_editor_absoluteX="60dp"
-        android:layout_marginTop="22dp"
-        app:layout_constraintTop_toBottomOf="@+id/joinPartyButton"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/buttonGuideline"
+        android:layout_marginTop="64dp"
+        android:layout_marginStart="8dp"
+        app:layout_constraintStart_toEndOf="@+id/joinPartyButton" />
 
 
 </android.support.constraint.ConstraintLayout>

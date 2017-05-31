@@ -6,5 +6,6 @@ public final class LogTag {
 
     public static final String LOG_TOKEN_SERVICE = "tag_log_token_service";
     public static final String LOG_LOGIN = "tag_log_login";
+    public static final String LOG_LOBBY = "tag_log_lobby";
 
 }

@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.view.animation.AccelerateDecelerateInterpolator;
@@ -17,6 +18,7 @@ import com.github.andrewlord1990.snackbarbuilder.SnackbarBuilder;
 
 import nucleus5.factory.RequiresPresenter;
 import se.zinokader.spotiq.R;
+import se.zinokader.spotiq.constants.LogTag;
 import se.zinokader.spotiq.constants.SpotifyConstants;
 import se.zinokader.spotiq.databinding.ActivityStartupBinding;
 import se.zinokader.spotiq.ui.base.BaseActivity;
@@ -48,8 +50,8 @@ public class StartupActivity extends BaseActivity<StartupPresenter> {
         binding.logInButton.revertAnimation();
     }
 
-    public void goToAuthentication() {
-        startActivityForResult(new Intent(this, AuthenticationActivity.class),
+    public void goToSpotifyAuthentication() {
+        startActivityForResult(new Intent(this, SpotifyAuthenticationActivity.class),
                 SpotifyConstants.LOGIN_REQUEST_CODE);
         overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
     }
@@ -105,16 +107,36 @@ public class StartupActivity extends BaseActivity<StartupPresenter> {
         }, 1000);
     }
 
+    public void showConnectedToSpotiqServers() {
+        new SnackbarBuilder(binding.getRoot())
+                .duration(Snackbar.LENGTH_SHORT)
+                .message(R.string.spotiq_log_in_success)
+                .build()
+                .show();
+    }
+
+    public void showFailedConnectionToSpotiqServers() {
+        new SnackbarBuilder(binding.getRoot())
+                .duration(Snackbar.LENGTH_LONG)
+                .message(R.string.spotiq_log_in_failed)
+                .build()
+                .show();
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode != SpotifyConstants.LOGIN_REQUEST_CODE) return;
+        if (requestCode != SpotifyConstants.LOGIN_REQUEST_CODE) {
+            Log.d(LogTag.LOG_LOGIN, "Wrong requestCode on Spotify auth. Expected: " +
+                    SpotifyConstants.LOGIN_REQUEST_CODE + ", received: " + requestCode);
+            return;
+        }
 
         if (resultCode == RESULT_OK) {
             new SnackbarBuilder(binding.getRoot())
                     .duration(Snackbar.LENGTH_SHORT)
-                    .message(R.string.log_in_success)
+                    .message(R.string.spotify_log_in_success)
                     .timeoutDismissCallback(snackbar -> getPresenter().logInFinished())
                     .build()
                     .show();
@@ -122,7 +144,7 @@ public class StartupActivity extends BaseActivity<StartupPresenter> {
         else {
             new SnackbarBuilder(binding.getRoot())
                     .duration(Snackbar.LENGTH_LONG)
-                    .message(R.string.log_in_failed)
+                    .message(R.string.spotify_log_in_failed)
                     .timeoutDismissCallback(snackbar -> getPresenter().logInFailed())
                     .build()
                     .show();

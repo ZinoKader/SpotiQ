@@ -24,18 +24,24 @@
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 
+# For Firebase
+-keepattributes Signature
+-keepclassmembers class se.zinokader.spotiq.model.** {
+  *;
 
+#For Glide
+-keep public class * implements com.bumptech.glide.module.GlideModule
+-keep public enum com.bumptech.glide.load.resource.bitmap.ImageHeaderParser$** {
+  **[] $VALUES;
+  public *;
+}
+
+#For IcePick
 -dontwarn icepick.**
-
 -keep class icepick.** { *; }
-
 -keep class **$$Icepick { *; }
-
 -keepclasseswithmembernames class * {
     @icepick.* <fields>;
 }
-
 -keepnames class * { @icepick.State *;}
-
-
 
