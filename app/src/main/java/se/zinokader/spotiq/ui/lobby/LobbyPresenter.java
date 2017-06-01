@@ -22,6 +22,7 @@ import se.zinokader.spotiq.model.Party;
 import se.zinokader.spotiq.repository.PartiesRepository;
 import se.zinokader.spotiq.service.SpotifyCommunicatorService;
 import se.zinokader.spotiq.ui.base.BasePresenter;
+import se.zinokader.spotiq.util.exception.PartyDoesNotExistException;
 import se.zinokader.spotiq.util.exception.PartyExistsException;
 
 
@@ -72,37 +73,35 @@ public class LobbyPresenter extends BasePresenter<LobbyActivity> {
     void joinParty(String partyTitle, String partyPassword) {
         Party party = new Party(partyTitle, partyPassword);
         Observable.just(party)
+                .flatMap(partyExists -> partiesRepository.getParty(partyTitle).blockingFirst().exists()
+                        ? Observable.just(partyExists)
+                        : Observable.error(new PartyDoesNotExistException()))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<Party>() {
                     @Override
                     public void onNext(Party party) {
-                        Observable.just(1)
-                                .observeOn(AndroidSchedulers.mainThread())
-                                .doOnNext(next -> {
-                                    getView().showMessage("Navigating to party " + partyTitle);
-                                })
-                                .delay(1, TimeUnit.SECONDS, AndroidSchedulers.mainThread())
-                                .subscribe(success -> {
-                                    getView().goToParty(party.getTitle());
-                                });
+                        navigateToParty(party.getTitle());
                     }
 
                     @Override
                     public void onError(Throwable e) {
-                        getView().showMessage("Something went wrong when joining the party");
+                        if (e instanceof PartyDoesNotExistException) {
+                            getView().showMessage("Party does not exist, why not create one instead?");
+                        }
+                        else {
+                            getView().showMessage("Something went wrong when joining the party");
+                        }
                         Log.d(LogTag.LOG_LOBBY, "Could not join party: " + e.getMessage());
                         e.printStackTrace();
                     }
 
                     @Override
                     public void onComplete() {
-                        Log.d(LogTag.LOG_LOBBY, "Party creation process completed");
                     }
 
                     @Override
                     public void onSubscribe(Disposable d) {
-
                     }
                 });
     }
@@ -121,15 +120,7 @@ public class LobbyPresenter extends BasePresenter<LobbyActivity> {
                 .subscribe(new Observer<Party>() {
                     @Override
                     public void onNext(Party party) {
-                        Observable.just(1)
-                                .observeOn(AndroidSchedulers.mainThread())
-                                .doOnNext(next -> {
-                                    getView().showMessage("Navigating to party " + partyTitle);
-                                })
-                                .delay(1, TimeUnit.SECONDS, AndroidSchedulers.mainThread())
-                                .subscribe(success -> {
-                                    getView().goToParty(party.getTitle());
-                                });
+                        navigateToParty(party.getTitle());
                     }
 
                     @Override
@@ -146,14 +137,24 @@ public class LobbyPresenter extends BasePresenter<LobbyActivity> {
 
                     @Override
                     public void onComplete() {
-                        Log.d(LogTag.LOG_LOBBY, "Party creation process completed");
                     }
 
                     @Override
                     public void onSubscribe(Disposable d) {
-
                     }
                 });
 
+    }
+
+    private void navigateToParty(String partyTitle) {
+        Observable.just(1)
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnNext(next -> {
+                    getView().showMessage("Navigating to party " + partyTitle);
+                })
+                .delay(1, TimeUnit.SECONDS, AndroidSchedulers.mainThread())
+                .subscribe(success -> {
+                    getView().goToParty(partyTitle);
+                });
     }
 }
