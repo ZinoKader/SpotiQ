@@ -2,26 +2,19 @@ package se.zinokader.spotiq.ui.login;
 
 import android.os.Bundle;
 
+import com.github.b3er.rxfirebase.auth.RxFirebaseAuth;
+import com.google.firebase.auth.FirebaseAuth;
+
 import java.util.concurrent.TimeUnit;
 
-import javax.inject.Inject;
-
 import io.reactivex.Observable;
-import io.reactivex.SingleObserver;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import se.zinokader.spotiq.ui.base.BasePresenter;
-import se.zinokader.spotiq.util.helper.FirebaseAuthenticationHelper;
 
 
 public class StartupPresenter extends BasePresenter<StartupActivity> {
 
-    private static final int LOG_IN_DELAY = 1;
-    private static final int FINISH_DELAY = 1;
-
-    @Inject
-    FirebaseAuthenticationHelper firebaseAuthenticationHelper;
 
     @Override
     protected void onCreate(Bundle savedState) {
@@ -29,39 +22,35 @@ public class StartupPresenter extends BasePresenter<StartupActivity> {
     }
 
     void logIn() {
-        firebaseAuthenticationHelper.authenticateAnonymously()
+        RxFirebaseAuth.signInAnonymously(FirebaseAuth.getInstance())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new SingleObserver<Boolean>() {
-                    @Override
-                    public void onSuccess(Boolean b) {
-                        getView().showConnectedToSpotiqServers();
-                        getView().startProgress();
-                        Observable.just(LOG_IN_DELAY)
-                                .delay(LOG_IN_DELAY, TimeUnit.SECONDS)
-                                .subscribe( success -> getView().goToSpotifyAuthentication());
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-                        getView().showFailedConnectionToSpotiqServers();
-                    }
-
-                    @Override
-                    public void onSubscribe(Disposable d) {}
-                });
+                .subscribe(
+                        success -> {
+                            getView().showMessage("Connected to SpotiQ servers");
+                            getView().startProgress();
+                            Observable.just(1)
+                                    .delay(1, TimeUnit.SECONDS)
+                                    .subscribe( delay -> getView().goToSpotifyAuthentication());
+                        },
+                        failed -> getView().showMessage("Could not connect to SpotiQ servers"));
     }
 
     void logInFinished() {
-        getView().finishProgress();
-        Observable.just(FINISH_DELAY)
-                .delay(FINISH_DELAY, TimeUnit.SECONDS)
+        Observable.just(1)
+                .delay(1, TimeUnit.SECONDS, AndroidSchedulers.mainThread())
                 .observeOn(AndroidSchedulers.mainThread())
+                .doOnNext(next -> {
+                    getView().finishProgress();
+                    getView().showMessage("Connected to Spotify successfully");
+                })
+                .delay(2, TimeUnit.SECONDS, AndroidSchedulers.mainThread())
                 .subscribe( success -> getView().goToLobby());
     }
 
     void logInFailed() {
         getView().resetProgress();
+        getView().showMessage("Something went wrong when connecting to Spotify");
     }
 
 }

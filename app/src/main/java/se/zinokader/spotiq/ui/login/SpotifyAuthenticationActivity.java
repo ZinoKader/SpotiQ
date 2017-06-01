@@ -63,7 +63,7 @@ public class SpotifyAuthenticationActivity extends NucleusAppCompatActivity<Base
                     spotifyCommunicatorService.getAuthenticator().setAccessToken(response.getAccessToken());
 
                     //schedule our token renewal job
-                    spotifyCommunicatorService.scheduleTokenRenewal();
+                    //spotifyCommunicatorService.scheduleTokenRenewal(); TODO: Replace job with refreshing token onResume() for presenter
 
                     setResult(RESULT_OK);
                     break;

@@ -13,4 +13,6 @@
     <string name="join_party_dialog_title">Join somebody else\'s party</string>
     <string name="submit">Submit</string>
     <string name="navigating_to_party">Loading party</string>
+    <string name="profile_image_transition">profileImageTransition</string>
+    <string name="user_name_transition">userNameTransition</string>
 </resources>

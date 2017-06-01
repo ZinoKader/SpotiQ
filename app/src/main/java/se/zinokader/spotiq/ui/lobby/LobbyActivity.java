@@ -2,12 +2,14 @@ package se.zinokader.spotiq.ui.lobby;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.app.ActivityOptions;
 import android.app.Dialog;
+import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
-import android.util.Log;
+import android.util.Pair;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewAnimationUtils;
@@ -20,8 +22,11 @@ import com.rengwuxian.materialedittext.MaterialEditText;
 
 import nucleus5.factory.RequiresPresenter;
 import se.zinokader.spotiq.R;
+import se.zinokader.spotiq.constants.ApplicationConstants;
 import se.zinokader.spotiq.databinding.ActivityLobbyBinding;
 import se.zinokader.spotiq.ui.base.BaseActivity;
+import se.zinokader.spotiq.ui.party.PartyActivity;
+import se.zinokader.spotiq.util.helper.GlideRequestOptions;
 import se.zinokader.spotiq.util.helper.PartyPasswordValidator;
 import se.zinokader.spotiq.util.helper.PartyTitleValidator;
 
@@ -37,7 +42,7 @@ public class LobbyActivity extends BaseActivity<LobbyPresenter> {
     }
 
     private static final int DIALOG_ANIMATION_DURATION = 500;
-    private ActivityLobbyBinding binding;
+    ActivityLobbyBinding binding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,24 +54,42 @@ public class LobbyActivity extends BaseActivity<LobbyPresenter> {
         getPresenter().loadUser();
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        getPresenter().resume();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        getPresenter().pause();
+    }
+
     public void setUserDetails(String userName, String userImageUrl) {
         binding.userName.setText(userName);
-        Glide.with(this).load(userImageUrl).into(binding.userImage);
+        Glide.with(this)
+                .load(userImageUrl)
+                .apply(GlideRequestOptions.getProfileImageOptions())
+                .into(binding.userImage);
     }
 
     public void goToParty(String partyTitle) {
+        ActivityOptions transitionOptions = ActivityOptions.makeSceneTransitionAnimation(this,
+                new Pair<>(binding.userImage, getResources().getString(R.string.profile_image_transition)),
+                new Pair<>(binding.userName, getResources().getString(R.string.user_name_transition)));
+        Intent intent = new Intent(this, PartyActivity.class);
+        intent.putExtra(ApplicationConstants.PARTY_NAME_EXTRA, partyTitle);
         new SnackbarBuilder(binding.getRoot())
                 .duration(Snackbar.LENGTH_SHORT)
                 .message(getString(R.string.navigating_to_party) + " " + partyTitle)
-                .timeoutDismissCallback(snackbar -> Log.d("", "")) //TODO: Navigate to PartyActivity
+                .timeoutDismissCallback(snackbar -> startActivity(intent, transitionOptions.toBundle()))
                 .build()
                 .show();
     }
 
     private void showDialog(DialogType dialogType) {
-
         View dialogView;
-
         switch (dialogType) {
             case JOIN_DIALOG:
                 dialogView = View.inflate(this, R.layout.dialog_join_party, null);
@@ -77,7 +100,6 @@ public class LobbyActivity extends BaseActivity<LobbyPresenter> {
             default:
                 return;
         }
-
         Dialog mockDialog = new Dialog(this, R.style.FullScreenDialogStyle);
         mockDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         mockDialog.setContentView(dialogView);
@@ -104,10 +126,8 @@ public class LobbyActivity extends BaseActivity<LobbyPresenter> {
 
         mockDialog.findViewById(R.id.closeDialogButton).setOnClickListener(c ->
                 animateDialog(DialogAction.CLOSE, dialogType, dialogView, mockDialog));
-
         mockDialog.setOnShowListener(dialogInterface ->
                 animateDialog(DialogAction.OPEN, dialogType, dialogView, null));
-
         mockDialog.setOnKeyListener((dialogInterface, i, keyEvent) -> {
             if (i == KeyEvent.KEYCODE_BACK) {
                 animateDialog(DialogAction.CLOSE, dialogType, dialogView, mockDialog);
@@ -121,13 +141,10 @@ public class LobbyActivity extends BaseActivity<LobbyPresenter> {
     }
 
     private void animateDialog(DialogAction dialogAction, DialogType dialogType, View dialogView, Dialog dialog) {
-
         View dialogRoot = dialogView.findViewById(R.id.root);
-
         int endRadius = (int) Math.hypot(dialogRoot.getWidth(), dialogRoot.getHeight());
         int x = dialogRoot.getWidth() / 2;
         int y;
-
         switch (dialogType) {
             case JOIN_DIALOG:
                 y = (int) binding.joinPartyButton.getY() + (binding.joinPartyButton.getHeight() / 2);
@@ -138,7 +155,6 @@ public class LobbyActivity extends BaseActivity<LobbyPresenter> {
             default:
                 return;
         }
-
         switch (dialogAction) {
             case OPEN:
                 Animator circularDialogReveal = ViewAnimationUtils.createCircularReveal(dialogRoot,
@@ -164,6 +180,10 @@ public class LobbyActivity extends BaseActivity<LobbyPresenter> {
                 circularDialogClose.start();
                 break;
         }
+    }
 
+    @Override
+    public View getRootView() {
+        return binding.getRoot();
     }
 }

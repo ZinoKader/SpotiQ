@@ -7,14 +7,11 @@ import android.databinding.DataBindingUtil;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.view.animation.AccelerateDecelerateInterpolator;
-
-import com.github.andrewlord1990.snackbarbuilder.SnackbarBuilder;
 
 import nucleus5.factory.RequiresPresenter;
 import se.zinokader.spotiq.R;
@@ -27,7 +24,7 @@ import se.zinokader.spotiq.ui.lobby.LobbyActivity;
 @RequiresPresenter(StartupPresenter.class)
 public class StartupActivity extends BaseActivity<StartupPresenter> {
 
-    private ActivityStartupBinding binding;
+    ActivityStartupBinding binding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -107,22 +104,6 @@ public class StartupActivity extends BaseActivity<StartupPresenter> {
         }, 1000);
     }
 
-    public void showConnectedToSpotiqServers() {
-        new SnackbarBuilder(binding.getRoot())
-                .duration(Snackbar.LENGTH_SHORT)
-                .message(R.string.spotiq_log_in_success)
-                .build()
-                .show();
-    }
-
-    public void showFailedConnectionToSpotiqServers() {
-        new SnackbarBuilder(binding.getRoot())
-                .duration(Snackbar.LENGTH_LONG)
-                .message(R.string.spotiq_log_in_failed)
-                .build()
-                .show();
-    }
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -134,20 +115,15 @@ public class StartupActivity extends BaseActivity<StartupPresenter> {
         }
 
         if (resultCode == RESULT_OK) {
-            new SnackbarBuilder(binding.getRoot())
-                    .duration(Snackbar.LENGTH_SHORT)
-                    .message(R.string.spotify_log_in_success)
-                    .timeoutDismissCallback(snackbar -> getPresenter().logInFinished())
-                    .build()
-                    .show();
+            getPresenter().logInFinished();
         }
         else {
-            new SnackbarBuilder(binding.getRoot())
-                    .duration(Snackbar.LENGTH_LONG)
-                    .message(R.string.spotify_log_in_failed)
-                    .timeoutDismissCallback(snackbar -> getPresenter().logInFailed())
-                    .build()
-                    .show();
+            getPresenter().logInFailed();
         }
+    }
+
+    @Override
+    public View getRootView() {
+        return binding.getRoot();
     }
 }
