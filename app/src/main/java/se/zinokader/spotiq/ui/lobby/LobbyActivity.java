@@ -8,7 +8,6 @@ import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
-import android.support.design.widget.Snackbar;
 import android.util.Pair;
 import android.view.KeyEvent;
 import android.view.View;
@@ -17,7 +16,6 @@ import android.view.Window;
 import android.view.animation.AccelerateDecelerateInterpolator;
 
 import com.bumptech.glide.Glide;
-import com.github.andrewlord1990.snackbarbuilder.SnackbarBuilder;
 import com.rengwuxian.materialedittext.MaterialEditText;
 
 import nucleus5.factory.RequiresPresenter;
@@ -80,12 +78,7 @@ public class LobbyActivity extends BaseActivity<LobbyPresenter> {
                 new Pair<>(binding.userName, getResources().getString(R.string.user_name_transition)));
         Intent intent = new Intent(this, PartyActivity.class);
         intent.putExtra(ApplicationConstants.PARTY_NAME_EXTRA, partyTitle);
-        new SnackbarBuilder(binding.getRoot())
-                .duration(Snackbar.LENGTH_SHORT)
-                .message(getString(R.string.navigating_to_party) + " " + partyTitle)
-                .timeoutDismissCallback(snackbar -> startActivity(intent, transitionOptions.toBundle()))
-                .build()
-                .show();
+        startActivity(intent, transitionOptions.toBundle());
     }
 
     private void showDialog(DialogType dialogType) {

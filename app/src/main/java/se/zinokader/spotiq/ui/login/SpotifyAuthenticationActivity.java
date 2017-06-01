@@ -62,12 +62,10 @@ public class SpotifyAuthenticationActivity extends NucleusAppCompatActivity<Base
                     spotifyCommunicatorService.getAuthenticator().setExpiryTimeStamp(response.getExpiresIn());
                     spotifyCommunicatorService.getAuthenticator().setAccessToken(response.getAccessToken());
 
-                    //schedule our token renewal job
-                    //spotifyCommunicatorService.scheduleTokenRenewal(); TODO: Replace job with refreshing token onResume() for presenter
-
                     setResult(RESULT_OK);
                     break;
                 default:
+                    setResult(RESULT_CANCELED);
                     Log.d(LogTag.LOG_LOGIN, "Something went wrong on login");
             }
         }
@@ -75,32 +73,28 @@ public class SpotifyAuthenticationActivity extends NucleusAppCompatActivity<Base
             setResult(RESULT_CANCELED);
             Log.d(LogTag.LOG_LOGIN, "Wrong request code for Spotify login");
         }
-
-        this.finish();
+        
+        finish();
     }
 
     @Override
     public void onLoggedIn() {
-        Log.d(LogTag.LOG_LOGIN, "Logged in!");
     }
 
     @Override
     public void onLoggedOut() {
+    }
 
+    @Override
+    public void onTemporaryError() {
+    }
+
+    @Override
+    public void onConnectionMessage(String s) {
     }
 
     @Override
     public void onLoginFailed(Error error) {
         Log.d(LogTag.LOG_LOGIN, error.toString());
-    }
-
-    @Override
-    public void onTemporaryError() {
-
-    }
-
-    @Override
-    public void onConnectionMessage(String s) {
-        Log.d(LogTag.LOG_LOGIN, "Spotify connection message: " + s);
     }
 }

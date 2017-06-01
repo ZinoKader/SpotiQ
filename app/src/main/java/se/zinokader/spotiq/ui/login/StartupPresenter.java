@@ -49,8 +49,13 @@ public class StartupPresenter extends BasePresenter<StartupActivity> {
     }
 
     void logInFailed() {
-        getView().resetProgress();
-        getView().showMessage("Something went wrong when connecting to Spotify");
+        Observable.just(1)
+                .delay(1, TimeUnit.SECONDS, AndroidSchedulers.mainThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe( failed -> {
+                    getView().resetProgress();
+                    getView().showMessage("Something went wrong when connecting to Spotify");
+                });
     }
 
 }

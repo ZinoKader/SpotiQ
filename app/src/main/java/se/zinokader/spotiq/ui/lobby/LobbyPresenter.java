@@ -3,6 +3,8 @@ package se.zinokader.spotiq.ui.lobby;
 import android.os.Bundle;
 import android.util.Log;
 
+import java.util.concurrent.TimeUnit;
+
 import javax.inject.Inject;
 
 import io.reactivex.Observable;
@@ -20,6 +22,7 @@ import se.zinokader.spotiq.model.Party;
 import se.zinokader.spotiq.repository.PartiesRepository;
 import se.zinokader.spotiq.service.SpotifyCommunicatorService;
 import se.zinokader.spotiq.ui.base.BasePresenter;
+import se.zinokader.spotiq.util.exception.PartyExistsException;
 
 
 public class LobbyPresenter extends BasePresenter<LobbyActivity> {
@@ -68,7 +71,40 @@ public class LobbyPresenter extends BasePresenter<LobbyActivity> {
 
     void joinParty(String partyTitle, String partyPassword) {
         Party party = new Party(partyTitle, partyPassword);
+        Observable.just(party)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<Party>() {
+                    @Override
+                    public void onNext(Party party) {
+                        Observable.just(1)
+                                .observeOn(AndroidSchedulers.mainThread())
+                                .doOnNext(next -> {
+                                    getView().showMessage("Navigating to party " + partyTitle);
+                                })
+                                .delay(1, TimeUnit.SECONDS, AndroidSchedulers.mainThread())
+                                .subscribe(success -> {
+                                    getView().goToParty(party.getTitle());
+                                });
+                    }
 
+                    @Override
+                    public void onError(Throwable e) {
+                        getView().showMessage("Something went wrong when joining the party");
+                        Log.d(LogTag.LOG_LOBBY, "Could not join party: " + e.getMessage());
+                        e.printStackTrace();
+                    }
+
+                    @Override
+                    public void onComplete() {
+                        Log.d(LogTag.LOG_LOBBY, "Party creation process completed");
+                    }
+
+                    @Override
+                    public void onSubscribe(Disposable d) {
+
+                    }
+                });
     }
 
     void createParty(String partyTitle, String partyPassword) {
@@ -76,23 +112,34 @@ public class LobbyPresenter extends BasePresenter<LobbyActivity> {
         Observable.just(party)
                 .flatMap(partyWithoutId -> {
                     partyWithoutId.setHostSpotifyId(spotifyCommunicatorService.getWebApi().getMe().id);
-                    return partiesRepository.createNewParty(partyWithoutId);
+                    return partiesRepository.getParty(partyTitle).blockingFirst().exists()
+                            ? Observable.error(new PartyExistsException())
+                            : partiesRepository.createNewParty(partyWithoutId);
                 })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<Party>() {
                     @Override
-                    public void onSubscribe(Disposable d) {
-
-                    }
-
-                    @Override
                     public void onNext(Party party) {
-                        getView().goToParty(party.getTitle());
+                        Observable.just(1)
+                                .observeOn(AndroidSchedulers.mainThread())
+                                .doOnNext(next -> {
+                                    getView().showMessage("Navigating to party " + partyTitle);
+                                })
+                                .delay(1, TimeUnit.SECONDS, AndroidSchedulers.mainThread())
+                                .subscribe(success -> {
+                                    getView().goToParty(party.getTitle());
+                                });
                     }
 
                     @Override
                     public void onError(Throwable e) {
+                        if(e instanceof PartyExistsException) {
+                            getView().showMessage("Party " + partyTitle + " already exists");
+                        }
+                        else {
+                            getView().showMessage("Something went wrong when creating the party");
+                        }
                         Log.d(LogTag.LOG_LOBBY, "Could not create a party: " + e.getMessage());
                         e.printStackTrace();
                     }
@@ -100,6 +147,11 @@ public class LobbyPresenter extends BasePresenter<LobbyActivity> {
                     @Override
                     public void onComplete() {
                         Log.d(LogTag.LOG_LOBBY, "Party creation process completed");
+                    }
+
+                    @Override
+                    public void onSubscribe(Disposable d) {
+
                     }
                 });
 
