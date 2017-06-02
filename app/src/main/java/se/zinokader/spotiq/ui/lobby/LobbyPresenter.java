@@ -78,6 +78,7 @@ public class LobbyPresenter extends BasePresenter<LobbyActivity> {
                         : Observable.error(new PartyDoesNotExistException()))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
+                .retry(ApplicationConstants.RETRY_CONNECTION_FREQUENCY)
                 .subscribe(new Observer<Party>() {
                     @Override
                     public void onNext(Party party) {
@@ -117,6 +118,7 @@ public class LobbyPresenter extends BasePresenter<LobbyActivity> {
                 })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
+                .retry(ApplicationConstants.RETRY_CONNECTION_FREQUENCY)
                 .subscribe(new Observer<Party>() {
                     @Override
                     public void onNext(Party party) {
@@ -147,7 +149,7 @@ public class LobbyPresenter extends BasePresenter<LobbyActivity> {
     }
 
     private void navigateToParty(String partyTitle) {
-        Observable.just(1)
+        Observable.empty()
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnNext(next -> {
                     getView().showMessage("Navigating to party " + partyTitle);

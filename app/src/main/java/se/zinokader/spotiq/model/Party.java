@@ -1,13 +1,10 @@
 package se.zinokader.spotiq.model;
 
-import java.util.List;
-
 public class Party {
 
     private String title;
     private String password;
     private String hostSpotifyId;
-    private List<Song> trackList;
 
     public Party() {}
 
@@ -28,10 +25,6 @@ public class Party {
         return password;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
     public String getHostSpotifyId() {
         return hostSpotifyId;
     }
@@ -40,11 +33,4 @@ public class Party {
         this.hostSpotifyId = hostSpotifyId;
     }
 
-    public List<Song> getTrackList() {
-        return trackList;
-    }
-
-    public void setTrackList(List<Song> trackList) {
-        this.trackList = trackList;
-    }
 }

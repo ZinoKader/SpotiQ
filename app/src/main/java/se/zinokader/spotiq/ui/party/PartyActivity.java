@@ -38,6 +38,7 @@ public class PartyActivity extends BaseActivity<PartyPresenter> {
         if(partyInfo != null) {
             getPresenter().setPartyName(partyInfo.getString(ApplicationConstants.PARTY_NAME_EXTRA));
         }
+        getPresenter().loadParty();
         getPresenter().loadUser();
     }
 
@@ -51,6 +52,10 @@ public class PartyActivity extends BaseActivity<PartyPresenter> {
     protected void onPause() {
         super.onPause();
         getPresenter().pause();
+    }
+
+    public void updatePartyDetails() {
+
     }
 
     public void setUserDetails(String userName, String userImageUrl) {
@@ -74,6 +79,13 @@ public class PartyActivity extends BaseActivity<PartyPresenter> {
                 .into(binding.userImage);
     }
 
+    public void setHostDetails(String hostName) {
+
+    }
+
+    public void setHostPriviliges() {
+
+    }
 
     @Override
     public View getRootView() {

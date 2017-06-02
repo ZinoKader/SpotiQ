@@ -29,7 +29,7 @@ public class StartupPresenter extends BasePresenter<StartupActivity> {
                         success -> {
                             getView().showMessage("Connected to SpotiQ servers");
                             getView().startProgress();
-                            Observable.just(1)
+                            Observable.empty()
                                     .delay(1, TimeUnit.SECONDS)
                                     .subscribe( delay -> getView().goToSpotifyAuthentication());
                         },
@@ -37,7 +37,7 @@ public class StartupPresenter extends BasePresenter<StartupActivity> {
     }
 
     void logInFinished() {
-        Observable.just(1)
+        Observable.empty()
                 .delay(1, TimeUnit.SECONDS, AndroidSchedulers.mainThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnNext(next -> {
@@ -49,7 +49,7 @@ public class StartupPresenter extends BasePresenter<StartupActivity> {
     }
 
     void logInFailed() {
-        Observable.just(1)
+        Observable.empty()
                 .delay(1, TimeUnit.SECONDS, AndroidSchedulers.mainThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe( failed -> {
