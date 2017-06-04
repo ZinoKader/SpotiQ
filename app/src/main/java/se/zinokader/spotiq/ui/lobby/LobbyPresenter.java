@@ -29,6 +29,7 @@ import se.zinokader.spotiq.ui.base.BasePresenter;
 import se.zinokader.spotiq.util.exception.PartyDoesNotExistException;
 import se.zinokader.spotiq.util.exception.PartyExistsException;
 import se.zinokader.spotiq.util.exception.PartyNotCreatedException;
+import se.zinokader.spotiq.util.exception.PartyWrongPasswordException;
 import se.zinokader.spotiq.util.exception.UserNotAddedException;
 
 
@@ -82,17 +83,23 @@ public class LobbyPresenter extends BasePresenter<LobbyActivity> {
                     if (dbPartySnapshot.exists()) {
                         User user = new User(spotifyUser.id, spotifyUser.display_name, spotifyUser.images);
                         boolean userAlreadyExists = dbPartySnapshot.child(FirebaseConstants.CHILD_USERS).hasChild(user.getUserId());
-                        return new UserPartyInformation(user, userAlreadyExists, party);
+                        Party dbParty = dbPartySnapshot.child(FirebaseConstants.CHILD_PARTYINFO).getValue(Party.class);
+                        return new UserPartyInformation(user, userAlreadyExists, dbParty);
                     }
                     else {
                         throw new PartyDoesNotExistException();
                     }
                 })
                 .map(userPartyInformation -> {
-                    if (!userPartyInformation.userAlreadyExists()) { //not important that this is synchronous
-                        partiesRepository.addUserToParty(userPartyInformation.getUser(), userPartyInformation.getParty().getTitle()).subscribe();
+                    if (userPartyInformation.getParty().getPassword().equals(partyPassword)) {
+                        if (!userPartyInformation.userAlreadyExists()) { //not important that this is synchronous
+                            partiesRepository.addUserToParty(userPartyInformation.getUser(), userPartyInformation.getParty().getTitle()).subscribe();
+                        }
+                        return userPartyInformation.getParty();
                     }
-                    return userPartyInformation.getParty();
+                    else {
+                        throw new PartyWrongPasswordException();
+                    }
                 })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -105,12 +112,15 @@ public class LobbyPresenter extends BasePresenter<LobbyActivity> {
                     @Override
                     public void onError(Throwable exception) {
                         if (exception instanceof PartyDoesNotExistException) {
-                            getView().showMessage("Party " + partyTitle + " already exists");
+                            getView().showMessage("Party does not exist, why not create it?");
+                        }
+                        else if (exception instanceof PartyWrongPasswordException) {
+                            getView().showMessage("Password incorrect");
                         }
                         else {
-                            getView().showMessage("Something went wrong when creating the party");
+                            getView().showMessage("Something went wrong when joining the party");
                         }
-                        Log.d(LogTag.LOG_LOBBY, "Could not create party");
+                        Log.d(LogTag.LOG_LOBBY, "Could not join party");
                         exception.printStackTrace();
                     }
 
@@ -184,7 +194,7 @@ public class LobbyPresenter extends BasePresenter<LobbyActivity> {
     private void navigateToParty(String partyTitle) {
         Observable.just(ApplicationConstants.SHORT_ACTION_DELAY)
                 .observeOn(AndroidSchedulers.mainThread())
-                .doOnNext(next -> getView().showMessage("Navigating to party " + partyTitle))
+                .doOnNext(next -> getView().showMessage("Entering party " + partyTitle + "..."))
                 .delay(ApplicationConstants.SHORT_ACTION_DELAY, TimeUnit.SECONDS, AndroidSchedulers.mainThread())
                 .subscribe(success -> getView().goToParty(partyTitle));
 

@@ -19,7 +19,8 @@ public class PartiesRepository {
     }
 
     public Observable<Boolean> createNewParty(Party party) {
-        return Observable.create(subscriber -> databaseReference.child(party.getTitle()).child(FirebaseConstants.CHILD_PARTYINFO).setValue(party)
+        return Observable.create(subscriber -> databaseReference.child(party.getTitle())
+                .child(FirebaseConstants.CHILD_PARTYINFO).setValue(party)
                 .addOnCompleteListener(task -> {
                     subscriber.onNext(task.isSuccessful());
                     subscriber.onComplete();
@@ -32,7 +33,8 @@ public class PartiesRepository {
     }
 
     public Observable<Boolean> addUserToParty(User user, String partyTitle) {
-        return Observable.create(subscriber -> databaseReference.child(partyTitle).child(FirebaseConstants.CHILD_USERS).child(user.getUserId()).setValue(user)
+        return Observable.create(subscriber -> databaseReference.child(partyTitle)
+                .child(FirebaseConstants.CHILD_USERS).child(user.getUserId()).setValue(user)
                 .addOnCompleteListener(task -> {
                     subscriber.onNext(task.isSuccessful());
                     subscriber.onComplete();
@@ -41,11 +43,13 @@ public class PartiesRepository {
     }
 
     public Observable<DataSnapshot> getPartyMembers(String partyTitle) {
-        return RxFirebaseDatabase.dataChanges(databaseReference.child(partyTitle).child(FirebaseConstants.CHILD_USERS));
+        return RxFirebaseDatabase.dataChanges(databaseReference.child(partyTitle)
+                .child(FirebaseConstants.CHILD_USERS));
     }
 
     public Single<Boolean> isHostOfParty(String spotifyUserId, String partyTitle) {
-        return RxFirebaseDatabase.data(databaseReference.child(partyTitle).child(FirebaseConstants.CHILD_PARTYINFO))
+        return RxFirebaseDatabase.data(databaseReference.child(partyTitle)
+                .child(FirebaseConstants.CHILD_PARTYINFO))
                 .map(dbPartySnapshot -> {
                     Party dbParty = dbPartySnapshot.getValue(Party.class);
                     return dbParty.getHostSpotifyId().equals(spotifyUserId);

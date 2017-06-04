@@ -40,6 +40,7 @@ public class StartupPresenter extends BasePresenter<StartupActivity> {
     void logInFinished() {
         Observable.just(ApplicationConstants.MEDIUM_ACTION_DELAY)
                 .observeOn(AndroidSchedulers.mainThread())
+                .delay(ApplicationConstants.SHORT_ACTION_DELAY, TimeUnit.SECONDS, AndroidSchedulers.mainThread())
                 .doOnNext(next -> {
                     getView().finishProgress();
                     getView().showMessage("Connected to Spotify successfully");
