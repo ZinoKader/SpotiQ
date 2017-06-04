@@ -104,11 +104,8 @@ public class LobbyPresenter extends BasePresenter<LobbyActivity> {
 
                     @Override
                     public void onError(Throwable exception) {
-                        if (exception instanceof PartyExistsException) {
+                        if (exception instanceof PartyDoesNotExistException) {
                             getView().showMessage("Party " + partyTitle + " already exists");
-                        }
-                        else if (exception instanceof UserNotAddedException) {
-                            getView().showMessage("Something went wrong when adding you to the party");
                         }
                         else {
                             getView().showMessage("Something went wrong when creating the party");
