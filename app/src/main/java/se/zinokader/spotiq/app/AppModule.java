@@ -9,6 +9,7 @@ import dagger.Module;
 import dagger.Provides;
 import se.zinokader.spotiq.constants.FirebaseConstants;
 import se.zinokader.spotiq.repository.PartiesRepository;
+import se.zinokader.spotiq.repository.SpotifyRepository;
 import se.zinokader.spotiq.service.SpotifyCommunicatorService;
 
 @Module
@@ -24,8 +25,13 @@ class AppModule {
     @Singleton
     PartiesRepository providePartiesRepository() {
         FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
-        DatabaseReference databaseReference = firebaseDatabase.getReference().child(FirebaseConstants.CHILD_PARTIES);
+        DatabaseReference databaseReference = firebaseDatabase.getReference().child(FirebaseConstants.CHILD_PARTYLIST);
         return new PartiesRepository(databaseReference);
+    }
+
+    @Provides
+    SpotifyRepository provideSpotifyRepository() {
+        return new SpotifyRepository();
     }
 
 }

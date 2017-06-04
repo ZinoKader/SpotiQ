@@ -16,8 +16,8 @@ import kaaes.spotify.webapi.android.models.UserPrivate;
 import retrofit.Callback;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
-import se.zinokader.spotiq.constants.ApplicationConstants;
 import se.zinokader.spotiq.constants.LogTag;
+import se.zinokader.spotiq.model.User;
 import se.zinokader.spotiq.repository.PartiesRepository;
 import se.zinokader.spotiq.service.SpotifyCommunicatorService;
 import se.zinokader.spotiq.ui.base.BasePresenter;
@@ -63,8 +63,10 @@ public class PartyPresenter extends BasePresenter<PartyActivity> {
                     .subscribeWith(new DisposableObserver<DataSnapshot>() {
                         @Override
                         public void onNext(DataSnapshot dataSnapshot) {
-                            //TODO: First make a user push his name to the party members list when joining a party,
-                            //Second, display party members in a list somewhee in the party
+                            if (dataSnapshot.exists()) {
+                                User partyMember = dataSnapshot.getValue(User.class);
+                                Log.d(LogTag.LOG_PARTY, "USER FROM DB: " + partyMember.getUserId());
+                            }
                         }
 
                         @Override
@@ -80,20 +82,13 @@ public class PartyPresenter extends BasePresenter<PartyActivity> {
         }
     }
 
-    void loadUser() {
+    void loadUser() { //TODO: Break out this method among others into a common superclass for PartyPresenter and LobbyPresenter
         spotifyCommunicatorService.getWebApi().getMe(new Callback<UserPrivate>() {
             @Override
             public void success(UserPrivate userPrivate, Response response) {
-                //display name can be null, in that case fallback to the userId
-                String userId = userPrivate.id;
-                String userName = userPrivate.display_name == null
-                        ? userId
-                        : userPrivate.display_name;
-                String userImageUrl = userPrivate.images.isEmpty()
-                        ? ApplicationConstants.PROFILE_IMAGE_PLACEHOLDER_URL
-                        : userPrivate.images.get(0).url;
-                getView().setUserDetails(userName, userImageUrl);
-                loadHost(userId, userName);
+                User user = new User(userPrivate.id, userPrivate.display_name, userPrivate.images);
+                getView().setUserDetails(user.getUserName(), user.getUserImageUrl());
+                loadHost(user.getUserId(), user.getUserName());
             }
 
             @Override
@@ -116,9 +111,9 @@ public class PartyPresenter extends BasePresenter<PartyActivity> {
         partiesRepository.isHostOfParty(userId, partyName)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(isHost -> {
+                .subscribe(userIsHost -> {
                     getView().setHostDetails(userName);
-                    if (isHost) {
+                    if (userIsHost) {
                         getView().setHostPriviliges();
                     }
                 });

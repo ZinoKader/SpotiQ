@@ -10,6 +10,7 @@ import java.util.concurrent.TimeUnit;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
+import se.zinokader.spotiq.constants.ApplicationConstants;
 import se.zinokader.spotiq.ui.base.BasePresenter;
 
 
@@ -29,28 +30,27 @@ public class StartupPresenter extends BasePresenter<StartupActivity> {
                         success -> {
                             getView().showMessage("Connected to SpotiQ servers");
                             getView().startProgress();
-                            Observable.empty()
-                                    .delay(1, TimeUnit.SECONDS)
+                            Observable.just(ApplicationConstants.SHORT_ACTION_DELAY)
+                                    .delay(ApplicationConstants.SHORT_ACTION_DELAY, TimeUnit.SECONDS)
                                     .subscribe( delay -> getView().goToSpotifyAuthentication());
                         },
                         failed -> getView().showMessage("Could not connect to SpotiQ servers"));
     }
 
     void logInFinished() {
-        Observable.empty()
-                .delay(1, TimeUnit.SECONDS, AndroidSchedulers.mainThread())
+        Observable.just(ApplicationConstants.MEDIUM_ACTION_DELAY)
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnNext(next -> {
                     getView().finishProgress();
                     getView().showMessage("Connected to Spotify successfully");
                 })
-                .delay(2, TimeUnit.SECONDS, AndroidSchedulers.mainThread())
+                .delay(ApplicationConstants.MEDIUM_ACTION_DELAY, TimeUnit.SECONDS, AndroidSchedulers.mainThread())
                 .subscribe( success -> getView().goToLobby());
     }
 
     void logInFailed() {
-        Observable.empty()
-                .delay(1, TimeUnit.SECONDS, AndroidSchedulers.mainThread())
+        Observable.just(ApplicationConstants.SHORT_ACTION_DELAY)
+                .delay(ApplicationConstants.SHORT_ACTION_DELAY, TimeUnit.SECONDS, AndroidSchedulers.mainThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe( failed -> {
                     getView().resetProgress();

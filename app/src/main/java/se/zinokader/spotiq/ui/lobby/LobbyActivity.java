@@ -31,15 +31,6 @@ import se.zinokader.spotiq.util.helper.PartyTitleValidator;
 @RequiresPresenter(LobbyPresenter.class)
 public class LobbyActivity extends BaseActivity<LobbyPresenter> {
 
-    private enum DialogType {
-        JOIN_DIALOG, CREATE_DIALOG
-    }
-
-    private enum DialogAction {
-        OPEN, CLOSE
-    }
-
-    private static final int DIALOG_ANIMATION_DURATION = 500;
     ActivityLobbyBinding binding;
 
     @Override
@@ -47,8 +38,8 @@ public class LobbyActivity extends BaseActivity<LobbyPresenter> {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_lobby);
         binding.setPresenter(getPresenter());
-        binding.joinPartyButton.setOnClickListener( c -> showDialog(DialogType.JOIN_DIALOG));
-        binding.createPartyButton.setOnClickListener( c -> showDialog(DialogType.CREATE_DIALOG));
+        binding.joinPartyButton.setOnClickListener(c -> showDialog(DialogType.JOIN_DIALOG));
+        binding.createPartyButton.setOnClickListener(c -> showDialog(DialogType.CREATE_DIALOG));
         getPresenter().loadUser();
     }
 
@@ -79,6 +70,16 @@ public class LobbyActivity extends BaseActivity<LobbyPresenter> {
         Intent intent = new Intent(this, PartyActivity.class);
         intent.putExtra(ApplicationConstants.PARTY_NAME_EXTRA, partyTitle);
         startActivity(intent, transitionOptions.toBundle());
+    }
+
+    private static final int DIALOG_ANIMATION_DURATION = 500;
+
+    private enum DialogType {
+        JOIN_DIALOG, CREATE_DIALOG
+    }
+
+    private enum DialogAction {
+        OPEN, CLOSE
     }
 
     private void showDialog(DialogType dialogType) {

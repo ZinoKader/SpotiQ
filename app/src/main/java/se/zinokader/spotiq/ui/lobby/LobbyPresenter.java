@@ -17,13 +17,19 @@ import retrofit.Callback;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
 import se.zinokader.spotiq.constants.ApplicationConstants;
+import se.zinokader.spotiq.constants.FirebaseConstants;
 import se.zinokader.spotiq.constants.LogTag;
 import se.zinokader.spotiq.model.Party;
+import se.zinokader.spotiq.model.User;
+import se.zinokader.spotiq.model.UserPartyInformation;
 import se.zinokader.spotiq.repository.PartiesRepository;
+import se.zinokader.spotiq.repository.SpotifyRepository;
 import se.zinokader.spotiq.service.SpotifyCommunicatorService;
 import se.zinokader.spotiq.ui.base.BasePresenter;
 import se.zinokader.spotiq.util.exception.PartyDoesNotExistException;
 import se.zinokader.spotiq.util.exception.PartyExistsException;
+import se.zinokader.spotiq.util.exception.PartyNotCreatedException;
+import se.zinokader.spotiq.util.exception.UserNotAddedException;
 
 
 public class LobbyPresenter extends BasePresenter<LobbyActivity> {
@@ -33,6 +39,9 @@ public class LobbyPresenter extends BasePresenter<LobbyActivity> {
 
     @Inject
     PartiesRepository partiesRepository;
+
+    @Inject
+    SpotifyRepository spotifyRepository;
 
     @Override
     protected void onCreate(Bundle savedState) {
@@ -51,20 +60,13 @@ public class LobbyPresenter extends BasePresenter<LobbyActivity> {
         spotifyCommunicatorService.getWebApi().getMe(new Callback<UserPrivate>() {
             @Override
             public void success(UserPrivate userPrivate, Response response) {
-                //display name can be null, in that case fallback to the userId
-                String userId = userPrivate.id;
-                String userName = userPrivate.display_name == null
-                        ? userId
-                        : userPrivate.display_name;
-                String userImageUrl = userPrivate.images.isEmpty()
-                        ? ApplicationConstants.PROFILE_IMAGE_PLACEHOLDER_URL
-                        : userPrivate.images.get(0).url;
-                getView().setUserDetails(userName, userImageUrl);
+                User user = new User(userPrivate.id, userPrivate.display_name, userPrivate.images);
+                getView().setUserDetails(user.getUserName(), user.getUserImageUrl());
             }
 
             @Override
             public void failure(RetrofitError error) {
-                Log.d(LogTag.LOG_LOBBY, "Error when getting user data " + error.getMessage());
+                Log.d(LogTag.LOG_LOBBY, "Error when getting user data");
                 error.printStackTrace();
             }
         });
@@ -72,13 +74,28 @@ public class LobbyPresenter extends BasePresenter<LobbyActivity> {
 
     void joinParty(String partyTitle, String partyPassword) {
         Party party = new Party(partyTitle, partyPassword);
-        Observable.just(party)
-                .flatMap(partyExists -> partiesRepository.getParty(partyTitle).blockingFirst().exists()
-                        ? Observable.just(partyExists)
-                        : Observable.error(new PartyDoesNotExistException()))
+
+        Observable.zip(
+                partiesRepository.getParty(party.getTitle()),
+                spotifyRepository.getMe(spotifyCommunicatorService.getWebApi()),
+                (dbPartySnapshot, spotifyUser) -> {
+                    if (dbPartySnapshot.exists()) {
+                        User user = new User(spotifyUser.id, spotifyUser.display_name, spotifyUser.images);
+                        boolean userAlreadyExists = dbPartySnapshot.child(FirebaseConstants.CHILD_USERS).hasChild(user.getUserId());
+                        return new UserPartyInformation(user, userAlreadyExists, party);
+                    }
+                    else {
+                        throw new PartyDoesNotExistException();
+                    }
+                })
+                .map(userPartyInformation -> {
+                    if (!userPartyInformation.userAlreadyExists()) { //not important that this is synchronous
+                        partiesRepository.addUserToParty(userPartyInformation.getUser(), userPartyInformation.getParty().getTitle()).subscribe();
+                    }
+                    return userPartyInformation.getParty();
+                })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .retry(ApplicationConstants.RETRY_CONNECTION_FREQUENCY)
                 .subscribe(new Observer<Party>() {
                     @Override
                     public void onNext(Party party) {
@@ -86,15 +103,18 @@ public class LobbyPresenter extends BasePresenter<LobbyActivity> {
                     }
 
                     @Override
-                    public void onError(Throwable e) {
-                        if (e instanceof PartyDoesNotExistException) {
-                            getView().showMessage("Party does not exist, why not create one instead?");
+                    public void onError(Throwable exception) {
+                        if (exception instanceof PartyExistsException) {
+                            getView().showMessage("Party " + partyTitle + " already exists");
+                        }
+                        else if (exception instanceof UserNotAddedException) {
+                            getView().showMessage("Something went wrong when adding you to the party");
                         }
                         else {
-                            getView().showMessage("Something went wrong when joining the party");
+                            getView().showMessage("Something went wrong when creating the party");
                         }
-                        Log.d(LogTag.LOG_LOBBY, "Could not join party: " + e.getMessage());
-                        e.printStackTrace();
+                        Log.d(LogTag.LOG_LOBBY, "Could not create party");
+                        exception.printStackTrace();
                     }
 
                     @Override
@@ -109,16 +129,30 @@ public class LobbyPresenter extends BasePresenter<LobbyActivity> {
 
     void createParty(String partyTitle, String partyPassword) {
         Party party = new Party(partyTitle, partyPassword);
-        Observable.just(party)
-                .flatMap(partyWithoutId -> {
-                    partyWithoutId.setHostSpotifyId(spotifyCommunicatorService.getWebApi().getMe().id);
-                    return partiesRepository.getParty(partyTitle).blockingFirst().exists()
-                            ? Observable.error(new PartyExistsException())
-                            : partiesRepository.createNewParty(partyWithoutId);
+
+        Observable.zip(
+                partiesRepository.getParty(party.getTitle()),
+                spotifyRepository.getMe(spotifyCommunicatorService.getWebApi()),
+                (dbParty, spotifyUser) -> {
+                    if (dbParty.exists()) {
+                        throw new PartyExistsException();
+                    }
+                    else {
+                        User user = new User(spotifyUser.id, spotifyUser.display_name, spotifyUser.images);
+                        party.setHostSpotifyId(user.getUserId());
+                        return new UserPartyInformation(user, party);
+                    }
                 })
+                .flatMap(userPartyInformation -> Observable.zip(
+                        partiesRepository.createNewParty(userPartyInformation.getParty()),
+                        partiesRepository.addUserToParty(userPartyInformation.getUser(), userPartyInformation.getParty().getTitle()),
+                        (partyWasCreated, userWasAdded) -> {
+                            if (!partyWasCreated) throw new PartyNotCreatedException();
+                            if (!userWasAdded) throw new UserNotAddedException();
+                            return userPartyInformation.getParty();
+                        }))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .retry(ApplicationConstants.RETRY_CONNECTION_FREQUENCY)
                 .subscribe(new Observer<Party>() {
                     @Override
                     public void onNext(Party party) {
@@ -126,15 +160,18 @@ public class LobbyPresenter extends BasePresenter<LobbyActivity> {
                     }
 
                     @Override
-                    public void onError(Throwable e) {
-                        if(e instanceof PartyExistsException) {
+                    public void onError(Throwable exception) {
+                        if (exception instanceof PartyExistsException) {
                             getView().showMessage("Party " + partyTitle + " already exists");
+                        }
+                        else if (exception instanceof UserNotAddedException) {
+                            getView().showMessage("Something went wrong when adding you to the party");
                         }
                         else {
                             getView().showMessage("Something went wrong when creating the party");
                         }
-                        Log.d(LogTag.LOG_LOBBY, "Could not create a party: " + e.getMessage());
-                        e.printStackTrace();
+                        Log.d(LogTag.LOG_LOBBY, "Could not create party");
+                        exception.printStackTrace();
                     }
 
                     @Override
@@ -145,18 +182,14 @@ public class LobbyPresenter extends BasePresenter<LobbyActivity> {
                     public void onSubscribe(Disposable d) {
                     }
                 });
-
     }
 
     private void navigateToParty(String partyTitle) {
-        Observable.empty()
+        Observable.just(ApplicationConstants.SHORT_ACTION_DELAY)
                 .observeOn(AndroidSchedulers.mainThread())
-                .doOnNext(next -> {
-                    getView().showMessage("Navigating to party " + partyTitle);
-                })
-                .delay(1, TimeUnit.SECONDS, AndroidSchedulers.mainThread())
-                .subscribe(success -> {
-                    getView().goToParty(partyTitle);
-                });
+                .doOnNext(next -> getView().showMessage("Navigating to party " + partyTitle))
+                .delay(ApplicationConstants.SHORT_ACTION_DELAY, TimeUnit.SECONDS, AndroidSchedulers.mainThread())
+                .subscribe(success -> getView().goToParty(partyTitle));
+
     }
 }
