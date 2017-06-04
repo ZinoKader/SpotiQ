@@ -1,9 +1,7 @@
-package se.zinokader.spotiq.ui.base;
+package se.zinokader.spotiq.feature.base;
 
 import android.os.Bundle;
-
 import com.github.andrewlord1990.snackbarbuilder.SnackbarBuilder;
-
 import nucleus5.factory.PresenterFactory;
 import nucleus5.presenter.Presenter;
 import nucleus5.view.NucleusAppCompatActivity;

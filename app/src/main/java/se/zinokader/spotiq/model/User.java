@@ -1,9 +1,8 @@
 package se.zinokader.spotiq.model;
 
 import java.util.List;
-
 import kaaes.spotify.webapi.android.models.Image;
-import se.zinokader.spotiq.constants.ApplicationConstants;
+import se.zinokader.spotiq.constant.ApplicationConstants;
 
 public class User {
 

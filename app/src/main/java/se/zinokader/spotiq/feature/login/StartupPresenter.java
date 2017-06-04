@@ -1,17 +1,14 @@
-package se.zinokader.spotiq.ui.login;
+package se.zinokader.spotiq.feature.login;
 
 import android.os.Bundle;
-
 import com.github.b3er.rxfirebase.auth.RxFirebaseAuth;
 import com.google.firebase.auth.FirebaseAuth;
-
 import java.util.concurrent.TimeUnit;
-
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
-import se.zinokader.spotiq.constants.ApplicationConstants;
-import se.zinokader.spotiq.ui.base.BasePresenter;
+import se.zinokader.spotiq.constant.ApplicationConstants;
+import se.zinokader.spotiq.feature.base.BasePresenter;
 
 
 public class StartupPresenter extends BasePresenter<StartupActivity> {

@@ -4,7 +4,7 @@
     <data>
         <variable
             name="presenter"
-            type="se.zinokader.spotiq.ui.party.PartyPresenter" />
+            type="se.zinokader.spotiq.feature.party.PartyPresenter" />
     </data>
 <android.support.constraint.ConstraintLayout
     android:layout_width="match_parent"

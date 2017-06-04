@@ -1,27 +1,21 @@
-package se.zinokader.spotiq.ui.party;
+package se.zinokader.spotiq.feature.party;
 
 import android.os.Bundle;
 import android.util.Log;
-
-import com.google.firebase.database.DataSnapshot;
-
 import javax.inject.Inject;
-
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
-import io.reactivex.observers.DisposableObserver;
 import io.reactivex.schedulers.Schedulers;
 import kaaes.spotify.webapi.android.models.UserPrivate;
 import retrofit.Callback;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
-import se.zinokader.spotiq.constants.LogTag;
+import se.zinokader.spotiq.constant.LogTag;
+import se.zinokader.spotiq.feature.base.BasePresenter;
 import se.zinokader.spotiq.model.User;
 import se.zinokader.spotiq.repository.PartiesRepository;
 import se.zinokader.spotiq.service.SpotifyCommunicatorService;
-import se.zinokader.spotiq.ui.base.BasePresenter;
-
 
 public class PartyPresenter extends BasePresenter<PartyActivity> {
 
@@ -60,29 +54,14 @@ public class PartyPresenter extends BasePresenter<PartyActivity> {
             partyMemberSubscription = partiesRepository.getPartyMembers(partyName)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribeWith(new DisposableObserver<DataSnapshot>() {
-                        @Override
-                        public void onNext(DataSnapshot dataSnapshot) {
-                            if (dataSnapshot.exists()) {
-                                User partyMember = dataSnapshot.getValue(User.class);
-                                Log.d(LogTag.LOG_PARTY, "USER FROM DB: " + partyMember.getUserId());
-                            }
-                        }
-
-                        @Override
-                        public void onError(Throwable e) {
-
-                        }
-
-                        @Override
-                        public void onComplete() {
-
-                        }
+                    .subscribe(childEvent -> {
+                        User partyMember = childEvent.dataSnapshot().getValue(User.class);
+                        Log.d(LogTag.LOG_PARTY, "USER FROM DB: " + partyMember.getUserId());
                     });
         }
     }
 
-    void loadUser() { //TODO: Break out this method among others into a common superclass for PartyPresenter and LobbyPresenter
+    void loadUser() {
         spotifyCommunicatorService.getWebApi().getMe(new Callback<UserPrivate>() {
             @Override
             public void success(UserPrivate userPrivate, Response response) {

@@ -1,12 +1,12 @@
 package se.zinokader.spotiq.repository;
 
+import com.github.b3er.rxfirebase.database.ChildEvent;
 import com.github.b3er.rxfirebase.database.RxFirebaseDatabase;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseReference;
-
 import io.reactivex.Observable;
 import io.reactivex.Single;
-import se.zinokader.spotiq.constants.FirebaseConstants;
+import se.zinokader.spotiq.constant.FirebaseConstants;
 import se.zinokader.spotiq.model.Party;
 import se.zinokader.spotiq.model.User;
 
@@ -42,8 +42,8 @@ public class PartiesRepository {
                 .addOnFailureListener(subscriber::onError));
     }
 
-    public Observable<DataSnapshot> getPartyMembers(String partyTitle) {
-        return RxFirebaseDatabase.dataChanges(databaseReference.child(partyTitle)
+    public Observable<ChildEvent> getPartyMembers(String partyTitle) {
+        return RxFirebaseDatabase.childEvents(databaseReference.child(partyTitle)
                 .child(FirebaseConstants.CHILD_USERS));
     }
 

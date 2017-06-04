@@ -1,4 +1,4 @@
-package se.zinokader.spotiq.constants;
+package se.zinokader.spotiq.constant;
 
 public class FirebaseConstants {
 

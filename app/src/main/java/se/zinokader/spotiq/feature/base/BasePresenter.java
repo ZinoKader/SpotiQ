@@ -1,7 +1,6 @@
-package se.zinokader.spotiq.ui.base;
+package se.zinokader.spotiq.feature.base;
 
 import android.os.Bundle;
-
 import icepick.Icepick;
 import nucleus5.presenter.RxPresenter;
 

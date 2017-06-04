@@ -1,4 +1,4 @@
-package se.zinokader.spotiq.ui.lobby;
+package se.zinokader.spotiq.feature.lobby;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -14,16 +14,14 @@ import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.view.Window;
 import android.view.animation.AccelerateDecelerateInterpolator;
-
 import com.bumptech.glide.Glide;
 import com.rengwuxian.materialedittext.MaterialEditText;
-
 import nucleus5.factory.RequiresPresenter;
 import se.zinokader.spotiq.R;
-import se.zinokader.spotiq.constants.ApplicationConstants;
+import se.zinokader.spotiq.constant.ApplicationConstants;
 import se.zinokader.spotiq.databinding.ActivityLobbyBinding;
-import se.zinokader.spotiq.ui.base.BaseActivity;
-import se.zinokader.spotiq.ui.party.PartyActivity;
+import se.zinokader.spotiq.feature.base.BaseActivity;
+import se.zinokader.spotiq.feature.party.PartyActivity;
 import se.zinokader.spotiq.util.helper.GlideRequestOptions;
 import se.zinokader.spotiq.util.helper.PartyPasswordValidator;
 import se.zinokader.spotiq.util.helper.PartyTitleValidator;

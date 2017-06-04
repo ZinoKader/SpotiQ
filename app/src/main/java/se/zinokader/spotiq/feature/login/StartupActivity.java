@@ -1,4 +1,4 @@
-package se.zinokader.spotiq.ui.login;
+package se.zinokader.spotiq.feature.login;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -12,14 +12,13 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.view.animation.AccelerateDecelerateInterpolator;
-
 import nucleus5.factory.RequiresPresenter;
 import se.zinokader.spotiq.R;
-import se.zinokader.spotiq.constants.LogTag;
-import se.zinokader.spotiq.constants.SpotifyConstants;
+import se.zinokader.spotiq.constant.LogTag;
+import se.zinokader.spotiq.constant.SpotifyConstants;
 import se.zinokader.spotiq.databinding.ActivityStartupBinding;
-import se.zinokader.spotiq.ui.base.BaseActivity;
-import se.zinokader.spotiq.ui.lobby.LobbyActivity;
+import se.zinokader.spotiq.feature.base.BaseActivity;
+import se.zinokader.spotiq.feature.lobby.LobbyActivity;
 
 @RequiresPresenter(StartupPresenter.class)
 public class StartupActivity extends BaseActivity<StartupPresenter> {

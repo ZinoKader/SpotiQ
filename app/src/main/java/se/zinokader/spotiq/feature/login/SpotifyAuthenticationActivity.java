@@ -1,23 +1,20 @@
-package se.zinokader.spotiq.ui.login;
+package se.zinokader.spotiq.feature.login;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-
 import com.spotify.sdk.android.authentication.AuthenticationClient;
 import com.spotify.sdk.android.authentication.AuthenticationRequest;
 import com.spotify.sdk.android.authentication.AuthenticationResponse;
 import com.spotify.sdk.android.player.ConnectionStateCallback;
 import com.spotify.sdk.android.player.Error;
-
 import javax.inject.Inject;
-
 import nucleus5.view.NucleusAppCompatActivity;
 import se.zinokader.spotiq.R;
-import se.zinokader.spotiq.constants.LogTag;
-import se.zinokader.spotiq.constants.SpotifyConstants;
+import se.zinokader.spotiq.constant.LogTag;
+import se.zinokader.spotiq.constant.SpotifyConstants;
+import se.zinokader.spotiq.feature.base.BasePresenter;
 import se.zinokader.spotiq.service.SpotifyCommunicatorService;
-import se.zinokader.spotiq.ui.base.BasePresenter;
 import se.zinokader.spotiq.util.di.Injector;
 
 /**

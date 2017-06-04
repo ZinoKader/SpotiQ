@@ -1,10 +1,8 @@
 package se.zinokader.spotiq.util.helper;
 
 import android.support.annotation.NonNull;
-
 import com.rengwuxian.materialedittext.validation.METValidator;
-
-import se.zinokader.spotiq.constants.ValidationConstants;
+import se.zinokader.spotiq.constant.ValidationConstants;
 
 public class PartyPasswordValidator extends METValidator {
 

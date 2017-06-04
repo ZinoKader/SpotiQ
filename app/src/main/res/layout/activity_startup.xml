@@ -4,7 +4,7 @@
     <data>
         <variable
             name="presenter"
-            type="se.zinokader.spotiq.ui.login.StartupPresenter" />
+            type="se.zinokader.spotiq.feature.login.StartupPresenter" />
     </data>
 
 <android.support.constraint.ConstraintLayout

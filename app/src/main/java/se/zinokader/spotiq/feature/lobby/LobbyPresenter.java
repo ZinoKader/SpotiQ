@@ -1,12 +1,9 @@
-package se.zinokader.spotiq.ui.lobby;
+package se.zinokader.spotiq.feature.lobby;
 
 import android.os.Bundle;
 import android.util.Log;
-
 import java.util.concurrent.TimeUnit;
-
 import javax.inject.Inject;
-
 import io.reactivex.Observable;
 import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -16,16 +13,16 @@ import kaaes.spotify.webapi.android.models.UserPrivate;
 import retrofit.Callback;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
-import se.zinokader.spotiq.constants.ApplicationConstants;
-import se.zinokader.spotiq.constants.FirebaseConstants;
-import se.zinokader.spotiq.constants.LogTag;
+import se.zinokader.spotiq.constant.ApplicationConstants;
+import se.zinokader.spotiq.constant.FirebaseConstants;
+import se.zinokader.spotiq.constant.LogTag;
+import se.zinokader.spotiq.feature.base.BasePresenter;
 import se.zinokader.spotiq.model.Party;
 import se.zinokader.spotiq.model.User;
 import se.zinokader.spotiq.model.UserPartyInformation;
 import se.zinokader.spotiq.repository.PartiesRepository;
 import se.zinokader.spotiq.repository.SpotifyRepository;
 import se.zinokader.spotiq.service.SpotifyCommunicatorService;
-import se.zinokader.spotiq.ui.base.BasePresenter;
 import se.zinokader.spotiq.util.exception.PartyDoesNotExistException;
 import se.zinokader.spotiq.util.exception.PartyExistsException;
 import se.zinokader.spotiq.util.exception.PartyNotCreatedException;

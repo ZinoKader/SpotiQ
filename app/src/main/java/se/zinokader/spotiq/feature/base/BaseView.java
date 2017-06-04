@@ -1,4 +1,4 @@
-package se.zinokader.spotiq.ui.base;
+package se.zinokader.spotiq.feature.base;
 
 import android.view.View;
 

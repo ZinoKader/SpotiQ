@@ -5,19 +5,16 @@ import android.content.Intent;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Log;
-
 import java.util.concurrent.TimeUnit;
-
 import javax.inject.Singleton;
-
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
-import se.zinokader.spotiq.constants.LogTag;
+import se.zinokader.spotiq.constant.LogTag;
+import se.zinokader.spotiq.feature.login.SpotifyAuthenticationActivity;
 import se.zinokader.spotiq.model.SpotifyAuthenticator;
-import se.zinokader.spotiq.ui.login.SpotifyAuthenticationActivity;
 
 @Singleton
 public class SpotifyCommunicatorService extends Service {
