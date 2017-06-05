@@ -2,7 +2,9 @@ package se.zinokader.spotiq.app;
 
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+
 import javax.inject.Singleton;
+
 import dagger.Module;
 import dagger.Provides;
 import se.zinokader.spotiq.constant.FirebaseConstants;
@@ -20,7 +22,6 @@ class AppModule {
     }
 
     @Provides
-    @Singleton
     PartiesRepository providePartiesRepository() {
         FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
         DatabaseReference databaseReference = firebaseDatabase.getReference().child(FirebaseConstants.CHILD_PARTYLIST);

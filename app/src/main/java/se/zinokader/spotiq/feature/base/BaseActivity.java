@@ -1,10 +1,14 @@
 package se.zinokader.spotiq.feature.base;
 
+import android.content.Intent;
 import android.os.Bundle;
+
 import com.github.andrewlord1990.snackbarbuilder.SnackbarBuilder;
+
 import nucleus5.factory.PresenterFactory;
 import nucleus5.presenter.Presenter;
 import nucleus5.view.NucleusAppCompatActivity;
+import se.zinokader.spotiq.service.SpotifyCommunicatorService;
 import se.zinokader.spotiq.util.di.Injector;
 
 public abstract class BaseActivity<T extends Presenter> extends NucleusAppCompatActivity<T> implements BaseView {
@@ -27,9 +31,12 @@ public abstract class BaseActivity<T extends Presenter> extends NucleusAppCompat
                 .show();
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
+    public void startForegroundTokenRenewalService() {
+        startService(new Intent(this, SpotifyCommunicatorService.class));
+    }
+
+    public void stopForegroundTokenRenewalService() {
+        stopService(new Intent(this, SpotifyCommunicatorService.class));
     }
 
 }

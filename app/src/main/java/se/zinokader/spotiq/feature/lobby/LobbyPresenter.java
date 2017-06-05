@@ -2,8 +2,11 @@ package se.zinokader.spotiq.feature.lobby;
 
 import android.os.Bundle;
 import android.util.Log;
+
 import java.util.concurrent.TimeUnit;
+
 import javax.inject.Inject;
+
 import io.reactivex.Observable;
 import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -47,11 +50,11 @@ public class LobbyPresenter extends BasePresenter<LobbyActivity> {
     }
 
     void resume() {
-        spotifyCommunicatorService.startForegroundTokenRenewalJob();
+        getView().startForegroundTokenRenewalService();
     }
 
     void pause() {
-        spotifyCommunicatorService.pauseForegroundTokenRenewalJob();
+        getView().stopForegroundTokenRenewalService();
     }
 
     void loadUser() {

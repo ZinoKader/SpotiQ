@@ -14,8 +14,10 @@ import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.view.Window;
 import android.view.animation.AccelerateDecelerateInterpolator;
+
 import com.bumptech.glide.Glide;
 import com.rengwuxian.materialedittext.MaterialEditText;
+
 import nucleus5.factory.RequiresPresenter;
 import se.zinokader.spotiq.R;
 import se.zinokader.spotiq.constant.ApplicationConstants;
@@ -49,8 +51,8 @@ public class LobbyActivity extends BaseActivity<LobbyPresenter> {
 
     @Override
     protected void onPause() {
-        super.onPause();
         getPresenter().pause();
+        super.onPause();
     }
 
     public void setUserDetails(String userName, String userImageUrl) {

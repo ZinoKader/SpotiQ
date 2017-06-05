@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<tabs>
+    <tab
+        id="@+id/tab_tracklist"
+        icon="@drawable/ic_tracklist"
+        title="Tracklist" />
+    <tab
+        id="@+id/tab_party_members"
+        icon="@drawable/ic_party_members"
+        title="Party" />
+</tabs>

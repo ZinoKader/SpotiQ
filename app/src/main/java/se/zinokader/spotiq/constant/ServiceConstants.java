@@ -1,9 +1,11 @@
 package se.zinokader.spotiq.constant;
 
+import java.util.concurrent.TimeUnit;
+
 public class ServiceConstants {
 
     private ServiceConstants() {}
 
-    public static final String TOKEN_RENEWAL_JOB_TAG = "2d9b808ff7b645a67813d7bdab22bca799d44997";
+    public static final long TOKEN_EXPIRY_CUTOFF = TimeUnit.MINUTES.toSeconds(20);
 
 }

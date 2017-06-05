@@ -7,113 +7,113 @@
             name="presenter"
             type="se.zinokader.spotiq.feature.lobby.LobbyPresenter" />
     </data>
-<android.support.constraint.ConstraintLayout
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
-
-    <android.support.constraint.Guideline
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/logoGuideline"
-        app:layout_constraintGuide_percent="0.02"
-        android:orientation="horizontal" />
-
-    <ImageView
-        android:id="@+id/spotiqLogo"
-        android:layout_width="wrap_content"
-        android:layout_height="55dp"
-        android:src="@drawable/image_spotiq_logo"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/logoGuideline" />
-
-    <com.mikhaellopez.circularimageview.CircularImageView
-        android:id="@+id/userImage"
-        android:layout_width="75dp"
-        android:layout_height="75dp"
-        android:layout_marginTop="20dp"
-        app:civ_border="true"
-        app:civ_border_color="@color/colorMaterialWhite"
-        app:civ_border_width="1dp"
-        app:civ_shadow="true"
-        app:civ_shadow_color="@color/colorPrimaryDark"
-        app:civ_shadow_radius="4"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/spotiqLogo"
-        app:layout_constraintHorizontal_bias="0.5" />
-
-    <TextView
-        android:id="@+id/userName"
+    <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="19dp"
-        android:layout_marginTop="8dp"
-        android:textAlignment="center"
-        android:textColor="@color/colorMaterialWhite"
-        android:textSize="15sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/userImage"
-        tools:layout_editor_absoluteX="0dp"
-        tools:layout_editor_absoluteY="181dp" />
+        android:layout_height="match_parent">
 
-    <android.support.constraint.Guideline
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/buttonGuideline"
-        app:layout_constraintGuide_percent="0.42"
-        android:orientation="horizontal"
-        android:textAlignment="center"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintEnd_toEndOf="parent" />
+        <android.support.constraint.Guideline
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/logoGuideline"
+            app:layout_constraintGuide_percent="0.02"
+            android:orientation="horizontal" />
 
-    <Button
-        android:id="@+id/joinPartyButton"
-        app:layout_constraintTop_toTopOf="@+id/buttonGuideline"
-        android:layout_width="240dp"
-        android:layout_height="70dp"
-        android:padding="7dp"
-        android:foreground="?selectableItemBackground"
-        android:background="@drawable/button_shape_material"
-        android:drawableTop="@drawable/ic_join_party"
-        android:drawablePadding="-10dp"
-        android:elevation="8dp"
-        android:fontFamily="@font/spotify"
-        android:text="@string/join_party"
-        android:textAllCaps="false"
-        android:textColor="@color/colorMaterialWhite"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        app:layout_constraintStart_toStartOf="parent"
-        android:layout_marginTop="64dp"
-        app:layout_constraintEnd_toStartOf="@+id/createPartyButton"
-        android:layout_marginEnd="8dp" />
+        <ImageView
+            android:id="@+id/spotiqLogo"
+            android:layout_width="wrap_content"
+            android:layout_height="55dp"
+            android:src="@drawable/image_spotiq_logo"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/logoGuideline" />
 
-    <Button
-        android:id="@+id/createPartyButton"
-        android:layout_width="240dp"
-        android:layout_height="70dp"
-        android:padding="7dp"
-        android:foreground="?selectableItemBackground"
-        android:background="@drawable/button_shape_material"
-        android:drawableTop="@drawable/ic_create_party"
-        android:drawablePadding="-10dp"
-        android:elevation="8dp"
-        android:fontFamily="@font/spotify"
-        android:text="@string/create_party"
-        android:textAllCaps="false"
-        android:textColor="@color/colorMaterialWhite"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/buttonGuideline"
-        android:layout_marginTop="64dp"
-        android:layout_marginStart="8dp"
-        app:layout_constraintStart_toEndOf="@+id/joinPartyButton" />
+        <com.mikhaellopez.circularimageview.CircularImageView
+            android:id="@+id/userImage"
+            android:layout_width="75dp"
+            android:layout_height="75dp"
+            android:layout_marginTop="20dp"
+            app:civ_border="true"
+            app:civ_border_color="@color/colorMaterialWhite"
+            app:civ_border_width="1dp"
+            app:civ_shadow="true"
+            app:civ_shadow_color="@color/colorPrimaryDark"
+            app:civ_shadow_radius="4"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/spotiqLogo"
+            app:layout_constraintHorizontal_bias="0.5" />
+
+        <TextView
+            android:id="@+id/userName"
+            android:layout_width="match_parent"
+            android:layout_height="19dp"
+            android:layout_marginTop="8dp"
+            android:textAlignment="center"
+            android:textColor="@color/colorMaterialWhite"
+            android:textSize="15sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/userImage"
+            tools:layout_editor_absoluteX="0dp"
+            tools:layout_editor_absoluteY="181dp" />
+
+        <android.support.constraint.Guideline
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/buttonGuideline"
+            app:layout_constraintGuide_percent="0.42"
+            android:orientation="horizontal"
+            android:textAlignment="center"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <Button
+            android:id="@+id/joinPartyButton"
+            app:layout_constraintTop_toTopOf="@+id/buttonGuideline"
+            android:layout_width="240dp"
+            android:layout_height="70dp"
+            android:padding="7dp"
+            android:foreground="?selectableItemBackground"
+            android:background="@drawable/button_shape_material"
+            android:drawableTop="@drawable/ic_join_party"
+            android:drawablePadding="-10dp"
+            android:elevation="8dp"
+            android:fontFamily="@font/spotify"
+            android:text="@string/join_party"
+            android:textAllCaps="false"
+            android:textColor="@color/colorMaterialWhite"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginTop="64dp"
+            app:layout_constraintEnd_toStartOf="@+id/createPartyButton"
+            android:layout_marginEnd="8dp" />
+
+        <Button
+            android:id="@+id/createPartyButton"
+            android:layout_width="240dp"
+            android:layout_height="70dp"
+            android:padding="7dp"
+            android:foreground="?selectableItemBackground"
+            android:background="@drawable/button_shape_material"
+            android:drawableTop="@drawable/ic_create_party"
+            android:drawablePadding="-10dp"
+            android:elevation="8dp"
+            android:fontFamily="@font/spotify"
+            android:text="@string/create_party"
+            android:textAllCaps="false"
+            android:textColor="@color/colorMaterialWhite"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/buttonGuideline"
+            android:layout_marginTop="64dp"
+            android:layout_marginStart="8dp"
+            app:layout_constraintStart_toEndOf="@+id/joinPartyButton" />
 
 
-</android.support.constraint.ConstraintLayout>
+    </android.support.constraint.ConstraintLayout>
 </layout>

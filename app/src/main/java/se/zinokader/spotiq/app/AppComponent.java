@@ -1,6 +1,7 @@
 package se.zinokader.spotiq.app;
 
 import javax.inject.Singleton;
+
 import dagger.Component;
 import se.zinokader.spotiq.feature.lobby.LobbyActivity;
 import se.zinokader.spotiq.feature.lobby.LobbyPresenter;
