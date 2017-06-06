@@ -25,25 +25,26 @@
         <TextView
             android:id="@+id/userName"
             android:layout_width="80dp"
-            android:layout_height="10dp"
+            android:layout_height="16dp"
+            android:layout_marginStart="12dp"
+            android:layout_marginTop="32dp"
             android:textAlignment="center"
             android:textColor="@color/colorMaterialWhite"
             android:textSize="13sp"
             android:transitionName="@string/user_name_transition"
-            app:layout_constraintTop_toBottomOf="@+id/userImage"
-            android:layout_marginTop="6dp"
-            app:layout_constraintStart_toStartOf="parent"
-            android:layout_marginStart="0dp" />
+            app:layout_constraintStart_toEndOf="@+id/userImage"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <se.zinokader.spotiq.feature.party.navigation.PartyViewPager
             android:id="@+id/tabPager"
             android:layout_width="match_parent"
-            android:layout_height="425dp"
-            android:layout_marginTop="8dp"
+            android:layout_height="0dp"
+            android:layout_marginTop="16dp"
             app:layout_constraintBottom_toTopOf="@+id/bottomBar"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHeight_default="wrap"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/userName" />
+            app:layout_constraintTop_toBottomOf="@+id/userImage" />
 
         <com.roughike.bottombar.BottomBar
             android:id="@+id/bottomBar"

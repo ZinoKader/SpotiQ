@@ -1,7 +1,6 @@
 package se.zinokader.spotiq.feature.party.partymembers;
 
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,7 +18,7 @@ public class PartyMemberRecyclerAdapter extends RecyclerView.Adapter<PartyMember
 
     private List<User> partyMembers;
 
-    public PartyMemberRecyclerAdapter(List<User> partyMembers) {
+    PartyMemberRecyclerAdapter(List<User> partyMembers) {
         this.partyMembers = partyMembers;
     }
 
@@ -48,7 +47,7 @@ public class PartyMemberRecyclerAdapter extends RecyclerView.Adapter<PartyMember
         private ImageView userImage;
         private TextView userName;
 
-        public UserHolder(View view) {
+        UserHolder(View view) {
             super(view);
 
             userImage = view.findViewById(R.id.userImage);
@@ -58,7 +57,6 @@ public class PartyMemberRecyclerAdapter extends RecyclerView.Adapter<PartyMember
 
         @Override
         public void onClick(View v) {
-            Log.d("RecyclerView", "CLICK!");
         }
     }
 
