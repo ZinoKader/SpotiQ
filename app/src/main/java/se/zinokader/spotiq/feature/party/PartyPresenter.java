@@ -58,6 +58,7 @@ public class PartyPresenter extends BasePresenter<PartyActivity> {
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(childEvent -> {
                         User partyMember = childEvent.dataSnapshot().getValue(User.class);
+                        getView().addPartyMember(partyMember);
                         Log.d(LogTag.LOG_PARTY, "USER FROM DB: " + partyMember.getUserId());
                     });
         }

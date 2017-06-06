@@ -1,4 +1,4 @@
-package se.zinokader.spotiq.feature.party;
+package se.zinokader.spotiq.feature.party.tracklist;
 
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
@@ -8,29 +8,23 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.dilpreet2028.fragmenter_annotations.Fragmenter;
+import com.dilpreet2028.fragmenter_annotations.annotations.FragModule;
+
 import se.zinokader.spotiq.R;
 import se.zinokader.spotiq.databinding.FragmentTracklistBinding;
 
+@FragModule
 public class TracklistFragment extends Fragment {
 
     FragmentTracklistBinding binding;
-
-    static final String FRAGMENT_TAG = "tracklist_fragment";
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_tracklist, container, false);
+        Fragmenter.inject(this);
         return binding.getRoot();
-    }
-
-    @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-    }
-
-    static TracklistFragment getInstance() {
-        return new TracklistFragment();
     }
 
 }

@@ -6,13 +6,13 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.View;
 
-import com.appolica.tabcontroller.TabController;
-import com.appolica.tabcontroller.fragment.TabControllerFragment;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
+
+import java.util.Arrays;
 
 import icepick.State;
 import nucleus5.factory.RequiresPresenter;
@@ -20,17 +20,25 @@ import se.zinokader.spotiq.R;
 import se.zinokader.spotiq.constant.ApplicationConstants;
 import se.zinokader.spotiq.databinding.ActivityPartyBinding;
 import se.zinokader.spotiq.feature.base.BaseActivity;
+import se.zinokader.spotiq.feature.party.navigation.PartyViewPagerAdapter;
+import se.zinokader.spotiq.feature.party.partymembers.PartyMembersFragment;
+import se.zinokader.spotiq.feature.party.partymembers.PartyMembersFragmentBuilder;
+import se.zinokader.spotiq.feature.party.tracklist.TracklistFragment;
+import se.zinokader.spotiq.feature.party.tracklist.TracklistFragmentBuilder;
+import se.zinokader.spotiq.model.User;
 import se.zinokader.spotiq.util.helper.GlideRequestOptions;
 
 @RequiresPresenter(PartyPresenter.class)
-public class PartyActivity extends BaseActivity<PartyPresenter> implements BottomBarListener.BottomBarTabListener {
+public class PartyActivity extends BaseActivity<PartyPresenter> {
 
     ActivityPartyBinding binding;
-    private TabController tabController;
-    private TracklistFragmentProvider tracklistFragmentProvider = new TracklistFragmentProvider();
 
     @State
     Bundle partyInfo;
+
+    private PartyViewPagerAdapter partyViewPagerAdapter;
+    private TracklistFragment tracklistFragment;
+    private PartyMembersFragment partyMembersFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,11 +51,22 @@ public class PartyActivity extends BaseActivity<PartyPresenter> implements Botto
             getPresenter().setPartyName(partyInfo.getString(ApplicationConstants.PARTY_NAME_EXTRA));
         }
 
-        TabControllerFragment tabControllerFragment =
-                (TabControllerFragment) getSupportFragmentManager().findFragmentById(R.id.tabFragmentContainer);
-        tabController = tabControllerFragment.getTabController();
+        partyViewPagerAdapter = new PartyViewPagerAdapter(getSupportFragmentManager());
+        tracklistFragment = TracklistFragmentBuilder.newInstance();
+        partyMembersFragment = PartyMembersFragmentBuilder.newInstance();
+        partyViewPagerAdapter.addFragments(Arrays.asList(tracklistFragment, partyMembersFragment));
+        binding.tabPager.setAdapter(partyViewPagerAdapter);
 
-        binding.bottomBar.setOnTabSelectListener(new BottomBarListener(this), true);
+        binding.bottomBar.setOnTabSelectListener(tabId -> {
+            switch (tabId) {
+                case R.id.tab_tracklist:
+                    binding.tabPager.setCurrentItem(ApplicationConstants.TAB_TRACKLIST_INDEX);
+                    break;
+                case R.id.tab_party_members:
+                    binding.tabPager.setCurrentItem(ApplicationConstants.TAB_PARTY_MEMBERS_INDEX);
+                    break;
+            }
+        });
 
         getPresenter().loadParty();
         getPresenter().loadUser();
@@ -90,21 +109,15 @@ public class PartyActivity extends BaseActivity<PartyPresenter> implements Botto
                 .into(binding.userImage);
     }
 
+    public void addPartyMember(User member) {
+        partyMembersFragment.addMember(member);
+    }
+
     public void setHostDetails(String hostName) {
 
     }
 
     public void setHostPriviliges() {
-
-    }
-
-    @Override
-    public void onTracklistTabSelected() {
-        tabController.switchTo(tracklistFragmentProvider);
-    }
-
-    @Override
-    public void onPartyMemberTabSelected() {
 
     }
 
