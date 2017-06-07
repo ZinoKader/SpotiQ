@@ -14,12 +14,10 @@ import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.view.Window;
 import android.view.animation.AccelerateDecelerateInterpolator;
-
 import com.bumptech.glide.Glide;
 import com.rengwuxian.materialedittext.MaterialEditText;
-
+import net.grandcentrix.thirtyinch.TiPresenter;
 import net.grandcentrix.thirtyinch.plugin.TiActivityPlugin;
-
 import se.zinokader.spotiq.R;
 import se.zinokader.spotiq.constant.ApplicationConstants;
 import se.zinokader.spotiq.databinding.ActivityLobbyBinding;
@@ -60,9 +58,15 @@ public class LobbyActivity extends BaseActivity implements LobbyView {
     }
 
     @Override
-    public void setPresenter(LobbyPresenter presenter) {
-        this.presenter = presenter;
+    public void setPresenter(TiPresenter presenter) {
+        this.presenter = (LobbyPresenter) presenter;
         ((Injector) getApplication()).inject(presenter);
+        this.presenter.init();
+    }
+
+    @Override
+    public boolean isPresenterAttached() {
+        return presenter != null;
     }
 
     public void setUserDetails(String userName, String userImageUrl) {

@@ -2,14 +2,9 @@ package se.zinokader.spotiq.feature.party;
 
 import android.support.annotation.NonNull;
 import android.util.Log;
-
 import net.grandcentrix.thirtyinch.TiPresenter;
-import net.grandcentrix.thirtyinch.rx2.RxTiPresenterDisposableHandler;
-
 import javax.inject.Inject;
-
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import se.zinokader.spotiq.constant.LogTag;
 import se.zinokader.spotiq.model.User;
@@ -30,17 +25,15 @@ public class PartyPresenter extends TiPresenter<PartyView> {
 
     private String partyName;
 
-    private Disposable partyMemberSubscription;
-    private RxTiPresenterDisposableHandler subscriptionHandler = new RxTiPresenterDisposableHandler(this);
-
     @Override
     protected void onAttachView(@NonNull PartyView view) {
         super.onAttachView(view);
-        view.setPresenter(this);
-        initialize();
+        if (!view.isPresenterAttached()) {
+            view.setPresenter(this);
+        }
     }
 
-    private void initialize() {
+    void init() {
         loadParty();
         loadUser();
     }
@@ -50,17 +43,14 @@ public class PartyPresenter extends TiPresenter<PartyView> {
     }
 
     private void loadParty() {
-        if (partyMemberSubscription == null) {
-            partyMemberSubscription = partiesRepository.getPartyMembers(partyName)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(childEvent -> {
-                        User partyMember = childEvent.dataSnapshot().getValue(User.class);
-                        sendToView(view -> view.addPartyMember(partyMember));
-                        Log.d(LogTag.LOG_PARTY, "USER FROM DB: " + partyMember.getUserId());
-                    });
-            subscriptionHandler.manageViewDisposable(partyMemberSubscription);
-        }
+        partiesRepository.getPartyMembers(partyName)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(childEvent -> {
+                    User partyMember = childEvent.dataSnapshot().getValue(User.class);
+                    sendToView(view -> view.addPartyMember(partyMember));
+                    Log.d(LogTag.LOG_PARTY, "USER FROM DB: " + partyMember.getUserId());
+                });
     }
 
     private void loadUser() {

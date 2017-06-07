@@ -2,13 +2,9 @@ package se.zinokader.spotiq.feature.lobby;
 
 import android.support.annotation.NonNull;
 import android.util.Log;
-
 import net.grandcentrix.thirtyinch.TiPresenter;
-
 import java.util.concurrent.TimeUnit;
-
 import javax.inject.Inject;
-
 import io.reactivex.Observable;
 import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -48,11 +44,12 @@ public class LobbyPresenter extends TiPresenter<LobbyView> {
     @Override
     public void attachView(@NonNull LobbyView view) {
         super.attachView(view);
-        view.setPresenter(this);
-        initialize();
+        if (!view.isPresenterAttached()) {
+            view.setPresenter(this);
+        }
     }
 
-    private void initialize() {
+    void init() {
         loadUser();
     }
 

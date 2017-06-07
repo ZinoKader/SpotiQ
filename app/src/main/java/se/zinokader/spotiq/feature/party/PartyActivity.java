@@ -5,24 +5,21 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.View;
-
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
-
+import net.grandcentrix.thirtyinch.TiPresenter;
 import net.grandcentrix.thirtyinch.plugin.TiActivityPlugin;
-
 import java.util.Arrays;
-
 import se.zinokader.spotiq.R;
 import se.zinokader.spotiq.constant.ApplicationConstants;
 import se.zinokader.spotiq.databinding.ActivityPartyBinding;
 import se.zinokader.spotiq.feature.base.BaseActivity;
 import se.zinokader.spotiq.feature.party.navigation.PartyViewPagerAdapter;
-import se.zinokader.spotiq.feature.party.partymembers.PartyMembersFragment;
-import se.zinokader.spotiq.feature.party.partymembers.PartyMembersFragmentBuilder;
+import se.zinokader.spotiq.feature.party.partymember.PartyMemberFragment;
+import se.zinokader.spotiq.feature.party.partymember.PartyMemberFragmentBuilder;
 import se.zinokader.spotiq.feature.party.tracklist.TracklistFragment;
 import se.zinokader.spotiq.feature.party.tracklist.TracklistFragmentBuilder;
 import se.zinokader.spotiq.model.User;
@@ -37,7 +34,7 @@ public class PartyActivity extends BaseActivity implements PartyView {
 
     private PartyViewPagerAdapter partyViewPagerAdapter;
     private TracklistFragment tracklistFragment;
-    private PartyMembersFragment partyMembersFragment;
+    private PartyMemberFragment partyMemberFragment;
 
     public PartyActivity() {
         addPlugin(new TiActivityPlugin<>(PartyPresenter::new));
@@ -55,8 +52,8 @@ public class PartyActivity extends BaseActivity implements PartyView {
 
         partyViewPagerAdapter = new PartyViewPagerAdapter(getSupportFragmentManager());
         tracklistFragment = TracklistFragmentBuilder.newInstance();
-        partyMembersFragment = PartyMembersFragmentBuilder.newInstance();
-        partyViewPagerAdapter.addFragments(Arrays.asList(tracklistFragment, partyMembersFragment));
+        partyMemberFragment = PartyMemberFragmentBuilder.newInstance();
+        partyViewPagerAdapter.addFragments(Arrays.asList(tracklistFragment, partyMemberFragment));
         binding.tabPager.setAdapter(partyViewPagerAdapter);
 
         binding.bottomBar.setOnTabSelectListener(tabId -> {
@@ -84,16 +81,19 @@ public class PartyActivity extends BaseActivity implements PartyView {
     }
 
     @Override
-    public void setPresenter(PartyPresenter presenter) {
-        this.presenter = presenter;
+    public void setPresenter(TiPresenter presenter) {
+        this.presenter = (PartyPresenter) presenter;
         ((Injector) getApplication()).inject(presenter);
-        presenter.setPartyName(partyInfo.getString(ApplicationConstants.PARTY_NAME_EXTRA));
+        this.presenter.setPartyName(partyInfo.getString(ApplicationConstants.PARTY_NAME_EXTRA));
+        this.presenter.init();
     }
 
-    public void updatePartyDetails() {
-
+    @Override
+    public boolean isPresenterAttached() {
+        return presenter != null;
     }
 
+    @Override
     public void setUserDetails(String userName, String userImageUrl) {
         binding.userName.setText(userName);
         Glide.with(this)
@@ -115,14 +115,17 @@ public class PartyActivity extends BaseActivity implements PartyView {
                 .into(binding.userImage);
     }
 
+    @Override
     public void addPartyMember(User member) {
-        partyMembersFragment.addMember(member);
+        partyMemberFragment.addMember(member);
     }
 
+    @Override
     public void setHostDetails(String hostName) {
 
     }
 
+    @Override
     public void setHostPriviliges() {
 
     }

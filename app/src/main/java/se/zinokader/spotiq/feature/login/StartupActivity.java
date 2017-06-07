@@ -12,9 +12,8 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.view.animation.AccelerateDecelerateInterpolator;
-
+import net.grandcentrix.thirtyinch.TiPresenter;
 import net.grandcentrix.thirtyinch.plugin.TiActivityPlugin;
-
 import se.zinokader.spotiq.R;
 import se.zinokader.spotiq.constant.LogTag;
 import se.zinokader.spotiq.constant.SpotifyConstants;
@@ -40,9 +39,14 @@ public class StartupActivity extends BaseActivity implements StartupView {
     }
 
     @Override
-    public void setPresenter(StartupPresenter presenter) {
-        this.presenter = presenter;
+    public void setPresenter(TiPresenter presenter) {
+        this.presenter = (StartupPresenter) presenter;
         ((Injector) getApplication()).inject(presenter);
+    }
+
+    @Override
+    public boolean isPresenterAttached() {
+        return presenter != null;
     }
 
     public void startProgress() {

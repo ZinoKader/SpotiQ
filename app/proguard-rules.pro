@@ -45,3 +45,7 @@
 }
 -keepnames class * { @icepick.State *;}
 
+# For Parceler
+-keep interface org.parceler.Parcel
+-keep @org.parceler.Parcel class * { *; }
+-keep class **$$Parcelable { *; }

@@ -1,14 +1,10 @@
 package se.zinokader.spotiq.feature.login;
 
 import android.support.annotation.NonNull;
-
 import com.github.b3er.rxfirebase.auth.RxFirebaseAuth;
 import com.google.firebase.auth.FirebaseAuth;
-
 import net.grandcentrix.thirtyinch.TiPresenter;
-
 import java.util.concurrent.TimeUnit;
-
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
@@ -20,7 +16,9 @@ public class StartupPresenter extends TiPresenter<StartupView> {
     @Override
     public void attachView(@NonNull StartupView view) {
         super.attachView(view);
-        view.setPresenter(this);
+        if (!view.isPresenterAttached()) {
+            view.setPresenter(this);
+        }
     }
 
     void logIn() {

@@ -5,11 +5,8 @@ import android.content.Intent;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Log;
-
 import java.util.concurrent.TimeUnit;
-
 import javax.inject.Singleton;
-
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
@@ -40,6 +37,11 @@ public class SpotifyCommunicatorService extends Service {
         stopJob();
     }
 
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        return START_STICKY;
+    }
+
     /**
      * We are implementing our service this way because the only way to refresh the token is opening
      * a new activity, which is annoying when the user is navigating other apps while using SpotiQ.
@@ -53,10 +55,10 @@ public class SpotifyCommunicatorService extends Service {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(interval -> {
-                    if (spotifyAuthenticator.getExpiresIn() < ServiceConstants.TOKEN_EXPIRY_CUTOFF) {
+                    if (spotifyAuthenticator.getExpiresIn() <= ServiceConstants.TOKEN_EXPIRY_CUTOFF) {
                         Intent loginIntent = new Intent(this, SpotifyAuthenticationActivity.class);
                         startActivity(loginIntent);
-                        Log.d(LogTag.LOG_TOKEN_SERVICE, "Token was updated. New token: " + spotifyAuthenticator.getAccessToken());
+                        Log.d(LogTag.LOG_TOKEN_SERVICE, "Token was updated");
                     }
                     else {
                         Log.d(LogTag.LOG_TOKEN_SERVICE, "Token wasn't updated - existing token still valid");

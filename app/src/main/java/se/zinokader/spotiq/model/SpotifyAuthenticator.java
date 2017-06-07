@@ -5,10 +5,16 @@ import org.threeten.bp.temporal.ChronoUnit;
 
 public class SpotifyAuthenticator {
 
-    public SpotifyAuthenticator() {}
-
     private String accessToken;
     private LocalDateTime expiryTimeStamp;
+
+    /**
+     * In case our SpotifyAuthenticator is garbage collected, when a new one is recreated, it is instantly expired
+     */
+    public SpotifyAuthenticator() {
+        this.accessToken = "";
+        this.expiryTimeStamp = LocalDateTime.now();
+    }
 
     public void setAccessToken(String accessToken) {
         this.accessToken = accessToken;
