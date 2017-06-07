@@ -18,41 +18,51 @@ import android.view.animation.AccelerateDecelerateInterpolator;
 import com.bumptech.glide.Glide;
 import com.rengwuxian.materialedittext.MaterialEditText;
 
-import nucleus5.factory.RequiresPresenter;
+import net.grandcentrix.thirtyinch.plugin.TiActivityPlugin;
+
 import se.zinokader.spotiq.R;
 import se.zinokader.spotiq.constant.ApplicationConstants;
 import se.zinokader.spotiq.databinding.ActivityLobbyBinding;
 import se.zinokader.spotiq.feature.base.BaseActivity;
 import se.zinokader.spotiq.feature.party.PartyActivity;
+import se.zinokader.spotiq.util.di.Injector;
 import se.zinokader.spotiq.util.helper.GlideRequestOptions;
 import se.zinokader.spotiq.util.helper.PartyPasswordValidator;
 import se.zinokader.spotiq.util.helper.PartyTitleValidator;
 
-@RequiresPresenter(LobbyPresenter.class)
-public class LobbyActivity extends BaseActivity<LobbyPresenter> {
+public class LobbyActivity extends BaseActivity implements LobbyView {
 
     ActivityLobbyBinding binding;
+    private LobbyPresenter presenter;
+
+    public LobbyActivity() {
+        addPlugin(new TiActivityPlugin<>(LobbyPresenter::new));
+    }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_lobby);
-        binding.setPresenter(getPresenter());
         binding.joinPartyButton.setOnClickListener(c -> showDialog(DialogType.JOIN_DIALOG));
         binding.createPartyButton.setOnClickListener(c -> showDialog(DialogType.CREATE_DIALOG));
-        getPresenter().loadUser();
     }
 
     @Override
-    protected void onResume() {
+    public void onResume() {
         super.onResume();
-        getPresenter().resume();
+        startForegroundTokenRenewalService();
     }
 
     @Override
-    protected void onPause() {
-        getPresenter().pause();
+    public void onPause() {
         super.onPause();
+        stopForegroundTokenRenewalService();
+    }
+
+    @Override
+    public void setPresenter(LobbyPresenter presenter) {
+        this.presenter = presenter;
+        ((Injector) getApplication()).inject(presenter);
     }
 
     public void setUserDetails(String userName, String userImageUrl) {
@@ -108,12 +118,12 @@ public class LobbyActivity extends BaseActivity<LobbyPresenter> {
                 case JOIN_DIALOG:
                     if(!(partyTitle.validate() & partyPassword.validate())) return;
                     animateDialog(DialogAction.CLOSE, dialogType, dialogView, mockDialog);
-                    getPresenter().joinParty(partyTitle.getText().toString(), partyPassword.getText().toString());
+                    presenter.joinParty(partyTitle.getText().toString(), partyPassword.getText().toString());
                     break;
                 case CREATE_DIALOG:
                     if(!(partyTitle.validate() & partyPassword.validate())) return;
                     animateDialog(DialogAction.CLOSE, dialogType, dialogView, mockDialog);
-                    getPresenter().createParty(partyTitle.getText().toString(), partyPassword.getText().toString());
+                    presenter.createParty(partyTitle.getText().toString(), partyPassword.getText().toString());
                     break;
             }
         });

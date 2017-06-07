@@ -1,22 +1,23 @@
 package se.zinokader.spotiq.feature.party;
 
-import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.util.Log;
+
+import net.grandcentrix.thirtyinch.TiPresenter;
+import net.grandcentrix.thirtyinch.rx2.RxTiPresenterDisposableHandler;
 
 import javax.inject.Inject;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import se.zinokader.spotiq.constant.LogTag;
-import se.zinokader.spotiq.feature.base.BasePresenter;
 import se.zinokader.spotiq.model.User;
 import se.zinokader.spotiq.repository.PartiesRepository;
 import se.zinokader.spotiq.repository.SpotifyRepository;
 import se.zinokader.spotiq.service.SpotifyCommunicatorService;
 
-public class PartyPresenter extends BasePresenter<PartyActivity> {
+public class PartyPresenter extends TiPresenter<PartyView> {
 
     @Inject
     SpotifyCommunicatorService spotifyCommunicatorService;
@@ -30,67 +31,58 @@ public class PartyPresenter extends BasePresenter<PartyActivity> {
     private String partyName;
 
     private Disposable partyMemberSubscription;
-    private CompositeDisposable disposableSubscriptions = new CompositeDisposable();
+    private RxTiPresenterDisposableHandler subscriptionHandler = new RxTiPresenterDisposableHandler(this);
 
     @Override
-    protected void onCreate(Bundle savedState) {
-        super.onCreate(savedState);
+    protected void onAttachView(@NonNull PartyView view) {
+        super.onAttachView(view);
+        view.setPresenter(this);
+        initialize();
     }
 
-    void resume() {
-        getView().startForegroundTokenRenewalService();
-        subscribeToPartyMemberChanges();
-    }
-
-    void pause() {
-        getView().stopForegroundTokenRenewalService();
-        unsubscribeToPartyMemberChanges();
+    private void initialize() {
+        loadParty();
+        loadUser();
     }
 
     void setPartyName(String partyName) {
         this.partyName = partyName;
     }
 
-    void loadParty() {
+    private void loadParty() {
         if (partyMemberSubscription == null) {
             partyMemberSubscription = partiesRepository.getPartyMembers(partyName)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(childEvent -> {
                         User partyMember = childEvent.dataSnapshot().getValue(User.class);
-                        getView().addPartyMember(partyMember);
+                        sendToView(view -> view.addPartyMember(partyMember));
                         Log.d(LogTag.LOG_PARTY, "USER FROM DB: " + partyMember.getUserId());
                     });
+            subscriptionHandler.manageViewDisposable(partyMemberSubscription);
         }
     }
 
-    void loadUser() {
+    private void loadUser() {
         spotifyRepository.getMe(spotifyCommunicatorService.getWebApi())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(userPrivate -> {
                     User user = new User(userPrivate.id, userPrivate.display_name, userPrivate.images);
-                    getView().setUserDetails(user.getUserName(), user.getUserImageUrl());
+                    sendToView(view -> view.setUserDetails(user.getUserName(), user.getUserImageUrl()));
                     loadHost(user.getUserId(), user.getUserName());
                 });
     }
 
-    private void subscribeToPartyMemberChanges() {
-        disposableSubscriptions.add(partyMemberSubscription);
-    }
-
-    private void unsubscribeToPartyMemberChanges() {
-        disposableSubscriptions.remove(partyMemberSubscription);
-    }
-
+    //TODO: Map magic this into the loadUser() method
     private void loadHost(String userId, String userName) {
         partiesRepository.isHostOfParty(userId, partyName)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(userIsHost -> {
-                    getView().setHostDetails(userName);
+                    sendToView(view -> view.setHostDetails(userName));
                     if (userIsHost) {
-                        getView().setHostPriviliges();
+                        sendToView(PartyView::setHostPriviliges);
                     }
                 });
     }

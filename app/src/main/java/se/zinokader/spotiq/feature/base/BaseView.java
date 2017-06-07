@@ -2,6 +2,9 @@ package se.zinokader.spotiq.feature.base;
 
 import android.view.View;
 
-public interface BaseView {
+import net.grandcentrix.thirtyinch.TiView;
+
+public interface BaseView extends TiView {
+    void showMessage(String message);
     View getRootView();
 }

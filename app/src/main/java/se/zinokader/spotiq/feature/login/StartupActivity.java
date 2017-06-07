@@ -12,25 +12,37 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.view.animation.AccelerateDecelerateInterpolator;
-import nucleus5.factory.RequiresPresenter;
+
+import net.grandcentrix.thirtyinch.plugin.TiActivityPlugin;
+
 import se.zinokader.spotiq.R;
 import se.zinokader.spotiq.constant.LogTag;
 import se.zinokader.spotiq.constant.SpotifyConstants;
 import se.zinokader.spotiq.databinding.ActivityStartupBinding;
 import se.zinokader.spotiq.feature.base.BaseActivity;
 import se.zinokader.spotiq.feature.lobby.LobbyActivity;
+import se.zinokader.spotiq.util.di.Injector;
 
-@RequiresPresenter(StartupPresenter.class)
-public class StartupActivity extends BaseActivity<StartupPresenter> {
+public class StartupActivity extends BaseActivity implements StartupView {
 
     ActivityStartupBinding binding;
+    private StartupPresenter presenter;
+
+    public StartupActivity() {
+        addPlugin(new TiActivityPlugin<>(StartupPresenter::new));
+    }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_startup);
-        binding.setPresenter(getPresenter());
-        binding.logInButton.setOnClickListener(c -> getPresenter().logIn());
+        binding.logInButton.setOnClickListener(c -> presenter.logIn());
+    }
+
+    @Override
+    public void setPresenter(StartupPresenter presenter) {
+        this.presenter = presenter;
+        ((Injector) getApplication()).inject(presenter);
     }
 
     public void startProgress() {
@@ -104,20 +116,20 @@ public class StartupActivity extends BaseActivity<StartupPresenter> {
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode != SpotifyConstants.LOGIN_REQUEST_CODE) {
-            Log.d(LogTag.LOG_LOGIN, "Wrong requestCode on Spotify auth. Expected: " +
+            Log.d(LogTag.LOG_LOGIN, "Wrong request code on Spotify auth. Expected: " +
                     SpotifyConstants.LOGIN_REQUEST_CODE + ", received: " + requestCode);
             return;
         }
 
         if (resultCode == RESULT_OK) {
-            getPresenter().logInFinished();
+            presenter.logInFinished();
         }
         else {
-            getPresenter().logInFailed();
+            presenter.logInFailed();
         }
     }
 

@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="100dp">
+    android:layout_height="80dp">
 
     <com.mikhaellopez.circularimageview.CircularImageView
         android:id="@+id/userImage"
@@ -24,7 +24,8 @@
         android:layout_height="30dp"
         android:layout_marginBottom="4dp"
         android:layout_marginStart="28dp"
-        android:textSize="16sp"
+        android:textSize="15sp"
+        android:textColor="@color/colorMaterialWhite"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toEndOf="@+id/userImage"

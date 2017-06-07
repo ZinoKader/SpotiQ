@@ -55,7 +55,6 @@ public class SpotifyCommunicatorService extends Service {
                 .subscribe(interval -> {
                     if (spotifyAuthenticator.getExpiresIn() < ServiceConstants.TOKEN_EXPIRY_CUTOFF) {
                         Intent loginIntent = new Intent(this, SpotifyAuthenticationActivity.class);
-                        loginIntent.addFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
                         startActivity(loginIntent);
                         Log.d(LogTag.LOG_TOKEN_SERVICE, "Token was updated. New token: " + spotifyAuthenticator.getAccessToken());
                     }

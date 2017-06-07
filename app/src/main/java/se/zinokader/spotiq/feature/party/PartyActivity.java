@@ -12,10 +12,10 @@ import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 
+import net.grandcentrix.thirtyinch.plugin.TiActivityPlugin;
+
 import java.util.Arrays;
 
-import icepick.State;
-import nucleus5.factory.RequiresPresenter;
 import se.zinokader.spotiq.R;
 import se.zinokader.spotiq.constant.ApplicationConstants;
 import se.zinokader.spotiq.databinding.ActivityPartyBinding;
@@ -26,29 +26,31 @@ import se.zinokader.spotiq.feature.party.partymembers.PartyMembersFragmentBuilde
 import se.zinokader.spotiq.feature.party.tracklist.TracklistFragment;
 import se.zinokader.spotiq.feature.party.tracklist.TracklistFragmentBuilder;
 import se.zinokader.spotiq.model.User;
+import se.zinokader.spotiq.util.di.Injector;
 import se.zinokader.spotiq.util.helper.GlideRequestOptions;
 
-@RequiresPresenter(PartyPresenter.class)
-public class PartyActivity extends BaseActivity<PartyPresenter> {
+public class PartyActivity extends BaseActivity implements PartyView {
 
     ActivityPartyBinding binding;
-
-    @State
-    Bundle partyInfo;
+    private PartyPresenter presenter;
+    private Bundle partyInfo;
 
     private PartyViewPagerAdapter partyViewPagerAdapter;
     private TracklistFragment tracklistFragment;
     private PartyMembersFragment partyMembersFragment;
 
+    public PartyActivity() {
+        addPlugin(new TiActivityPlugin<>(PartyPresenter::new));
+    }
+
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         postponeEnterTransition();
         binding = DataBindingUtil.setContentView(this, R.layout.activity_party);
-        binding.setPresenter(getPresenter());
         partyInfo = getIntent().getExtras();
         if(partyInfo != null) {
-            getPresenter().setPartyName(partyInfo.getString(ApplicationConstants.PARTY_NAME_EXTRA));
+            binding.partyTitle.setText(partyInfo.getString(ApplicationConstants.PARTY_NAME_EXTRA));
         }
 
         partyViewPagerAdapter = new PartyViewPagerAdapter(getSupportFragmentManager());
@@ -67,21 +69,25 @@ public class PartyActivity extends BaseActivity<PartyPresenter> {
                     break;
             }
         });
-
-        getPresenter().loadParty();
-        getPresenter().loadUser();
     }
 
     @Override
-    protected void onResume() {
+    public void onResume() {
         super.onResume();
-        getPresenter().resume();
+        startForegroundTokenRenewalService();
     }
 
     @Override
-    protected void onPause() {
-        getPresenter().pause();
+    public void onPause() {
         super.onPause();
+        stopForegroundTokenRenewalService();
+    }
+
+    @Override
+    public void setPresenter(PartyPresenter presenter) {
+        this.presenter = presenter;
+        ((Injector) getApplication()).inject(presenter);
+        presenter.setPartyName(partyInfo.getString(ApplicationConstants.PARTY_NAME_EXTRA));
     }
 
     public void updatePartyDetails() {
@@ -125,5 +131,4 @@ public class PartyActivity extends BaseActivity<PartyPresenter> {
     public View getRootView() {
         return binding.getRoot();
     }
-
 }

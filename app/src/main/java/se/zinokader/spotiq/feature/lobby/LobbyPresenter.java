@@ -1,7 +1,9 @@
 package se.zinokader.spotiq.feature.lobby;
 
-import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.util.Log;
+
+import net.grandcentrix.thirtyinch.TiPresenter;
 
 import java.util.concurrent.TimeUnit;
 
@@ -19,7 +21,6 @@ import retrofit.client.Response;
 import se.zinokader.spotiq.constant.ApplicationConstants;
 import se.zinokader.spotiq.constant.FirebaseConstants;
 import se.zinokader.spotiq.constant.LogTag;
-import se.zinokader.spotiq.feature.base.BasePresenter;
 import se.zinokader.spotiq.model.Party;
 import se.zinokader.spotiq.model.User;
 import se.zinokader.spotiq.model.UserPartyInformation;
@@ -33,7 +34,7 @@ import se.zinokader.spotiq.util.exception.PartyWrongPasswordException;
 import se.zinokader.spotiq.util.exception.UserNotAddedException;
 
 
-public class LobbyPresenter extends BasePresenter<LobbyActivity> {
+public class LobbyPresenter extends TiPresenter<LobbyView> {
 
     @Inject
     SpotifyCommunicatorService spotifyCommunicatorService;
@@ -45,24 +46,22 @@ public class LobbyPresenter extends BasePresenter<LobbyActivity> {
     SpotifyRepository spotifyRepository;
 
     @Override
-    protected void onCreate(Bundle savedState) {
-        super.onCreate(savedState);
+    public void attachView(@NonNull LobbyView view) {
+        super.attachView(view);
+        view.setPresenter(this);
+        initialize();
     }
 
-    void resume() {
-        getView().startForegroundTokenRenewalService();
+    private void initialize() {
+        loadUser();
     }
 
-    void pause() {
-        getView().stopForegroundTokenRenewalService();
-    }
-
-    void loadUser() {
+    private void loadUser() {
         spotifyCommunicatorService.getWebApi().getMe(new Callback<UserPrivate>() {
             @Override
             public void success(UserPrivate userPrivate, Response response) {
                 User user = new User(userPrivate.id, userPrivate.display_name, userPrivate.images);
-                getView().setUserDetails(user.getUserName(), user.getUserImageUrl());
+                sendToView(view -> view.setUserDetails(user.getUserName(), user.getUserImageUrl()));
             }
 
             @Override
@@ -112,13 +111,13 @@ public class LobbyPresenter extends BasePresenter<LobbyActivity> {
                     @Override
                     public void onError(Throwable exception) {
                         if (exception instanceof PartyDoesNotExistException) {
-                            getView().showMessage("Party does not exist, why not create it?");
+                            sendToView(view -> view.showMessage("Party does not exist, why not create it?"));
                         }
                         else if (exception instanceof PartyWrongPasswordException) {
-                            getView().showMessage("Password incorrect");
+                            sendToView(view -> view.showMessage("Password invalid"));
                         }
                         else {
-                            getView().showMessage("Something went wrong when joining the party");
+                            sendToView(view -> view.showMessage("Something went wrong when joining the party"));
                         }
                         Log.d(LogTag.LOG_LOBBY, "Could not join party");
                         exception.printStackTrace();
@@ -169,13 +168,13 @@ public class LobbyPresenter extends BasePresenter<LobbyActivity> {
                     @Override
                     public void onError(Throwable exception) {
                         if (exception instanceof PartyExistsException) {
-                            getView().showMessage("Party " + partyTitle + " already exists");
+                            sendToView(view -> view.showMessage("Party " + partyTitle + " already exists"));
                         }
                         else if (exception instanceof UserNotAddedException) {
-                            getView().showMessage("Something went wrong when adding you to the party");
+                            sendToView(view -> view.showMessage("Something went wrong when adding you to the party"));
                         }
                         else {
-                            getView().showMessage("Something went wrong when creating the party");
+                            sendToView(view -> view.showMessage("Something went wrong when creating the party"));
                         }
                         Log.d(LogTag.LOG_LOBBY, "Could not create party");
                         exception.printStackTrace();
@@ -194,9 +193,9 @@ public class LobbyPresenter extends BasePresenter<LobbyActivity> {
     private void navigateToParty(String partyTitle) {
         Observable.just(ApplicationConstants.SHORT_ACTION_DELAY)
                 .observeOn(AndroidSchedulers.mainThread())
-                .doOnNext(next -> getView().showMessage("Entering party " + partyTitle + "..."))
+                .doOnNext(next -> sendToView(view -> view.showMessage("Entering party " + partyTitle + "...")))
                 .delay(ApplicationConstants.SHORT_ACTION_DELAY, TimeUnit.SECONDS, AndroidSchedulers.mainThread())
-                .subscribe(success -> getView().goToParty(partyTitle));
+                .subscribe(success -> sendToView(view -> view.goToParty(partyTitle)));
 
     }
 }
