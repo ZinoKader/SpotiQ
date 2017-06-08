@@ -4,8 +4,8 @@ import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,9 +13,16 @@ import com.dilpreet2028.fragmenter_annotations.Fragmenter;
 import com.dilpreet2028.fragmenter_annotations.annotations.FragModule;
 import java.util.ArrayList;
 import java.util.List;
+import kaaes.spotify.webapi.android.SpotifyApi;
+import kaaes.spotify.webapi.android.SpotifyService;
+import kaaes.spotify.webapi.android.models.Track;
+import retrofit.Callback;
+import retrofit.RetrofitError;
+import retrofit.client.Response;
 import se.zinokader.spotiq.R;
 import se.zinokader.spotiq.databinding.FragmentTracklistBinding;
 import se.zinokader.spotiq.model.Song;
+import se.zinokader.spotiq.util.mapper.TrackMapper;
 
 @FragModule
 public class TracklistFragment extends Fragment {
@@ -32,8 +39,66 @@ public class TracklistFragment extends Fragment {
 
         tracklistRecyclerAdapter = new TracklistRecyclerAdapter(songs);
         binding.songsRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        binding.songsRecyclerView.addItemDecoration(new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL));
         binding.songsRecyclerView.setAdapter(tracklistRecyclerAdapter);
+
+        //Quick, lazy test. TODO: Remove this
+        SpotifyApi spotifyApi = new SpotifyApi();
+        spotifyApi.setAccessToken("BQCalgjo8TZ87MEHrjDYLtAE-vrkANvQ01SxZJedDmQONkXOwu-6CFEb5-UMgJCGJ6nhtTrGtzW67gnPugiBen58KVxeZGWSmht0ot2KSJB-giKfUgLR8mRga07vg8tf-HEdbhVj7B-miKuwHsCW7qtxIBYyJh-UiF1wxxfmEH7ayssb32o");
+        SpotifyService spotifyService = spotifyApi.getService();
+
+        spotifyService.getTrack("3n3Ppam7vgaVa1iaRUc9Lp", new Callback<Track>() {
+            @Override
+            public void success(Track track, Response response) {
+                Song testSong = TrackMapper.trackToSong(track, "zinne97");
+                addSong(testSong);
+            }
+
+            @Override
+            public void failure(RetrofitError error) {
+                Log.d("ERRORGUY", error.getBody().toString());
+            }
+        });
+
+        spotifyService.getTrack("12Chz98pHFMPJEknJQMWvI", new Callback<Track>() {
+            @Override
+            public void success(Track track, Response response) {
+                Song testSong = TrackMapper.trackToSong(track, "zinne97");
+                addSong(testSong);
+            }
+
+            @Override
+            public void failure(RetrofitError error) {
+                Log.d("ERRORGUY", error.getBody().toString());
+            }
+        });
+
+        spotifyService.getTrack("7kzKAuUzOITUauHAhoMoxA", new Callback<Track>() {
+            @Override
+            public void success(Track track, Response response) {
+                Song testSong = TrackMapper.trackToSong(track, "zinne97");
+                addSong(testSong);
+            }
+
+            @Override
+            public void failure(RetrofitError error) {
+                Log.d("ERRORGUY", error.getBody().toString());
+            }
+        });
+
+        spotifyService.getTrack("6b2oQwSGFkzsMtQruIWm2p", new Callback<Track>() {
+            @Override
+            public void success(Track track, Response response) {
+                Song testSong = TrackMapper.trackToSong(track, "zinne97");
+                addSong(testSong);
+            }
+
+            @Override
+            public void failure(RetrofitError error) {
+                Log.d("ERRORGUY", error.getBody().toString());
+            }
+        });
+
+
 
         return binding.getRoot();
     }

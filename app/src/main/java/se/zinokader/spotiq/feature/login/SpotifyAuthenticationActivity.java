@@ -4,15 +4,12 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-
 import com.spotify.sdk.android.authentication.AuthenticationClient;
 import com.spotify.sdk.android.authentication.AuthenticationRequest;
 import com.spotify.sdk.android.authentication.AuthenticationResponse;
 import com.spotify.sdk.android.player.ConnectionStateCallback;
 import com.spotify.sdk.android.player.Error;
-
 import javax.inject.Inject;
-
 import se.zinokader.spotiq.R;
 import se.zinokader.spotiq.constant.LogTag;
 import se.zinokader.spotiq.constant.SpotifyConstants;
@@ -59,6 +56,8 @@ public class SpotifyAuthenticationActivity extends AppCompatActivity implements 
                     //refresh our authentication token
                     spotifyCommunicatorService.getAuthenticator().setExpiryTimeStamp(response.getExpiresIn());
                     spotifyCommunicatorService.getAuthenticator().setAccessToken(response.getAccessToken());
+
+                    Log.d(LogTag.LOG_LOGIN, "ACCESS TOKEN: " + spotifyCommunicatorService.getAuthenticator().getAccessToken());
 
                     setResult(RESULT_OK);
                     break;

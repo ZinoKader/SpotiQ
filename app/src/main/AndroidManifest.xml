@@ -30,7 +30,7 @@
             android:theme="@style/AppThemeNoActionBar"/>
 
         <activity android:name=".feature.party.PartyActivity"
-            android:theme="@style/AppThemeNoActionBar"/>
+            android:theme="@style/AppThemeToolBar"/>
 
         <meta-data
             android:name="preloaded_fonts"

@@ -4,7 +4,6 @@ import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -34,7 +33,8 @@ public class PartyMemberFragment extends Fragment {
 
         partyMemberRecyclerAdapter = new PartyMemberRecyclerAdapter(partyMembers);
         binding.membersRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        binding.membersRecyclerView.addItemDecoration(new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL));
+        binding.membersRecyclerView.addItemDecoration(new DividerItemDecoration(getContext()
+                .getDrawable(R.drawable.list_divider),false, false));
         binding.membersRecyclerView.setAdapter(partyMemberRecyclerAdapter);
         return binding.getRoot();
     }

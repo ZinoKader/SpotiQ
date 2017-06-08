@@ -24,9 +24,8 @@ import se.zinokader.spotiq.databinding.ActivityLobbyBinding;
 import se.zinokader.spotiq.feature.base.BaseActivity;
 import se.zinokader.spotiq.feature.party.PartyActivity;
 import se.zinokader.spotiq.util.di.Injector;
-import se.zinokader.spotiq.util.helper.GlideRequestOptions;
-import se.zinokader.spotiq.util.helper.PartyPasswordValidator;
-import se.zinokader.spotiq.util.helper.PartyTitleValidator;
+import se.zinokader.spotiq.util.validator.PartyPasswordValidator;
+import se.zinokader.spotiq.util.validator.PartyTitleValidator;
 
 public class LobbyActivity extends BaseActivity implements LobbyView {
 
@@ -73,7 +72,9 @@ public class LobbyActivity extends BaseActivity implements LobbyView {
         binding.userName.setText(userName);
         Glide.with(this)
                 .load(userImageUrl)
-                .apply(GlideRequestOptions.getProfileImageOptions())
+                .placeholder(R.drawable.image_profile_placeholder)
+                .dontAnimate()
+                .dontTransform()
                 .into(binding.userImage);
     }
 

@@ -1,13 +1,10 @@
 package se.zinokader.spotiq.feature.party;
 
 import android.databinding.DataBindingUtil;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.view.View;
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.DataSource;
-import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import net.grandcentrix.thirtyinch.TiPresenter;
@@ -24,7 +21,6 @@ import se.zinokader.spotiq.feature.party.tracklist.TracklistFragment;
 import se.zinokader.spotiq.feature.party.tracklist.TracklistFragmentBuilder;
 import se.zinokader.spotiq.model.User;
 import se.zinokader.spotiq.util.di.Injector;
-import se.zinokader.spotiq.util.helper.GlideRequestOptions;
 
 public class PartyActivity extends BaseActivity implements PartyView {
 
@@ -98,16 +94,18 @@ public class PartyActivity extends BaseActivity implements PartyView {
         binding.userName.setText(userName);
         Glide.with(this)
                 .load(userImageUrl)
-                .apply(GlideRequestOptions.getProfileImageOptions())
-                .listener(new RequestListener<Drawable>() {
+                .placeholder(R.drawable.image_profile_placeholder)
+                .dontAnimate()
+                .dontTransform()
+                .listener(new RequestListener<String, GlideDrawable>() {
                     @Override
-                    public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+                    public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
                         startPostponedEnterTransition();
                         return false;
                     }
 
                     @Override
-                    public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                    public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
                         startPostponedEnterTransition();
                         return false;
                     }

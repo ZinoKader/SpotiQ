@@ -23,17 +23,22 @@ public class PartyMemberRecyclerAdapter extends RecyclerView.Adapter<PartyMember
     public UserHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
         View inflatedView = LayoutInflater.from(viewGroup.getContext())
                 .inflate(R.layout.recyclerview_row_party_members, viewGroup, false);
+        inflatedView.getLayoutParams().width = viewGroup.getWidth();
         return new UserHolder(inflatedView);
     }
 
     @Override
     public void onBindViewHolder(UserHolder userHolder, int i) {
         User partyMember = partyMembers.get(i);
-        Glide.with(userHolder.itemView)
+        Glide.with(userHolder.itemView.getContext())
                 .load(partyMember.getUserImageUrl())
                 .into(userHolder.userImage);
         userHolder.userName.setText(partyMember.getUserName());
-        userHolder.songsRequested.setText(String.format("Requsted %d songs", partyMember.getSongsRequested()));
+        userHolder.songsRequested.setText(String.format(
+                partyMember.getSongsRequested() == 1
+                        ? "Requested %d song"
+                        : "Requested %d songs",
+                partyMember.getSongsRequested()));
         userHolder.memberType.setText(partyMember.getHasHostPriviliges() ? "Host" : "Member");
     }
 

@@ -1,4 +1,4 @@
-package se.zinokader.spotiq.util.helper;
+package se.zinokader.spotiq.util.validator;
 
 import android.support.annotation.NonNull;
 import com.rengwuxian.materialedittext.validation.METValidator;

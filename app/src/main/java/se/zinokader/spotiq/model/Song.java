@@ -18,9 +18,10 @@ public class Song {
     public Song() {
     }
 
-    //TODO: Just take the kaaes api song object and transform it here
-    public Song(String addedBySpotifyId, List<ArtistSimple> artists, AlbumSimple album, long durationMs, String name, String previewUrl) {
+    //TODO: use TrackMapper
+    public Song(String addedBySpotifyId, String songSpotifyId, List<ArtistSimple> artists, AlbumSimple album, long durationMs, String name, String previewUrl) {
         this.addedBySpotifyId = addedBySpotifyId;
+        this.songSpotifyId = songSpotifyId;
         this.album = album;
         this.artists = artists;
         this.durationMs = durationMs;

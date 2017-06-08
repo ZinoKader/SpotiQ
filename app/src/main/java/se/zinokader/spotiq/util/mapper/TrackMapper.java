@@ -9,6 +9,6 @@ public class TrackMapper {
 
     public static Song trackToSong(Track track, String addedBySpotifyId) {
         //TODO: Map Track to Song
-        return new Song(addedBySpotifyId, track.artists, track.album, track.duration_ms, track.name, track.preview_url);
+        return new Song(addedBySpotifyId, track.id, track.artists, track.album, track.duration_ms, track.name, track.preview_url);
     }
 }

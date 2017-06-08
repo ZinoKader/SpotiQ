@@ -3,9 +3,13 @@
     <tab
         id="@+id/tab_tracklist"
         icon="@drawable/ic_tracklist"
-        title="Tracklist" />
+        title="Tracklist"
+        inActiveColor="#fafafa"
+        activeColor="#fafafa" />
     <tab
         id="@+id/tab_party_members"
         icon="@drawable/ic_party_members"
-        title="Party" />
+        title="Party"
+        inActiveColor="#fafafa"
+        activeColor="#fafafa"/>
 </tabs>
