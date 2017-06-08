@@ -1,7 +1,6 @@
 package se.zinokader.spotiq.model;
 
 import java.util.List;
-
 import kaaes.spotify.webapi.android.models.AlbumSimple;
 import kaaes.spotify.webapi.android.models.ArtistSimple;
 import kaaes.spotify.webapi.android.models.Image;
@@ -9,6 +8,7 @@ import kaaes.spotify.webapi.android.models.Image;
 public class Song {
 
     private String addedBySpotifyId;
+    private String songSpotifyId;
     private AlbumSimple album;
     private List<ArtistSimple> artists;
     private long durationMs;
@@ -18,6 +18,7 @@ public class Song {
     public Song() {
     }
 
+    //TODO: Just take the kaaes api song object and transform it here
     public Song(String addedBySpotifyId, List<ArtistSimple> artists, AlbumSimple album, long durationMs, String name, String previewUrl) {
         this.addedBySpotifyId = addedBySpotifyId;
         this.album = album;
@@ -35,6 +36,14 @@ public class Song {
         this.addedBySpotifyId = addedBySpotifyId;
     }
 
+    public String getSongSpotifyId() {
+        return songSpotifyId;
+    }
+
+    public void setSongSpotifyId(String songSpotifyId) {
+        this.songSpotifyId = songSpotifyId;
+    }
+
     public List<ArtistSimple> getArtists() {
         return artists;
     }
@@ -49,6 +58,10 @@ public class Song {
 
     public String getPreviewUrl() {
         return previewUrl;
+    }
+
+    public AlbumSimple getAlbum() {
+        return album;
     }
 
     public Image getAlbumArt() {

@@ -1,5 +1,6 @@
 package se.zinokader.spotiq.model;
 
+import org.threeten.bp.LocalDateTime;
 import java.util.List;
 import kaaes.spotify.webapi.android.models.Image;
 import se.zinokader.spotiq.constant.ApplicationConstants;
@@ -9,7 +10,9 @@ public class User {
     private String userId;
     private String userName;
     private String userImageUrl;
-    private int songsRequested;
+    private String joinedTimeStamp;
+    private int songsRequested = 0;
+    private boolean hasHostPriviliges = false;
 
     public User() {}
 
@@ -21,6 +24,8 @@ public class User {
         this.userImageUrl = userImages.isEmpty()
                 ? ApplicationConstants.PROFILE_IMAGE_PLACEHOLDER_URL
                 : userImages.get(0).url;
+        this.songsRequested = 0;
+        this.hasHostPriviliges = false;
     }
 
     public String getUserId() {
@@ -51,7 +56,19 @@ public class User {
         return songsRequested;
     }
 
-    public void setSongsRequested(int songsRequested) {
-        this.songsRequested = songsRequested;
+    public boolean getHasHostPriviliges() {
+        return hasHostPriviliges;
+    }
+
+    public void setHasHostPriviliges() {
+        this.hasHostPriviliges = true;
+    }
+
+    public String getJoinedTimeStamp() {
+        return joinedTimeStamp;
+    }
+
+    public void setJoinedNowTimeStamp() {
+        this.joinedTimeStamp = LocalDateTime.now().toString();
     }
 }

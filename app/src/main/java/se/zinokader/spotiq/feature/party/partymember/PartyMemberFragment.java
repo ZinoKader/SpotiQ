@@ -12,10 +12,12 @@ import android.view.ViewGroup;
 import com.dilpreet2028.fragmenter_annotations.Fragmenter;
 import com.dilpreet2028.fragmenter_annotations.annotations.FragModule;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import se.zinokader.spotiq.R;
 import se.zinokader.spotiq.databinding.FragmentPartyMembersBinding;
 import se.zinokader.spotiq.model.User;
+import se.zinokader.spotiq.util.comparator.PartyMemberComparator;
 
 @FragModule
 public class PartyMemberFragment extends Fragment {
@@ -39,6 +41,7 @@ public class PartyMemberFragment extends Fragment {
 
     public void addMember(User partyMember) {
         partyMembers.add(partyMember);
+        Collections.sort(partyMembers, PartyMemberComparator.getByJoinedTimeComparator());
         partyMemberRecyclerAdapter.notifyDataSetChanged();
     }
 

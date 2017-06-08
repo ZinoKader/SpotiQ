@@ -78,6 +78,7 @@ public class LobbyPresenter extends TiPresenter<LobbyView> {
                 (dbPartySnapshot, spotifyUser) -> {
                     if (dbPartySnapshot.exists()) {
                         User user = new User(spotifyUser.id, spotifyUser.display_name, spotifyUser.images);
+                        user.setJoinedNowTimeStamp();
                         boolean userAlreadyExists = dbPartySnapshot.child(FirebaseConstants.CHILD_USERS).hasChild(user.getUserId());
                         Party dbParty = dbPartySnapshot.child(FirebaseConstants.CHILD_PARTYINFO).getValue(Party.class);
                         return new UserPartyInformation(user, userAlreadyExists, dbParty);
@@ -142,6 +143,8 @@ public class LobbyPresenter extends TiPresenter<LobbyView> {
                     }
                     else {
                         User user = new User(spotifyUser.id, spotifyUser.display_name, spotifyUser.images);
+                        user.setJoinedNowTimeStamp();
+                        user.setHasHostPriviliges();
                         party.setHostSpotifyId(user.getUserId());
                         return new UserPartyInformation(user, party);
                     }

@@ -33,6 +33,8 @@ public class PartyMemberRecyclerAdapter extends RecyclerView.Adapter<PartyMember
                 .load(partyMember.getUserImageUrl())
                 .into(userHolder.userImage);
         userHolder.userName.setText(partyMember.getUserName());
+        userHolder.songsRequested.setText(String.format("Requsted %d songs", partyMember.getSongsRequested()));
+        userHolder.memberType.setText(partyMember.getHasHostPriviliges() ? "Host" : "Member");
     }
 
     @Override
@@ -43,12 +45,16 @@ public class PartyMemberRecyclerAdapter extends RecyclerView.Adapter<PartyMember
     public static class UserHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         private ImageView userImage;
         private TextView userName;
+        private TextView songsRequested;
+        private TextView memberType;
 
         UserHolder(View view) {
             super(view);
 
             userImage = view.findViewById(R.id.userImage);
             userName = view.findViewById(R.id.userName);
+            songsRequested = view.findViewById(R.id.songsRequested);
+            memberType = view.findViewById(R.id.memberType);
             view.setOnClickListener(this);
         }
 
