@@ -18,7 +18,6 @@ public class Song {
     public Song() {
     }
 
-    //TODO: use TrackMapper
     public Song(String addedBySpotifyId, String songSpotifyId, List<ArtistSimple> artists, AlbumSimple album, long durationMs, String name, String previewUrl) {
         this.addedBySpotifyId = addedBySpotifyId;
         this.songSpotifyId = songSpotifyId;

@@ -15,6 +15,5 @@ public final class SpotifyConstants {
 
     public static final String CLIENT_ID = "5646444c2abc4d8299ee3f2cb274f0b6";
     public static final String REDIRECT_URI = "spotiq://callback";
-    public static final int LOGIN_REQUEST_CODE = 5473;
 
 }

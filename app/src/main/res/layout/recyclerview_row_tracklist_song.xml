@@ -1,113 +1,75 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/trackView"
+    android:id="@+id/trackViewHolder"
     android:layout_width="match_parent"
-    android:layout_height="245dp"
-    android:foreground="?selectableItemBackground"
-    app:cardBackgroundColor="@color/colorMaterialWhite"
-    app:cardCornerRadius="4dp"
-    app:cardElevation="11dp"
-    app:cardPreventCornerOverlap="false"
-    app:cardUseCompatPadding="true">
+    android:layout_height="125dp"
+    android:background="@color/colorMaterialWhite"
+    android:foreground="?selectableItemBackground">
 
     <android.support.constraint.ConstraintLayout
-        android:id="@+id/trackViewHolder"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/colorMaterialWhite">
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:layout_editor_absoluteX="0dp">
 
-        <ImageView
-            android:id="@+id/albumArt"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
-            android:layout_marginStart="0dp"
-            android:layout_marginTop="12dp"
-            android:background="@color/colorPrimary"
-            android:elevation="15dp"
-            android:scaleType="centerCrop"
+        <TextView
+            android:id="@+id/songName"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/roboto_light"
+            android:shadowColor="@color/colorMaterialGray"
+            android:textAlignment="center"
+            android:textColor="@color/colorMaterialWhite"
+            android:textSize="16sp"
+            android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            tools:layout_editor_absoluteX="122dp" />
 
-        <android.support.constraint.ConstraintLayout
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:layout_marginBottom="0dp"
-            android:layout_marginEnd="0dp"
-            android:layout_marginStart="0dp"
+        <TextView
+            android:id="@+id/artistsName"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:background="@color/colorMaterialWhite"
-            app:layout_constraintBottom_toBottomOf="parent"
+            android:fontFamily="@font/roboto_light"
+            android:shadowColor="@color/colorMaterialGray"
+            android:textAlignment="center"
+            android:textColor="@color/colorMaterialWhite"
+            android:textSize="12sp"
+            android:textStyle="normal"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/albumArt">
+            app:layout_constraintTop_toBottomOf="@+id/songName"
+            tools:layout_editor_absoluteX="122dp" />
 
-            <TextView
-                android:id="@+id/songName"
-                android:layout_width="275dp"
-                android:layout_height="18dp"
-                android:layout_marginTop="6dp"
-                android:textAlignment="viewStart"
-                android:textColor="@color/colorMaterialWhite"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <TextView
-                android:id="@+id/artistsName"
-                android:layout_width="275dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:textAlignment="viewStart"
-                android:textColor="@color/colorMaterialWhite"
-                android:textSize="12sp"
-                android:textStyle="normal"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/songName"
-                tools:layout_editor_absoluteX="204dp" />
-
-            <TextView
-                android:id="@+id/albumName"
-                android:layout_width="275dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:textAlignment="viewStart"
-                android:textColor="@color/colorMaterialWhite"
-                android:textSize="11sp"
-                android:textStyle="normal"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/artistsName"
-                tools:layout_editor_absoluteX="204dp" />
-
-            <TextView
-                android:id="@+id/runTime"
-                android:layout_width="275dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:textAlignment="viewStart"
-                android:textColor="@color/colorMaterialWhite"
-                android:textSize="10sp"
-                android:textStyle="normal"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/albumName" />
-
-        </android.support.constraint.ConstraintLayout>
-
+        <TextView
+            android:id="@+id/runTime"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:fontFamily="@font/roboto_light"
+            android:shadowColor="@color/colorMaterialGray"
+            android:textAlignment="center"
+            android:textColor="@color/colorMaterialWhite"
+            android:textSize="10sp"
+            android:textStyle="normal"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/artistsName" />
 
     </android.support.constraint.ConstraintLayout>
 
 
-</android.support.v7.widget.CardView>
+</android.support.constraint.ConstraintLayout>
 

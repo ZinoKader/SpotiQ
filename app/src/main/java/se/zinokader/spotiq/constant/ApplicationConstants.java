@@ -4,6 +4,10 @@ public class ApplicationConstants {
 
     private ApplicationConstants() {}
 
+    /* Request codes */
+    public static final int LOGIN_INTENT_REQUEST_CODE = 5473;
+    public static final int SEARCH_INTENT_REQUEST_CODE = 3125;
+
     /* Timing-related */
     public static final int SHORT_ACTION_DELAY = 1;
     public static final int MEDIUM_ACTION_DELAY = 2;

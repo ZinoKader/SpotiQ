@@ -1,5 +1,6 @@
 package se.zinokader.spotiq.feature.party;
 
+import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.view.View;
@@ -19,6 +20,7 @@ import se.zinokader.spotiq.feature.party.partymember.PartyMemberFragment;
 import se.zinokader.spotiq.feature.party.partymember.PartyMemberFragmentBuilder;
 import se.zinokader.spotiq.feature.party.tracklist.TracklistFragment;
 import se.zinokader.spotiq.feature.party.tracklist.TracklistFragmentBuilder;
+import se.zinokader.spotiq.feature.search.SearchActivity;
 import se.zinokader.spotiq.model.User;
 import se.zinokader.spotiq.util.di.Injector;
 
@@ -51,6 +53,13 @@ public class PartyActivity extends BaseActivity implements PartyView {
         partyMemberFragment = PartyMemberFragmentBuilder.newInstance();
         partyViewPagerAdapter.addFragments(Arrays.asList(tracklistFragment, partyMemberFragment));
         binding.tabPager.setAdapter(partyViewPagerAdapter);
+
+        binding.searchTransitionSheet.setFab(binding.searchFab);
+        binding.searchFab.setOnClickListener(view -> binding.searchTransitionSheet.expandFab());
+        binding.searchTransitionSheet.setFabAnimationEndListener(() -> {
+            Intent searchActivityIntent = new Intent(this, SearchActivity.class);
+            startActivityForResult(searchActivityIntent, ApplicationConstants.SEARCH_INTENT_REQUEST_CODE);
+        });
 
         binding.bottomBar.setOnTabSelectListener(tabId -> {
             switch (tabId) {
@@ -126,6 +135,14 @@ public class PartyActivity extends BaseActivity implements PartyView {
     @Override
     public void setHostPriviliges() {
 
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == ApplicationConstants.SEARCH_INTENT_REQUEST_CODE) {
+            binding.searchTransitionSheet.contractFab();
+        }
     }
 
     @Override

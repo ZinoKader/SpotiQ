@@ -1,13 +1,11 @@
 package se.zinokader.spotiq.feature.party.tracklist;
 
-import android.graphics.Bitmap;
-import android.graphics.drawable.GradientDrawable;
+import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.drawable.GlideDrawable;
@@ -17,10 +15,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
+import jp.wasabeef.glide.transformations.BlurTransformation;
+import jp.wasabeef.glide.transformations.ColorFilterTransformation;
+import jp.wasabeef.glide.transformations.CropTransformation;
 import kaaes.spotify.webapi.android.models.ArtistSimple;
 import se.zinokader.spotiq.R;
 import se.zinokader.spotiq.model.Song;
-import se.zinokader.spotiq.util.image.ImageHelper;
 
 public class TracklistRecyclerAdapter extends RecyclerView.Adapter<TracklistRecyclerAdapter.SongHolder> {
 
@@ -40,7 +40,9 @@ public class TracklistRecyclerAdapter extends RecyclerView.Adapter<TracklistRecy
 
     @Override
     public void onBindViewHolder(SongHolder songHolder, int i) {
+
         Song song = songs.get(i);
+        Context context = songHolder.itemView.getContext();
 
         List<String> artists = new ArrayList<>();
         for (ArtistSimple artist : song.getArtists()) {
@@ -55,35 +57,22 @@ public class TracklistRecyclerAdapter extends RecyclerView.Adapter<TracklistRecy
                 TimeUnit.MILLISECONDS.toSeconds(song.getDurationMs())
                         - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(song.getDurationMs())));
 
+        songHolder.cropTransformation = new CropTransformation(context, 600, 300, CropTransformation.CropType.CENTER);
+        songHolder.blurTransformation = new BlurTransformation(context, 15, 1);
+        songHolder.colorFilterTransformation = new ColorFilterTransformation(context, R.color.colorPrimary);
+
         Glide.with(songHolder.itemView.getContext())
                 .load(song.getAlbumArt().url)
-                //.bitmapTransform(new BlurTransformation(songHolder.itemView.getContext(), 25, 4))
+                .bitmapTransform(songHolder.blurTransformation, songHolder.cropTransformation, songHolder.colorFilterTransformation)
                 .into(new SimpleTarget<GlideDrawable>() {
                     @Override
                     public void onResourceReady(GlideDrawable drawable, GlideAnimation<? super GlideDrawable> glideAnimation) {
-
-                        Bitmap imageBitmap = ImageHelper.convertToBitmap(drawable,
-                                drawable.getIntrinsicWidth(),
-                                drawable.getIntrinsicHeight());
-
-                        int startColor = ImageHelper.getDominantColor(imageBitmap);
-                        int endColor = songHolder.cardViewRoot.getSolidColor();
-
-                        int[] gradientColors = { startColor, endColor };
-                        GradientDrawable gradientDrawable = new GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM, gradientColors);
-
-                        songHolder.cardViewRoot.setBackground(gradientDrawable);
+                        songHolder.cardViewRoot.setBackground(drawable);
                     }
                 });
 
-
-        Glide.with(songHolder.itemView.getContext())
-                .load(song.getAlbumArt().url)
-                .into(songHolder.albumArt);
-
         songHolder.songName.setText(song.getName());
         songHolder.artistsName.setText(artistsName);
-        songHolder.albumName.setText(song.getAlbum().name);
         songHolder.runTime.setText(runTimeText);
     }
 
@@ -93,21 +82,21 @@ public class TracklistRecyclerAdapter extends RecyclerView.Adapter<TracklistRecy
     }
 
     public static class SongHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+        private CropTransformation cropTransformation;
+        private BlurTransformation blurTransformation;
+        private ColorFilterTransformation colorFilterTransformation;
+
         private View cardViewRoot;
-        private ImageView albumArt;
         private TextView songName;
         private TextView artistsName;
-        private TextView albumName;
         private TextView runTime;
 
         SongHolder(View view) {
             super(view);
 
             cardViewRoot = view.findViewById(R.id.trackViewHolder);
-            albumArt = view.findViewById(R.id.albumArt);
             songName = view.findViewById(R.id.songName);
             artistsName = view.findViewById(R.id.artistsName);
-            albumName = view.findViewById(R.id.albumName);
             runTime = view.findViewById(R.id.runTime);
             view.setOnClickListener(this);
         }

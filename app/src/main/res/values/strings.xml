@@ -1,10 +1,14 @@
 <resources>
     <string name="app_name">SpotiQ</string>
+
+    <!-- Login_-->
     <string name="connect_to_spotify">Connect to</string>
     <string name="spotify_log_in_success">Connected to Spotify successfully</string>
     <string name="spotify_log_in_failed">Something went wrong when connecting to Spotify</string>
     <string name="spotiq_log_in_success">Connected to SpotiQ servers</string>
     <string name="spotiq_log_in_failed">Could not connect to SpotiQ servers</string>
+
+    <!-- Lobby -->
     <string name="join_party">Join party</string>
     <string name="create_party">Create party</string>
     <string name="party_title">Party title</string>
@@ -13,6 +17,11 @@
     <string name="join_party_dialog_title">Join somebody else\'s party</string>
     <string name="submit">Submit</string>
     <string name="navigating_to_party">Loading party</string>
+
+    <!-- Search -->
+    <string name="search_hint">Search for music</string>
+
+    <!-- Transition names -->
     <string name="profile_image_transition">profileImageTransition</string>
     <string name="user_name_transition">userNameTransition</string>
 </resources>

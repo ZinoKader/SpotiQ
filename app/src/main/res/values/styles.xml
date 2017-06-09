@@ -22,7 +22,7 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
-        <item name="android:windowBackground">@color/colorPrimaryLight</item>
+        <item name="android:windowBackground">@color/colorPrimaryDark</item>
         <item name="android:colorControlActivated">@color/colorMaterialWhite</item>
         <item name="android:textCursorDrawable">@color/colorMaterialWhite</item>
     </style>

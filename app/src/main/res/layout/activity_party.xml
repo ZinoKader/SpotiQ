@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:app="http://schemas.android.com/apk/res-auto"
+<layout
+    xmlns:fab="http://schemas.android.com/apk/res-auto"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <android.support.constraint.ConstraintLayout
@@ -10,8 +12,6 @@
             android:id="@+id/toolbar"
             android:background="@color/colorPrimary"
             android:elevation="15dp"
-            android:clipChildren="false"
-            android:paddingBottom="10dp"
             app:contentInsetStart="0dp"
             android:layout_width="match_parent"
             android:layout_height="110dp"
@@ -24,7 +24,6 @@
 
             <android.support.constraint.ConstraintLayout
                 android:background="@color/colorPrimary"
-                android:elevation="15dp"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
 
@@ -35,6 +34,7 @@
                     android:layout_marginTop="28dp"
                     android:textAlignment="center"
                     android:textColor="@color/colorMaterialWhite"
+                    android:shadowColor="@color/colorMaterialGray"
                     android:textSize="18sp"
                     android:textStyle="bold"
                     app:layout_constraintEnd_toEndOf="parent"
@@ -75,12 +75,38 @@
             android:id="@+id/tabPager"
             android:layout_width="0dp"
             android:layout_height="0dp"
+            android:translationZ="-5dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/toolbar"
             android:layout_marginBottom="0dp"
             app:layout_constraintBottom_toTopOf="@+id/bottomBar" />
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/searchFab"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_queue_song"
+            android:background="?selectableItemBackground"
+            fab:borderWidth="0dp"
+            fab:fabSize="normal"
+            fab:rippleColor="@color/colorAccentDark"
+            fab:elevation="8dp"
+            fab:pressedTranslationZ="10dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginEnd="24dp"
+            android:layout_marginBottom="24dp"
+            app:layout_constraintBottom_toTopOf="@+id/bottomBar" />
+
+        <com.github.fabtransitionactivity.SheetLayout
+            android:id="@+id/searchTransitionSheet"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="bottom"
+            app:ft_container_gravity="center"
+            app:ft_color="@color/colorAccent"
+            android:elevation="100dp"/>
 
         <com.roughike.bottombar.BottomBar
             android:id="@+id/bottomBar"
@@ -96,7 +122,10 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintEnd_toEndOf="parent" />
+            app:layout_constraintEnd_toEndOf="parent" >
+
+        </com.roughike.bottombar.BottomBar>
+
 
     </android.support.constraint.ConstraintLayout>
 </layout>

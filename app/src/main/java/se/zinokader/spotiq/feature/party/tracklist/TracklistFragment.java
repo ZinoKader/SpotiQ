@@ -43,7 +43,7 @@ public class TracklistFragment extends Fragment {
 
         //Quick, lazy test. TODO: Remove this
         SpotifyApi spotifyApi = new SpotifyApi();
-        spotifyApi.setAccessToken("BQCalgjo8TZ87MEHrjDYLtAE-vrkANvQ01SxZJedDmQONkXOwu-6CFEb5-UMgJCGJ6nhtTrGtzW67gnPugiBen58KVxeZGWSmht0ot2KSJB-giKfUgLR8mRga07vg8tf-HEdbhVj7B-miKuwHsCW7qtxIBYyJh-UiF1wxxfmEH7ayssb32o");
+        spotifyApi.setAccessToken("BQCDpRDk4M4hSWVugFZJKDxcab6m4uxlH8YQGhSi2P-vvs0VF40H-TPIzneePI9aDW6XNKmidrMqEShzYhedJEW_hlpBjnqiD7w3fZvVuzr7pwY8s2z4A5f0LMAaeW8WquaQzvL90yTgjgJXzRhqg6EQLfgdMNhMoN-PsxqvH6NKJpJ_RxM");
         SpotifyService spotifyService = spotifyApi.getService();
 
         spotifyService.getTrack("3n3Ppam7vgaVa1iaRUc9Lp", new Callback<Track>() {
@@ -72,7 +72,7 @@ public class TracklistFragment extends Fragment {
             }
         });
 
-        spotifyService.getTrack("7kzKAuUzOITUauHAhoMoxA", new Callback<Track>() {
+        spotifyService.getTrack("1tjHKKI0r82IB5KL29whHs", new Callback<Track>() {
             @Override
             public void success(Track track, Response response) {
                 Song testSong = TrackMapper.trackToSong(track, "zinne97");

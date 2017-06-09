@@ -11,6 +11,7 @@ import com.spotify.sdk.android.player.ConnectionStateCallback;
 import com.spotify.sdk.android.player.Error;
 import javax.inject.Inject;
 import se.zinokader.spotiq.R;
+import se.zinokader.spotiq.constant.ApplicationConstants;
 import se.zinokader.spotiq.constant.LogTag;
 import se.zinokader.spotiq.constant.SpotifyConstants;
 import se.zinokader.spotiq.service.SpotifyCommunicatorService;
@@ -39,7 +40,7 @@ public class SpotifyAuthenticationActivity extends AppCompatActivity implements 
                 .build();
 
         AuthenticationClient.openLoginActivity(this,
-                SpotifyConstants.LOGIN_REQUEST_CODE,
+                ApplicationConstants.LOGIN_INTENT_REQUEST_CODE,
                 authRequest);
     }
 
@@ -47,7 +48,7 @@ public class SpotifyAuthenticationActivity extends AppCompatActivity implements 
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
         super.onActivityResult(requestCode, resultCode, intent);
 
-        if (requestCode == SpotifyConstants.LOGIN_REQUEST_CODE) {
+        if (requestCode == ApplicationConstants.LOGIN_INTENT_REQUEST_CODE) {
             AuthenticationResponse response = AuthenticationClient.getResponse(resultCode, intent);
             switch (response.getType()) {
                 case TOKEN:

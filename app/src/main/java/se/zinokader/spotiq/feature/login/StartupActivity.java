@@ -15,8 +15,8 @@ import android.view.animation.AccelerateDecelerateInterpolator;
 import net.grandcentrix.thirtyinch.TiPresenter;
 import net.grandcentrix.thirtyinch.plugin.TiActivityPlugin;
 import se.zinokader.spotiq.R;
+import se.zinokader.spotiq.constant.ApplicationConstants;
 import se.zinokader.spotiq.constant.LogTag;
-import se.zinokader.spotiq.constant.SpotifyConstants;
 import se.zinokader.spotiq.databinding.ActivityStartupBinding;
 import se.zinokader.spotiq.feature.base.BaseActivity;
 import se.zinokader.spotiq.feature.lobby.LobbyActivity;
@@ -64,7 +64,7 @@ public class StartupActivity extends BaseActivity implements StartupView {
 
     public void goToSpotifyAuthentication() {
         startActivityForResult(new Intent(this, SpotifyAuthenticationActivity.class),
-                SpotifyConstants.LOGIN_REQUEST_CODE);
+                ApplicationConstants.LOGIN_INTENT_REQUEST_CODE);
         overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
     }
 
@@ -123,9 +123,9 @@ public class StartupActivity extends BaseActivity implements StartupView {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode != SpotifyConstants.LOGIN_REQUEST_CODE) {
+        if (requestCode != ApplicationConstants.LOGIN_INTENT_REQUEST_CODE) {
             Log.d(LogTag.LOG_LOGIN, "Wrong request code on Spotify auth. Expected: " +
-                    SpotifyConstants.LOGIN_REQUEST_CODE + ", received: " + requestCode);
+                    ApplicationConstants.LOGIN_INTENT_REQUEST_CODE + ", received: " + requestCode);
             return;
         }
 
