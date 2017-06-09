@@ -1,11 +1,22 @@
 package se.zinokader.spotiq.util.mapper;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import kaaes.spotify.webapi.android.models.Track;
 import se.zinokader.spotiq.model.Song;
 
 public class TrackMapper {
 
     private TrackMapper() {}
+
+    public static List<Song> tracksToSongs(List<Track> tracks, String addedBySpotifyId) {
+        List<Song> songs = new ArrayList<>();
+        for (Track track : tracks) {
+            songs.add(trackToSong(track, addedBySpotifyId));
+        }
+        return songs;
+    }
 
     public static Song trackToSong(Track track, String addedBySpotifyId) {
         return new Song(addedBySpotifyId, track.id, track.artists, track.album, track.duration_ms, track.name, track.preview_url);

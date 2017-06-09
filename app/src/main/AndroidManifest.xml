@@ -33,7 +33,7 @@
             android:theme="@style/AppThemeToolBar"/>
 
         <activity android:name=".feature.search.SearchActivity"
-            android:theme="@style/AppThemeToolBar"/>
+            android:theme="@style/AppThemeToolBarSearch"/>
 
         <meta-data
             android:name="preloaded_fonts"

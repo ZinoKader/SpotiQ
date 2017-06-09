@@ -18,23 +18,17 @@
         <item name="android:textCursorDrawable">@color/colorMaterialWhite</item>
     </style>
 
-    <style name="AppThemeToolBar" parent="Theme.AppCompat.NoActionBar">
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="colorAccent">@color/colorAccent</item>
+    <style name="AppThemeToolBar" parent="AppThemeNoActionBar">
         <item name="android:windowBackground">@color/colorPrimaryDark</item>
-        <item name="android:colorControlActivated">@color/colorMaterialWhite</item>
-        <item name="android:textCursorDrawable">@color/colorMaterialWhite</item>
     </style>
 
-    <style name="FullScreenDialogStyle" parent="Theme.AppCompat.NoActionBar">
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="colorAccent">@color/colorAccent</item>
+    <style name="AppThemeToolBarSearch" parent="AppThemeToolBar">
+        <item name="android:textCursorDrawable">@null</item>
+        <item name="colorControlActivated">@color/colorAccent</item>
+    </style>
+
+    <style name="FullScreenDialogStyle" parent="AppThemeNoActionBar">
         <item name="android:windowIsFloating">false</item>
-        <item name="android:windowBackground">@color/colorAccent</item>
-        <item name="android:colorControlActivated">@color/colorMaterialWhite</item>
-        <item name="android:textCursorDrawable">@color/colorMaterialWhite</item>
     </style>
 
 </resources>
