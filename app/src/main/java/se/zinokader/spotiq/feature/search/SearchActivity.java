@@ -42,8 +42,8 @@ public class SearchActivity extends BaseActivity implements SearchView {
             }
 
             @Override
-            public void onSearch(String s) {
-
+            public void onSearch(String query) {
+                presenter.searchTracks(query);
             }
 
             @Override

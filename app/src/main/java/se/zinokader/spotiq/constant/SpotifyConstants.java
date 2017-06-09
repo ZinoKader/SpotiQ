@@ -22,5 +22,6 @@ public final class SpotifyConstants {
 
     /* Spotify Web API-related */
     public static final int SEARCH_QUERY_RESPONSE_LIMIT = 50;
+    public static final int TOTAL_ITEMS_LIMIT = 250;
 
 }
