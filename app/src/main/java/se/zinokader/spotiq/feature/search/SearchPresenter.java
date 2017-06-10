@@ -9,17 +9,16 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
 import io.reactivex.Observable;
 import io.reactivex.Observer;
-import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
 import kaaes.spotify.webapi.android.SpotifyService;
+import kaaes.spotify.webapi.android.models.Pager;
 import kaaes.spotify.webapi.android.models.Track;
+import kaaes.spotify.webapi.android.models.TracksPager;
 import se.zinokader.spotiq.constant.SpotifyConstants;
 import se.zinokader.spotiq.model.Song;
 import se.zinokader.spotiq.repository.PartiesRepository;
@@ -60,18 +59,16 @@ public class SearchPresenter extends TiPresenter<SearchView> {
         List<Track> collectedTracks = new ArrayList<>();
 
         searchTracksRecursively(query, searchOptions)
-                .debounce(600, TimeUnit.MILLISECONDS)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<List<Track>>() {
+                .concatMap(tracksPager -> Observable.fromArray(tracksPager.tracks))
+                .subscribe(new Observer<Pager<Track>>() {
                     @Override
                     public void onSubscribe(Disposable d) {
 
                     }
 
                     @Override
-                    public void onNext(List<Track> tracks) {
-                        collectedTracks.addAll(tracks);
+                    public void onNext(Pager<Track> trackPager) {
+                        collectedTracks.addAll(trackPager.items);
                     }
 
                     @Override
@@ -81,29 +78,30 @@ public class SearchPresenter extends TiPresenter<SearchView> {
 
                     @Override
                     public void onComplete() {
-                        List<Song> songs = TrackMapper.tracksToSongs(collectedTracks, "hey");
-                        Log.d("DAMN YO!", "CHECK THAT SIZE: " + songs.size());
+                        List<Song> songs = TrackMapper.tracksToSongs(collectedTracks, "zinne97");
+                        Log.d("pls work ", "pls " + songs.size());
+                        for (Song song: songs) {
+                            Log.d("SONG :", song.getName());
+                        }
                     }
                 });
 
     }
 
-    private Observable<List<Track>> searchTracksRecursively(String query, Map<String, Object> searchOptions) {
+    private Observable<TracksPager> searchTracksRecursively(String query, Map<String, Object> searchOptions) {
 
         int lastOffset = (int) searchOptions.get(SpotifyService.OFFSET);
-        Log.d("OFFSET", "OFFSET IS AT " + lastOffset);
 
         return spotifyRepository.searchTracks(query, searchOptions, spotifyCommunicatorService.getWebApi())
-                .map(tracksPager -> tracksPager.tracks)
-                .flatMap(tracks -> {
-                    if (tracks.next != null || lastOffset + tracks.limit <= SpotifyConstants.TOTAL_ITEMS_LIMIT) {
-                        searchOptions.put(SpotifyService.OFFSET, lastOffset + tracks.limit);
-                        return Observable.just(tracks.items)
-                                .concatWith(searchTracksRecursively(query, searchOptions));
+                .concatMap(tracksPager -> {
+                    if (lastOffset + tracksPager.tracks.limit >= SpotifyConstants.TOTAL_ITEMS_LIMIT) {
+                        return Observable.just(tracksPager);
                     }
-                    else {
-                        return Observable.just(tracks.items);
-                    }
+                    searchOptions.put(SpotifyService.OFFSET, lastOffset + tracksPager.tracks.limit);
+                    return Observable.just(tracksPager)
+                            .concatWith(searchTracksRecursively(query, searchOptions));
+
+
                 });
     }
 
