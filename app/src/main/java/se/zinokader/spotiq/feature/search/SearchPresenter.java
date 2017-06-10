@@ -13,11 +13,9 @@ import java.util.Map;
 import javax.inject.Inject;
 
 import io.reactivex.Observable;
-import io.reactivex.Observer;
+import io.reactivex.SingleObserver;
 import io.reactivex.disposables.Disposable;
 import kaaes.spotify.webapi.android.SpotifyService;
-import kaaes.spotify.webapi.android.models.Pager;
-import kaaes.spotify.webapi.android.models.Track;
 import kaaes.spotify.webapi.android.models.TracksPager;
 import se.zinokader.spotiq.constant.SpotifyConstants;
 import se.zinokader.spotiq.model.Song;
@@ -56,33 +54,31 @@ public class SearchPresenter extends TiPresenter<SearchView> {
         searchOptions.put(SpotifyService.LIMIT, SpotifyConstants.SEARCH_QUERY_RESPONSE_LIMIT);
         searchOptions.put(SpotifyService.OFFSET, 0);
 
-        List<Track> collectedTracks = new ArrayList<>();
-
         searchTracksRecursively(query, searchOptions)
                 .concatMap(tracksPager -> Observable.fromArray(tracksPager.tracks))
-                .subscribe(new Observer<Pager<Track>>() {
+                .map(trackPager -> TrackMapper.tracksToSongs(trackPager.items, "zinne97"))
+                .toList()
+                .map(lists -> {
+                    List<Song> joinedSongList = new ArrayList<>();
+                    for (List<Song> list : lists) {
+                        joinedSongList.addAll(list);
+                    }
+                    return joinedSongList;
+                })
+                .subscribe(new SingleObserver<List<Song>>() {
                     @Override
                     public void onSubscribe(Disposable d) {
 
                     }
 
                     @Override
-                    public void onNext(Pager<Track> trackPager) {
-                        collectedTracks.addAll(trackPager.items);
+                    public void onSuccess(List<Song> songs) {
+                        Log.d("pls work ", "pls " + songs.size());
                     }
 
                     @Override
                     public void onError(Throwable e) {
 
-                    }
-
-                    @Override
-                    public void onComplete() {
-                        List<Song> songs = TrackMapper.tracksToSongs(collectedTracks, "zinne97");
-                        Log.d("pls work ", "pls " + songs.size());
-                        for (Song song: songs) {
-                            Log.d("SONG :", song.getName());
-                        }
                     }
                 });
 
