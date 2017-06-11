@@ -45,7 +45,6 @@ public class PartyActivity extends BaseActivity implements PartyView {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        postponeEnterTransition();
         binding = DataBindingUtil.setContentView(this, R.layout.activity_party);
         partyInfo = getIntent().getExtras();
         if(partyInfo != null) {
@@ -62,6 +61,7 @@ public class PartyActivity extends BaseActivity implements PartyView {
         binding.searchFab.setOnClickListener(view -> binding.searchTransitionSheet.expandFab());
         binding.searchTransitionSheet.setFabAnimationEndListener(() -> {
             Intent searchActivityIntent = new Intent(this, SearchActivity.class);
+            searchActivityIntent.putExtras(partyInfo);
             startActivityForResult(searchActivityIntent, ApplicationConstants.SEARCH_INTENT_REQUEST_CODE);
         });
 
@@ -75,6 +75,8 @@ public class PartyActivity extends BaseActivity implements PartyView {
                     break;
             }
         });
+
+        postponeEnterTransition();
     }
 
     @Override

@@ -24,4 +24,5 @@
     <!-- Transition names -->
     <string name="profile_image_transition">profileImageTransition</string>
     <string name="user_name_transition">userNameTransition</string>
+    <string name="spotify_artists_album_separator">●</string>
 </resources>

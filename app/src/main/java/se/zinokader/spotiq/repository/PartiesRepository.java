@@ -4,6 +4,7 @@ import com.github.b3er.rxfirebase.database.ChildEvent;
 import com.github.b3er.rxfirebase.database.RxFirebaseDatabase;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseReference;
+
 import io.reactivex.Observable;
 import io.reactivex.Single;
 import se.zinokader.spotiq.constant.FirebaseConstants;
@@ -19,8 +20,10 @@ public class PartiesRepository {
     }
 
     public Observable<Boolean> createNewParty(Party party) {
-        return Observable.create(subscriber -> databaseReference.child(party.getTitle())
-                .child(FirebaseConstants.CHILD_PARTYINFO).setValue(party)
+        return Observable.create(subscriber -> databaseReference
+                .child(party.getTitle())
+                .child(FirebaseConstants.CHILD_PARTYINFO)
+                .setValue(party)
                 .addOnCompleteListener(task -> {
                     subscriber.onNext(task.isSuccessful());
                     subscriber.onComplete();
@@ -33,8 +36,11 @@ public class PartiesRepository {
     }
 
     public Observable<Boolean> addUserToParty(User user, String partyTitle) {
-        return Observable.create(subscriber -> databaseReference.child(partyTitle)
-                .child(FirebaseConstants.CHILD_USERS).child(user.getUserId()).setValue(user)
+        return Observable.create(subscriber -> databaseReference
+                .child(partyTitle)
+                .child(FirebaseConstants.CHILD_USERS)
+                .child(user.getUserId())
+                .setValue(user)
                 .addOnCompleteListener(task -> {
                     subscriber.onNext(task.isSuccessful());
                     subscriber.onComplete();
@@ -43,16 +49,16 @@ public class PartiesRepository {
     }
 
     public Observable<ChildEvent> getPartyMembers(String partyTitle) {
-        return RxFirebaseDatabase.childEvents(databaseReference.child(partyTitle)
-                .child(FirebaseConstants.CHILD_USERS));
+        return RxFirebaseDatabase.childEvents(databaseReference.child(partyTitle).child(FirebaseConstants.CHILD_USERS));
     }
 
     public Single<Boolean> isHostOfParty(String spotifyUserId, String partyTitle) {
-        return RxFirebaseDatabase.data(databaseReference.child(partyTitle)
+        return RxFirebaseDatabase.data(databaseReference
+                .child(partyTitle)
                 .child(FirebaseConstants.CHILD_PARTYINFO))
                 .map(dbPartySnapshot -> {
                     Party dbParty = dbPartySnapshot.getValue(Party.class);
-                    return dbParty.getHostSpotifyId().equals(spotifyUserId);
+                    return dbParty != null && dbParty.getHostSpotifyId().equals(spotifyUserId);
                 });
     }
 

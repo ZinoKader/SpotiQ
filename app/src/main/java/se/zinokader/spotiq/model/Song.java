@@ -1,9 +1,11 @@
 package se.zinokader.spotiq.model;
 
 import java.util.List;
+
 import kaaes.spotify.webapi.android.models.AlbumSimple;
 import kaaes.spotify.webapi.android.models.ArtistSimple;
-import kaaes.spotify.webapi.android.models.Image;
+import se.zinokader.spotiq.constant.ApplicationConstants;
+
 
 public class Song {
 
@@ -64,7 +66,9 @@ public class Song {
         return album;
     }
 
-    public Image getAlbumArt() {
-        return this.album.images.get(0);
+    public String getAlbumArtUrl() {
+        return album.images.isEmpty()
+                ? ApplicationConstants.PROFILE_IMAGE_PLACEHOLDER_URL
+                : album.images.get(0).url;
     }
 }

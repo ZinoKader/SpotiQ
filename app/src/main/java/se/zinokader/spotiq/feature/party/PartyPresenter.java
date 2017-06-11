@@ -2,8 +2,11 @@ package se.zinokader.spotiq.feature.party;
 
 import android.support.annotation.NonNull;
 import android.util.Log;
+
 import net.grandcentrix.thirtyinch.TiPresenter;
+
 import javax.inject.Inject;
+
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import se.zinokader.spotiq.constant.LogTag;
@@ -64,7 +67,6 @@ public class PartyPresenter extends TiPresenter<PartyView> {
                 });
     }
 
-    //TODO: Map magic this into the loadUser() method
     private void loadHost(String userId, String userName) {
         partiesRepository.isHostOfParty(userId, partyName)
                 .subscribeOn(Schedulers.io())

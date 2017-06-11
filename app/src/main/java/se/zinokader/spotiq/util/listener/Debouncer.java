@@ -17,35 +17,18 @@ public class Debouncer {
         startTimer(delayMs);
     }
 
-    public void cancel() {
-        cancelTimer();
-        pendingRunnable = null;
-    }
-
     private void startTimer(final long updateIntervalMs) {
+        debounceTimer = new CountDownTimer(updateIntervalMs, updateIntervalMs) {
+            @Override
+            public void onTick(long millisUntilFinished) {
+            }
 
-        if (updateIntervalMs > 0) {
-
-            // Debounce timer
-            debounceTimer = new CountDownTimer(updateIntervalMs, updateIntervalMs) {
-
-                @Override
-                public void onTick(long millisUntilFinished) {
-                    // Do nothing
-                }
-
-                @Override
-                public void onFinish() {
-                    execute();
-                }
-            };
-            debounceTimer.start();
-        }
-        else {
-
-            // Do immediately
-            execute();
-        }
+            @Override
+            public void onFinish() {
+                execute();
+            }
+        };
+        debounceTimer.start();
     }
 
     private void cancelTimer() {

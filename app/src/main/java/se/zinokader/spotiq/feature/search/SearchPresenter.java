@@ -5,6 +5,7 @@ import android.util.Log;
 
 import net.grandcentrix.thirtyinch.TiPresenter;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,9 +20,10 @@ import io.reactivex.schedulers.Schedulers;
 import kaaes.spotify.webapi.android.SpotifyService;
 import kaaes.spotify.webapi.android.models.TracksPager;
 import se.zinokader.spotiq.constant.SpotifyConstants;
+import se.zinokader.spotiq.feature.search.preview.PreviewPlayer;
 import se.zinokader.spotiq.model.Song;
-import se.zinokader.spotiq.repository.PartiesRepository;
 import se.zinokader.spotiq.repository.SpotifyRepository;
+import se.zinokader.spotiq.repository.TracklistRepository;
 import se.zinokader.spotiq.service.SpotifyCommunicatorService;
 import se.zinokader.spotiq.util.mapper.TrackMapper;
 
@@ -31,11 +33,13 @@ public class SearchPresenter extends TiPresenter<SearchView> {
     SpotifyCommunicatorService spotifyCommunicatorService;
 
     @Inject
-    PartiesRepository partiesRepository;
+    TracklistRepository tracklistRepository;
 
     @Inject
     SpotifyRepository spotifyRepository;
 
+    private PreviewPlayer songPreviewPlayer = new PreviewPlayer();
+    private String partyTitle;
     private String spotifyId;
 
     @Override
@@ -46,10 +50,48 @@ public class SearchPresenter extends TiPresenter<SearchView> {
         }
     }
 
+    void setPartyTitle(String partyTitle) {
+        this.partyTitle = partyTitle;
+    }
+
     void init() {
+        spotifyRepository.getMe(spotifyCommunicatorService.getWebApi())
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(userPrivate -> spotifyId = userPrivate.id);
+    }
+
+    @Override
+    protected void onDestroy() {
+        songPreviewPlayer.release();
+        super.onDestroy();
+    }
+
+    void startPreview(String previewUrl) {
+        songPreviewPlayer.playPreview(previewUrl);
+    }
+
+    void stopPreview() {
+        songPreviewPlayer.stopPreview();
+    }
+
+    void requestSong(Song song) {
+        tracklistRepository.addSong(song, partyTitle)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(succeeded -> {
+                    if (succeeded) {
+                        sendToView(view -> view.finishWithSuccess("Song added to the tracklist!"));
+                    }
+                    else {
+                        sendToView(view -> view.showMessage("Song could not be added to the tracklist"));
+                    }
+                });
     }
 
     void searchTracks(String query) {
+
+        sendToView(view -> view.updateSearch(new ArrayList<Song>(), true));
 
         Map<String, Object> searchOptions = new HashMap<>();
         searchOptions.put(SpotifyService.LIMIT, SpotifyConstants.SEARCH_QUERY_RESPONSE_LIMIT);
@@ -58,7 +100,7 @@ public class SearchPresenter extends TiPresenter<SearchView> {
         searchTracksRecursively(query, searchOptions)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .concatMap(tracksPager -> Observable.fromArray(TrackMapper.tracksToSongs(tracksPager.tracks.items, "zinne97")))
+                .concatMap(tracksPager -> Observable.fromArray(TrackMapper.tracksToSongs(tracksPager.tracks.items, spotifyId)))
                 .subscribe(new Observer<List<Song>>() {
                     @Override
                     public void onSubscribe(Disposable d) {
@@ -68,6 +110,7 @@ public class SearchPresenter extends TiPresenter<SearchView> {
                     @Override
                     public void onNext(List<Song> songs) {
                         Log.d("songs", "yeah " + songs.size());
+                        sendToView(view -> view.updateSearch(songs, false));
                     }
 
                     @Override

@@ -13,6 +13,7 @@ public class ApplicationConstants {
     public static final int MEDIUM_ACTION_DELAY = 2;
 
     /* Image-related */
+    public static final String ALBUM_ART_PLACEHOLDER_URL = "https://www.zinokader.se/img/spotiq-album-placeholder.png";
     public static final String PROFILE_IMAGE_PLACEHOLDER_URL = "https://www.zinokader.se/img/spotiq-profile-placeholder.png";
 
     /* Activity & Lifecycle-related */
@@ -22,6 +23,7 @@ public class ApplicationConstants {
     public static final int TAB_PARTY_MEMBERS_INDEX = 1;
 
     /* Search-related */
+    public static final String SONG_ADD_EXTRA = "song_add_extra";
     public static final int DEFAULT_DEBOUNCE_MS = 400;
 
 }
