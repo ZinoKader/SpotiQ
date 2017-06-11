@@ -5,7 +5,6 @@ import android.util.Log;
 
 import net.grandcentrix.thirtyinch.TiPresenter;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,8 +12,10 @@ import java.util.Map;
 import javax.inject.Inject;
 
 import io.reactivex.Observable;
-import io.reactivex.SingleObserver;
+import io.reactivex.Observer;
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 import kaaes.spotify.webapi.android.SpotifyService;
 import kaaes.spotify.webapi.android.models.TracksPager;
 import se.zinokader.spotiq.constant.SpotifyConstants;
@@ -55,29 +56,27 @@ public class SearchPresenter extends TiPresenter<SearchView> {
         searchOptions.put(SpotifyService.OFFSET, 0);
 
         searchTracksRecursively(query, searchOptions)
-                .concatMap(tracksPager -> Observable.fromArray(tracksPager.tracks))
-                .map(trackPager -> TrackMapper.tracksToSongs(trackPager.items, "zinne97"))
-                .toList()
-                .map(lists -> {
-                    List<Song> joinedSongList = new ArrayList<>();
-                    for (List<Song> list : lists) {
-                        joinedSongList.addAll(list);
-                    }
-                    return joinedSongList;
-                })
-                .subscribe(new SingleObserver<List<Song>>() {
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .concatMap(tracksPager -> Observable.fromArray(TrackMapper.tracksToSongs(tracksPager.tracks.items, "zinne97")))
+                .subscribe(new Observer<List<Song>>() {
                     @Override
                     public void onSubscribe(Disposable d) {
 
                     }
 
                     @Override
-                    public void onSuccess(List<Song> songs) {
-                        Log.d("pls work ", "pls " + songs.size());
+                    public void onNext(List<Song> songs) {
+                        Log.d("songs", "yeah " + songs.size());
                     }
 
                     @Override
                     public void onError(Throwable e) {
+
+                    }
+
+                    @Override
+                    public void onComplete() {
 
                     }
                 });

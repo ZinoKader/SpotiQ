@@ -7,17 +7,20 @@ import android.view.View;
 import net.grandcentrix.thirtyinch.TiPresenter;
 import net.grandcentrix.thirtyinch.plugin.TiActivityPlugin;
 
-import org.cryse.widget.persistentsearch.PersistentSearchView;
+import org.cryse.widget.persistentsearch.SimpleSearchListener;
 
 import se.zinokader.spotiq.R;
+import se.zinokader.spotiq.constant.ApplicationConstants;
 import se.zinokader.spotiq.databinding.ActivitySearchBinding;
 import se.zinokader.spotiq.feature.base.BaseActivity;
 import se.zinokader.spotiq.util.di.Injector;
+import se.zinokader.spotiq.util.listener.Debouncer;
 
 public class SearchActivity extends BaseActivity implements SearchView {
 
     ActivitySearchBinding binding;
     private SearchPresenter presenter;
+    private Debouncer debouncer = new Debouncer();
 
     public SearchActivity() {
         addPlugin(new TiActivityPlugin<>(SearchPresenter::new));
@@ -30,42 +33,13 @@ public class SearchActivity extends BaseActivity implements SearchView {
 
         binding.searchBar.openSearch();
         binding.searchBar.setHomeButtonListener(this::finish);
-        binding.searchBar.setSearchListener(new PersistentSearchView.SearchListener() {
+        binding.searchBar.setSearchListener(new SimpleSearchListener() {
             @Override
-            public void onSearchCleared() {
-
-            }
-
-            @Override
-            public void onSearchTermChanged(String s) {
-
-            }
-
-            @Override
-            public void onSearch(String query) {
-                presenter.searchTracks(query);
-            }
-
-            @Override
-            public void onSearchEditOpened() {
-
-            }
-
-            @Override
-            public void onSearchEditClosed() {
-
-            }
-
-            @Override
-            public boolean onSearchEditBackPressed() {
-                return false;
-            }
-
-            @Override
-            public void onSearchExit() {
-
+            public void onSearchTermChanged(String query) {
+                debouncer.debounce(() -> presenter.searchTracks(query), ApplicationConstants.DEFAULT_DEBOUNCE_MS);
             }
         });
+
     }
 
     @Override

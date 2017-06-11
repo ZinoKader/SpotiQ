@@ -21,4 +21,7 @@ public class ApplicationConstants {
     public static final int TAB_TRACKLIST_INDEX = 0;
     public static final int TAB_PARTY_MEMBERS_INDEX = 1;
 
+    /* Search-related */
+    public static final int DEFAULT_DEBOUNCE_MS = 400;
+
 }
