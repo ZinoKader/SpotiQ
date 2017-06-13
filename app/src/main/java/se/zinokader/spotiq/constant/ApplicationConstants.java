@@ -8,7 +8,8 @@ public class ApplicationConstants {
     public static final int LOGIN_INTENT_REQUEST_CODE = 5473;
     public static final int SEARCH_INTENT_REQUEST_CODE = 3125;
 
-    /* Timing-related */
+    /* Time and timing-related */
+    public static final int SHORT_VIBRATION_DURATION = 30;
     public static final int SHORT_ACTION_DELAY = 1;
     public static final int MEDIUM_ACTION_DELAY = 2;
 

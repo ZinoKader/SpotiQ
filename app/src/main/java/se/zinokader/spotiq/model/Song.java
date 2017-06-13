@@ -46,6 +46,10 @@ public class Song {
         this.songSpotifyId = songSpotifyId;
     }
 
+    public String getSongUri() {
+        return "spotify:track:" + songSpotifyId;
+    }
+
     public List<ArtistSimple> getArtists() {
         return artists;
     }

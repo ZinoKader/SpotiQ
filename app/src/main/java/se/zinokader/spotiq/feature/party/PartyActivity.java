@@ -3,12 +3,14 @@ package se.zinokader.spotiq.feature.party;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.view.View;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
+import com.spotify.sdk.android.player.Config;
 
 import net.grandcentrix.thirtyinch.TiPresenter;
 import net.grandcentrix.thirtyinch.plugin.TiActivityPlugin;
@@ -17,6 +19,7 @@ import java.util.Arrays;
 
 import se.zinokader.spotiq.R;
 import se.zinokader.spotiq.constant.ApplicationConstants;
+import se.zinokader.spotiq.constant.SpotifyConstants;
 import se.zinokader.spotiq.databinding.ActivityPartyBinding;
 import se.zinokader.spotiq.feature.base.BaseActivity;
 import se.zinokader.spotiq.feature.party.navigation.PartyViewPagerAdapter;
@@ -82,13 +85,13 @@ public class PartyActivity extends BaseActivity implements PartyView {
     @Override
     public void onResume() {
         super.onResume();
-        startForegroundTokenRenewalService();
+        super.startForegroundTokenRenewalService();
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        stopForegroundTokenRenewalService();
+        super.stopForegroundTokenRenewalService();
     }
 
     @Override
@@ -134,13 +137,32 @@ public class PartyActivity extends BaseActivity implements PartyView {
     }
 
     @Override
-    public void setHostDetails(String hostName) {
+    public void setHostPriviliges() {
 
     }
 
     @Override
-    public void setHostPriviliges() {
+    public void onBackPressed() {
+        new AlertDialog.Builder(this)
+                .setTitle("Confirm exit")
+                .setMessage("Are you sure you want to exit the party?")
+                .setPositiveButton("Yes", (dialogInterface, i) -> {
+                    dialogInterface.dismiss();
+                    super.onBackPressed();
+                })
+                .setNegativeButton("No", (dialogInterface, i) -> dialogInterface.dismiss())
+                .create()
+                .show();
+    }
 
+    @Override
+    public Config setupPlayerConfig(String accessToken) {
+        return new Config(this, accessToken, SpotifyConstants.CLIENT_ID);
+    }
+
+    @Override
+    public View getRootView() {
+        return binding.getRoot();
     }
 
     @Override
@@ -150,10 +172,5 @@ public class PartyActivity extends BaseActivity implements PartyView {
             binding.searchTransitionSheet.contractFab();
 
         }
-    }
-
-    @Override
-    public View getRootView() {
-        return binding.getRoot();
     }
 }

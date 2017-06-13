@@ -36,8 +36,6 @@ public class SearchRecyclerAdapter extends RecyclerView.Adapter<SearchRecyclerAd
         View inflatedView = LayoutInflater.from(viewGroup.getContext())
                 .inflate(R.layout.recyclerview_row_search_song, viewGroup, false);
         inflatedView.getLayoutParams().width = viewGroup.getWidth();
-
-
         return new SongHolder(inflatedView);
     }
 
@@ -70,10 +68,21 @@ public class SearchRecyclerAdapter extends RecyclerView.Adapter<SearchRecyclerAd
 
         String artistsName = TextUtils.join(", ", artists);
 
-        Glide.with(context).load(song.getAlbumArtUrl()).into(songHolder.albumArt);
+        Glide.with(context).load(song.getAlbumArtUrl())
+                .fitCenter()
+                .into(songHolder.albumArt);
         songHolder.songName.setText(song.getName());
         songHolder.artistsName.setText(artistsName);
         songHolder.albumName.setText(song.getAlbum().name);
+    }
+
+    @Override
+    public void onViewRecycled(SongHolder songHolder) {
+        if(songHolder != null) {
+            songHolder.albumArt.setImageDrawable(null);
+            Glide.clear(songHolder.albumArt);
+        }
+        super.onViewRecycled(songHolder);
     }
 
     public void addSongs(List<Song> songs) {

@@ -7,5 +7,4 @@ import se.zinokader.spotiq.model.Song;
 
 public interface SearchView extends BaseView {
     void updateSearch(List<Song> songs, boolean shouldClear);
-    void finishWithSuccess(String message);
 }

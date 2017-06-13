@@ -2,9 +2,13 @@ package se.zinokader.spotiq.feature.lobby;
 
 import android.support.annotation.NonNull;
 import android.util.Log;
+
 import net.grandcentrix.thirtyinch.TiPresenter;
+
 import java.util.concurrent.TimeUnit;
+
 import javax.inject.Inject;
+
 import io.reactivex.Observable;
 import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -143,9 +147,10 @@ public class LobbyPresenter extends TiPresenter<LobbyView> {
                     }
                     else {
                         User user = new User(spotifyUser.id, spotifyUser.display_name, spotifyUser.images);
+                        party.setCreatedNowTimeStamp();
+                        party.setHostSpotifyId(user.getUserId());
                         user.setJoinedNowTimeStamp();
                         user.setHasHostPriviliges();
-                        party.setHostSpotifyId(user.getUserId());
                         return new UserPartyInformation(user, party);
                     }
                 })

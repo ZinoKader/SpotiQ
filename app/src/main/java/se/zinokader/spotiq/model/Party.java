@@ -1,10 +1,13 @@
 package se.zinokader.spotiq.model;
 
+import org.threeten.bp.LocalDateTime;
+
 public class Party {
 
     private String title;
     private String password;
     private String hostSpotifyId;
+    private String createdTimeStamp;
 
     public Party() {}
 
@@ -33,4 +36,11 @@ public class Party {
         this.hostSpotifyId = hostSpotifyId;
     }
 
+    public String getCreatedTimeStamp() {
+        return createdTimeStamp;
+    }
+
+    public void setCreatedNowTimeStamp() {
+        this.createdTimeStamp = LocalDateTime.now().toString();
+    }
 }

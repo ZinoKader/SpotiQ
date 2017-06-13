@@ -1,7 +1,9 @@
 package se.zinokader.spotiq.feature.search;
 
+import android.content.Context;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
+import android.os.Vibrator;
 import android.support.design.widget.Snackbar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.view.MotionEvent;
@@ -32,6 +34,7 @@ public class SearchActivity extends BaseActivity implements SearchView {
     private Bundle partyInfo;
     private SearchPresenter presenter;
     private SearchRecyclerAdapter searchRecyclerAdapter;
+    private Vibrator vibrator;
     private Debouncer debouncer = new Debouncer();
 
     public SearchActivity() {
@@ -42,9 +45,11 @@ public class SearchActivity extends BaseActivity implements SearchView {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_search);
+        vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         partyInfo = getIntent().getExtras();
 
         searchRecyclerAdapter = new SearchRecyclerAdapter();
+        binding.songSearchRecyclerView.setHasFixedSize(true);
         binding.songSearchRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         binding.songSearchRecyclerView.setAdapter(searchRecyclerAdapter);
 
@@ -64,6 +69,7 @@ public class SearchActivity extends BaseActivity implements SearchView {
         searchRecyclerAdapter.observeLongClicks()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(song -> {
+                    vibrator.vibrate(ApplicationConstants.SHORT_VIBRATION_DURATION);
                     if (song.getPreviewUrl() != null) {
                         presenter.startPreview(song.getPreviewUrl());
                     }
@@ -102,16 +108,6 @@ public class SearchActivity extends BaseActivity implements SearchView {
     }
 
     @Override
-    public void finishWithSuccess(String message) {
-        new SnackbarBuilder(getRootView())
-                .duration(Snackbar.LENGTH_SHORT)
-                .message(message)
-                .timeoutDismissCallback(dismissed -> finish())
-                .build()
-                .show();
-    }
-
-    @Override
     public void updateSearch(List<Song> songs, boolean shouldClear) {
         if (shouldClear) searchRecyclerAdapter.clearSongs();
         searchRecyclerAdapter.addSongs(songs);
@@ -121,13 +117,13 @@ public class SearchActivity extends BaseActivity implements SearchView {
     @Override
     public void onResume() {
         super.onResume();
-        startForegroundTokenRenewalService();
+        super.startForegroundTokenRenewalService();
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        stopForegroundTokenRenewalService();
+        super.stopForegroundTokenRenewalService();
     }
 
     @Override
@@ -144,6 +140,7 @@ public class SearchActivity extends BaseActivity implements SearchView {
     public boolean isPresenterAttached() {
         return presenter != null;
     }
+
     @Override
     public View getRootView() {
         return binding.getRoot();

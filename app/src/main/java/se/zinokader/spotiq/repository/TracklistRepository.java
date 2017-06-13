@@ -18,7 +18,7 @@ public class TracklistRepository {
         return Observable.create(subscriber -> databaseReference
                 .child(partyTitle)
                 .child(FirebaseConstants.CHILD_TRACKLIST)
-                .push()
+                .push() //push is timestamp-based, items are chronologically ordered
                 .setValue(song)
                 .addOnCompleteListener(task -> {
                     subscriber.onNext(task.isSuccessful());

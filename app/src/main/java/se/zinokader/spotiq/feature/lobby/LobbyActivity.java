@@ -14,10 +14,13 @@ import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.view.Window;
 import android.view.animation.AccelerateDecelerateInterpolator;
+
 import com.bumptech.glide.Glide;
 import com.rengwuxian.materialedittext.MaterialEditText;
+
 import net.grandcentrix.thirtyinch.TiPresenter;
 import net.grandcentrix.thirtyinch.plugin.TiActivityPlugin;
+
 import se.zinokader.spotiq.R;
 import se.zinokader.spotiq.constant.ApplicationConstants;
 import se.zinokader.spotiq.databinding.ActivityLobbyBinding;
@@ -47,13 +50,13 @@ public class LobbyActivity extends BaseActivity implements LobbyView {
     @Override
     public void onResume() {
         super.onResume();
-        startForegroundTokenRenewalService();
+        super.startForegroundTokenRenewalService();
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        stopForegroundTokenRenewalService();
+        super.stopForegroundTokenRenewalService();
     }
 
     @Override

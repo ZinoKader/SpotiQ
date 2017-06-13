@@ -1,13 +1,15 @@
 package se.zinokader.spotiq.feature.login;
 
 import android.support.annotation.NonNull;
-import com.github.b3er.rxfirebase.auth.RxFirebaseAuth;
+
 import com.google.firebase.auth.FirebaseAuth;
+
 import net.grandcentrix.thirtyinch.TiPresenter;
+
 import java.util.concurrent.TimeUnit;
+
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.schedulers.Schedulers;
 import se.zinokader.spotiq.constant.ApplicationConstants;
 
 
@@ -22,17 +24,15 @@ public class StartupPresenter extends TiPresenter<StartupView> {
     }
 
     void logIn() {
-        RxFirebaseAuth.signInAnonymously(FirebaseAuth.getInstance())
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(success -> {
-                            sendToView(view -> view.showMessage("Connected to SpotiQ servers"));
-                            sendToView(StartupView::startProgress);
-                            Observable.just(ApplicationConstants.SHORT_ACTION_DELAY)
-                                    .delay(ApplicationConstants.SHORT_ACTION_DELAY, TimeUnit.SECONDS)
-                                    .subscribe( delay -> sendToView(StartupView::goToSpotifyAuthentication));
-                        },
-                        failed -> sendToView(view -> view.showMessage("Could not connect to SpotiQ servers")));
+        FirebaseAuth.getInstance().signInAnonymously()
+                .addOnSuccessListener(authResult -> {
+                    sendToView(view -> view.showMessage("Connected to SpotiQ servers"));
+                    sendToView(StartupView::startProgress);
+                    Observable.just(ApplicationConstants.SHORT_ACTION_DELAY)
+                            .delay(ApplicationConstants.SHORT_ACTION_DELAY, TimeUnit.SECONDS)
+                            .subscribe(delay -> sendToView(StartupView::goToSpotifyAuthentication));
+                })
+                .addOnFailureListener(exception -> sendToView(view -> view.showMessage("Could not connect to SpotiQ servers")));
     }
 
     void logInFinished() {
@@ -44,7 +44,7 @@ public class StartupPresenter extends TiPresenter<StartupView> {
                     sendToView(view -> view.showMessage("Connected to Spotify successfully"));
                 })
                 .delay(ApplicationConstants.MEDIUM_ACTION_DELAY, TimeUnit.SECONDS, AndroidSchedulers.mainThread())
-                .subscribe( success -> sendToView(StartupView::goToLobby));
+                .subscribe(success -> sendToView(StartupView::goToLobby));
     }
 
     void logInFailed() {
