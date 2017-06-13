@@ -8,11 +8,14 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
 import com.dilpreet2028.fragmenter_annotations.Fragmenter;
 import com.dilpreet2028.fragmenter_annotations.annotations.FragModule;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
 import se.zinokader.spotiq.R;
 import se.zinokader.spotiq.databinding.FragmentPartyMembersBinding;
 import se.zinokader.spotiq.model.User;
@@ -43,6 +46,15 @@ public class PartyMemberFragment extends Fragment {
         partyMembers.add(partyMember);
         Collections.sort(partyMembers, PartyMemberComparator.getByJoinedTimeComparator());
         partyMemberRecyclerAdapter.notifyDataSetChanged();
+    }
+
+    public void changePartyMember(User changedPartyMember) {
+        for (User existingPartyMember : partyMembers) {
+            if (existingPartyMember.getUserId().equals(changedPartyMember.getUserId())) {
+                partyMembers.remove(existingPartyMember);
+                addMember(changedPartyMember);
+            }
+        }
     }
 
 }

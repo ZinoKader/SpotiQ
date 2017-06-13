@@ -14,15 +14,20 @@ import com.spotify.sdk.android.player.SpotifyPlayer;
 
 import net.grandcentrix.thirtyinch.TiPresenter;
 
+import java.util.concurrent.TimeUnit;
+
 import javax.inject.Inject;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
+import se.zinokader.spotiq.constant.ApplicationConstants;
 import se.zinokader.spotiq.constant.LogTag;
 import se.zinokader.spotiq.model.ChildEvent;
+import se.zinokader.spotiq.model.Song;
 import se.zinokader.spotiq.model.User;
 import se.zinokader.spotiq.repository.PartiesRepository;
 import se.zinokader.spotiq.repository.SpotifyRepository;
+import se.zinokader.spotiq.repository.TracklistRepository;
 import se.zinokader.spotiq.service.SpotifyCommunicatorService;
 
 public class PartyPresenter extends TiPresenter<PartyView> implements ConnectionStateCallback, Player.NotificationCallback {
@@ -34,10 +39,13 @@ public class PartyPresenter extends TiPresenter<PartyView> implements Connection
     PartiesRepository partiesRepository;
 
     @Inject
+    TracklistRepository tracklistRepository;
+
+    @Inject
     SpotifyRepository spotifyRepository;
 
     private SpotifyPlayer spotifyPlayer;
-    private String partyName;
+    private String partyTitle;
 
     @Override
     protected void onAttachView(@NonNull PartyView view) {
@@ -48,7 +56,8 @@ public class PartyPresenter extends TiPresenter<PartyView> implements Connection
     }
 
     void init() {
-        loadParty();
+        loadPartyListener();
+        loadTracklistListener();
         loadUser();
     }
 
@@ -58,18 +67,38 @@ public class PartyPresenter extends TiPresenter<PartyView> implements Connection
         super.onDestroy();
     }
 
-    void setPartyName(String partyName) {
-        this.partyName = partyName;
+    void setPartyTitle(String partyTitle) {
+        this.partyTitle = partyTitle;
     }
 
-    private void loadParty() {
-        partiesRepository.getPartyMembers(partyName)
+    private void loadPartyListener() {
+        partiesRepository.listenToPartyMemberChanges(partyTitle)
+                .delay(ApplicationConstants.DEFAULT_DELAY_MS, TimeUnit.MILLISECONDS)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(childEvent -> {
+                    User partyMember = childEvent.getDataSnapshot().getValue(User.class);
+                    switch (childEvent.getChangeType()) {
+                        case ADDED:
+                            sendToView(view -> view.addPartyMember(partyMember));
+                            break;
+                        case CHANGED:
+                            Log.d("changed", "changggggeeed");
+                            sendToView(view -> view.changePartyMember(partyMember));
+                            break;
+                    }
+                });
+    }
+
+    private void loadTracklistListener() {
+        tracklistRepository.listenToTracklistChanges(partyTitle)
+                .delay(ApplicationConstants.DEFAULT_DELAY_MS, TimeUnit.MILLISECONDS)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(childEvent -> {
                     if (childEvent.getChangeType().equals(ChildEvent.Type.ADDED)) {
-                        User partyMember = childEvent.getDataSnapshot().getValue(User.class);
-                        sendToView(view -> view.addPartyMember(partyMember));
+                        Song song = childEvent.getDataSnapshot().getValue(Song.class);
+                        sendToView(view -> view.addSong(song));
                     }
                 });
     }
@@ -86,7 +115,7 @@ public class PartyPresenter extends TiPresenter<PartyView> implements Connection
     }
 
     private void loadHost(String userId) {
-        partiesRepository.isHostOfParty(userId, partyName)
+        partiesRepository.isHostOfParty(userId, partyTitle)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(userIsHost -> {

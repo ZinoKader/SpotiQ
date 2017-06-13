@@ -1,5 +1,7 @@
 package se.zinokader.spotiq.model;
 
+import com.google.firebase.database.Exclude;
+
 import java.util.List;
 
 import kaaes.spotify.webapi.android.models.AlbumSimple;
@@ -23,8 +25,8 @@ public class Song {
     public Song(String addedBySpotifyId, String songSpotifyId, List<ArtistSimple> artists, AlbumSimple album, long durationMs, String name, String previewUrl) {
         this.addedBySpotifyId = addedBySpotifyId;
         this.songSpotifyId = songSpotifyId;
-        this.album = album;
         this.artists = artists;
+        this.album = album;
         this.durationMs = durationMs;
         this.name = name;
         this.previewUrl = previewUrl;
@@ -44,10 +46,6 @@ public class Song {
 
     public void setSongSpotifyId(String songSpotifyId) {
         this.songSpotifyId = songSpotifyId;
-    }
-
-    public String getSongUri() {
-        return "spotify:track:" + songSpotifyId;
     }
 
     public List<ArtistSimple> getArtists() {
@@ -70,6 +68,12 @@ public class Song {
         return album;
     }
 
+    @Exclude
+    public String getSongUri() {
+        return "spotify:track:" + songSpotifyId;
+    }
+
+    @Exclude
     public String getAlbumArtUrl() {
         return album.images.isEmpty()
                 ? ApplicationConstants.PROFILE_IMAGE_PLACEHOLDER_URL

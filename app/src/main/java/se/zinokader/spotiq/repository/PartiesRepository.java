@@ -4,6 +4,8 @@ import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.MutableData;
+import com.google.firebase.database.Transaction;
 import com.google.firebase.database.ValueEventListener;
 
 import io.reactivex.Observable;
@@ -62,33 +64,61 @@ public class PartiesRepository {
                 .addOnFailureListener(subscriber::onError));
     }
 
-    public Observable<ChildEvent> getPartyMembers(String partyTitle) {
-        return Observable.create(subscriber -> databaseReference.child(partyTitle).child(FirebaseConstants.CHILD_USERS).addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String previousChildName) {
-                subscriber.onNext(new ChildEvent(dataSnapshot, ChildEvent.Type.ADDED, previousChildName));
-            }
+    public void incrementUserSongRequestCount(User user, String partyTitle) {
+        databaseReference
+                .child(partyTitle)
+                .child(FirebaseConstants.CHILD_USERS)
+                .child(user.getUserId())
+                .child(FirebaseConstants.CHILD_USER_SONGS_REQUESTED)
+                .runTransaction(new Transaction.Handler() {
+                    @Override
+                    public Transaction.Result doTransaction(MutableData currentData) {
+                        if (currentData.getValue() == null) {
+                            currentData.setValue(1);
+                        }
+                        else {
+                            currentData.setValue((Long) currentData.getValue() + 1);
+                        }
+                        return Transaction.success(currentData);
+                    }
 
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String previousChildName) {
-                subscriber.onNext(new ChildEvent(dataSnapshot, ChildEvent.Type.CHANGED, previousChildName));
-            }
+                    @Override
+                    public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
 
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-                subscriber.onNext(new ChildEvent(dataSnapshot, ChildEvent.Type.REMOVED));
-            }
+                    }
+                });
+    }
 
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String previousChildName) {
-                subscriber.onNext(new ChildEvent(dataSnapshot, ChildEvent.Type.MOVED, previousChildName));
-            }
+    public Observable<ChildEvent> listenToPartyMemberChanges(String partyTitle) {
+        return Observable.create(subscriber -> databaseReference
+                .child(partyTitle)
+                .child(FirebaseConstants.CHILD_USERS)
+                .addChildEventListener(new ChildEventListener() {
+                    @Override
+                    public void onChildAdded(DataSnapshot dataSnapshot, String previousChildName) {
+                        subscriber.onNext(new ChildEvent(dataSnapshot, ChildEvent.Type.ADDED, previousChildName));
+                    }
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                subscriber.onError(databaseError.toException());
-            }
-        }));
+                    @Override
+                    public void onChildChanged(DataSnapshot dataSnapshot, String previousChildName) {
+                        subscriber.onNext(new ChildEvent(dataSnapshot, ChildEvent.Type.CHANGED, previousChildName));
+                    }
+
+                    @Override
+                    public void onChildRemoved(DataSnapshot dataSnapshot) {
+                        subscriber.onNext(new ChildEvent(dataSnapshot, ChildEvent.Type.REMOVED));
+                    }
+
+                    @Override
+                    public void onChildMoved(DataSnapshot dataSnapshot, String previousChildName) {
+                        subscriber.onNext(new ChildEvent(dataSnapshot, ChildEvent.Type.MOVED, previousChildName));
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                        subscriber.onError(databaseError.toException());
+                    }
+                }));
     }
 
     public Single<Boolean> isHostOfParty(String spotifyUserId, String partyTitle) {

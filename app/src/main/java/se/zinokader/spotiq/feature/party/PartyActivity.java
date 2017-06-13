@@ -28,6 +28,7 @@ import se.zinokader.spotiq.feature.party.partymember.PartyMemberFragmentBuilder;
 import se.zinokader.spotiq.feature.party.tracklist.TracklistFragment;
 import se.zinokader.spotiq.feature.party.tracklist.TracklistFragmentBuilder;
 import se.zinokader.spotiq.feature.search.SearchActivity;
+import se.zinokader.spotiq.model.Song;
 import se.zinokader.spotiq.model.User;
 import se.zinokader.spotiq.util.di.Injector;
 
@@ -49,14 +50,16 @@ public class PartyActivity extends BaseActivity implements PartyView {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_party);
+        postponeEnterTransition();
         partyInfo = getIntent().getExtras();
-        if(partyInfo != null) {
+        if (partyInfo != null) {
             binding.partyTitle.setText(partyInfo.getString(ApplicationConstants.PARTY_NAME_EXTRA));
         }
 
         partyViewPagerAdapter = new PartyViewPagerAdapter(getSupportFragmentManager());
         tracklistFragment = TracklistFragmentBuilder.newInstance();
         partyMemberFragment = PartyMemberFragmentBuilder.newInstance();
+
         partyViewPagerAdapter.addFragments(Arrays.asList(tracklistFragment, partyMemberFragment));
         binding.tabPager.setAdapter(partyViewPagerAdapter);
 
@@ -79,7 +82,6 @@ public class PartyActivity extends BaseActivity implements PartyView {
             }
         });
 
-        postponeEnterTransition();
     }
 
     @Override
@@ -98,7 +100,7 @@ public class PartyActivity extends BaseActivity implements PartyView {
     public void setPresenter(TiPresenter presenter) {
         this.presenter = (PartyPresenter) presenter;
         ((Injector) getApplication()).inject(presenter);
-        this.presenter.setPartyName(partyInfo.getString(ApplicationConstants.PARTY_NAME_EXTRA));
+        this.presenter.setPartyTitle(partyInfo.getString(ApplicationConstants.PARTY_NAME_EXTRA));
         this.presenter.init();
     }
 
@@ -132,8 +134,18 @@ public class PartyActivity extends BaseActivity implements PartyView {
     }
 
     @Override
-    public void addPartyMember(User member) {
-        partyMemberFragment.addMember(member);
+    public void addSong(Song song) {
+        tracklistFragment.addSong(song);
+    }
+
+    @Override
+    public void addPartyMember(User partyMember) {
+        partyMemberFragment.addMember(partyMember);
+    }
+
+    @Override
+    public void changePartyMember(User partyMember) {
+        partyMemberFragment.changePartyMember(partyMember);
     }
 
     @Override

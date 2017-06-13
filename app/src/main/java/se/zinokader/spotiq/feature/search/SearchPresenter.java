@@ -22,6 +22,8 @@ import kaaes.spotify.webapi.android.models.TracksPager;
 import se.zinokader.spotiq.constant.SpotifyConstants;
 import se.zinokader.spotiq.feature.search.preview.PreviewPlayer;
 import se.zinokader.spotiq.model.Song;
+import se.zinokader.spotiq.model.User;
+import se.zinokader.spotiq.repository.PartiesRepository;
 import se.zinokader.spotiq.repository.SpotifyRepository;
 import se.zinokader.spotiq.repository.TracklistRepository;
 import se.zinokader.spotiq.service.SpotifyCommunicatorService;
@@ -33,6 +35,9 @@ public class SearchPresenter extends TiPresenter<SearchView> {
     SpotifyCommunicatorService spotifyCommunicatorService;
 
     @Inject
+    PartiesRepository partiesRepository;
+
+    @Inject
     TracklistRepository tracklistRepository;
 
     @Inject
@@ -40,7 +45,7 @@ public class SearchPresenter extends TiPresenter<SearchView> {
 
     private PreviewPlayer songPreviewPlayer = new PreviewPlayer();
     private String partyTitle;
-    private String spotifyId;
+    private User me;
 
     @Override
     protected void onAttachView(@NonNull SearchView view) {
@@ -58,7 +63,7 @@ public class SearchPresenter extends TiPresenter<SearchView> {
         spotifyRepository.getMe(spotifyCommunicatorService.getWebApi())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(userPrivate -> spotifyId = userPrivate.id);
+                .subscribe(userPrivate -> me = new User(userPrivate.id, userPrivate.display_name, userPrivate.images));
     }
 
     @Override
@@ -82,6 +87,7 @@ public class SearchPresenter extends TiPresenter<SearchView> {
                 .subscribe(succeeded -> {
                     if (succeeded) {
                         sendToView(view -> view.finishWithSuccess("Song added to the tracklist!"));
+                        partiesRepository.incrementUserSongRequestCount(me, partyTitle);
                     }
                     else {
                         sendToView(view -> view.showMessage("Song could not be added to the tracklist"));
@@ -100,7 +106,7 @@ public class SearchPresenter extends TiPresenter<SearchView> {
         searchTracksRecursively(query, searchOptions)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .concatMap(tracksPager -> Observable.fromArray(TrackMapper.tracksToSongs(tracksPager.tracks.items, spotifyId)))
+                .concatMap(tracksPager -> Observable.fromArray(TrackMapper.tracksToSongs(tracksPager.tracks.items, me.getUserId())))
                 .subscribe(new Observer<List<Song>>() {
                     @Override
                     public void onSubscribe(Disposable d) {
