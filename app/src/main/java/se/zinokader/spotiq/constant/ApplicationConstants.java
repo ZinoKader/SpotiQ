@@ -16,6 +16,9 @@ public class ApplicationConstants {
     /* Image-related */
     public static final String ALBUM_ART_PLACEHOLDER_URL = "https://www.zinokader.se/img/spotiq-album-placeholder.png";
     public static final String PROFILE_IMAGE_PLACEHOLDER_URL = "https://www.zinokader.se/img/spotiq-profile-placeholder.png";
+    public static final int DEFAULT_TRACKLIST_CROP_WIDTH = 600;
+    public static final int DEFAULT_TRACKLIST_CROP_HEIGHT = 200;
+    public static final int DEFAULT_TRACKLIST_BLUR_RADIUS = 100;
 
     /* Activity & Lifecycle-related */
     //Party-related

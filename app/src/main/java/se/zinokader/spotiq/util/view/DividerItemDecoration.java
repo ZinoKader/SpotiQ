@@ -1,4 +1,4 @@
-package se.zinokader.spotiq.feature.party.partymember;
+package se.zinokader.spotiq.util.view;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;

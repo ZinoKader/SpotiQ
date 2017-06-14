@@ -68,7 +68,8 @@ public class SearchRecyclerAdapter extends RecyclerView.Adapter<SearchRecyclerAd
 
         String artistsName = TextUtils.join(", ", artists);
 
-        Glide.with(context).load(song.getAlbumArtUrl())
+        Glide.with(context)
+                .load(song.getAlbumArtUrl())
                 .fitCenter()
                 .into(songHolder.albumArt);
         songHolder.songName.setText(song.getName());

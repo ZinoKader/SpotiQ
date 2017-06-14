@@ -6,6 +6,7 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
@@ -23,28 +24,33 @@ import jp.wasabeef.glide.transformations.ColorFilterTransformation;
 import jp.wasabeef.glide.transformations.CropTransformation;
 import kaaes.spotify.webapi.android.models.ArtistSimple;
 import se.zinokader.spotiq.R;
+import se.zinokader.spotiq.constant.ApplicationConstants;
 import se.zinokader.spotiq.model.Song;
 
-public class TracklistRecyclerAdapter extends RecyclerView.Adapter<TracklistRecyclerAdapter.SongHolder> {
+public class UpNextRecyclerAdapter extends RecyclerView.Adapter<UpNextRecyclerAdapter.SongHolder> {
 
     private List<Song> songs;
 
-    TracklistRecyclerAdapter(List<Song> songs) {
+    UpNextRecyclerAdapter(List<Song> songs) {
         this.songs = songs;
     }
 
     @Override
     public SongHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
         View inflatedView = LayoutInflater.from(viewGroup.getContext())
-                .inflate(R.layout.recyclerview_row_tracklist_song, viewGroup, false);
+                .inflate(R.layout.recyclerview_row_tracklist_upnext, viewGroup, false);
         inflatedView.getLayoutParams().width = viewGroup.getWidth();
         return new SongHolder(inflatedView);
     }
 
     @Override
-    public void onBindViewHolder(SongHolder songHolder, int i) {
+    public void onBindViewHolder(SongHolder songHolder, int position) {
 
-        Song song = songs.get(i);
+        if (position >= 0) {
+            position += 1;
+        }
+
+        Song song = songs.get(position);
         Context context = songHolder.itemView.getContext();
 
         List<String> artists = new ArrayList<>();
@@ -60,8 +66,11 @@ public class TracklistRecyclerAdapter extends RecyclerView.Adapter<TracklistRecy
                 TimeUnit.MILLISECONDS.toSeconds(song.getDurationMs())
                         - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(song.getDurationMs())));
 
-        songHolder.cropTransformation = new CropTransformation(context, 600, 300, CropTransformation.CropType.CENTER);
-        songHolder.blurTransformation = new BlurTransformation(context, 15, 1);
+        songHolder.cropTransformation = new CropTransformation(context,
+                ApplicationConstants.DEFAULT_TRACKLIST_CROP_WIDTH,
+                ApplicationConstants.DEFAULT_TRACKLIST_CROP_HEIGHT,
+                CropTransformation.CropType.CENTER);
+        songHolder.blurTransformation = new BlurTransformation(context, ApplicationConstants.DEFAULT_TRACKLIST_BLUR_RADIUS);
         songHolder.colorFilterTransformation = new ColorFilterTransformation(context, R.color.colorPrimary);
 
         Glide.with(songHolder.itemView.getContext())
@@ -74,39 +83,45 @@ public class TracklistRecyclerAdapter extends RecyclerView.Adapter<TracklistRecy
                     }
                 });
 
+        Glide.with(context)
+                .load(song.getAlbumArtUrl())
+                .fitCenter()
+                .into(songHolder.albumArt);
+
         songHolder.songName.setText(song.getName());
         songHolder.artistsName.setText(artistsName);
         songHolder.runTime.setText(runTimeText);
+        songHolder.albumName.setText(song.getAlbum().name);
     }
 
     @Override
     public int getItemCount() {
-        return songs.size();
+        return songs.size() > 1 ? songs.size() - 1 : 0; //handle all items except the first one
     }
 
-    public static class SongHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    class SongHolder extends RecyclerView.ViewHolder {
         private CropTransformation cropTransformation;
         private BlurTransformation blurTransformation;
         private ColorFilterTransformation colorFilterTransformation;
 
         private View cardViewRoot;
+        private ImageView albumArt;
         private TextView songName;
         private TextView artistsName;
+        private TextView albumName;
         private TextView runTime;
 
         SongHolder(View view) {
             super(view);
 
             cardViewRoot = view.findViewById(R.id.trackViewHolder);
+            albumArt = view.findViewById(R.id.albumArt);
             songName = view.findViewById(R.id.songName);
             artistsName = view.findViewById(R.id.artistsName);
+            albumName = view.findViewById(R.id.albumName);
             runTime = view.findViewById(R.id.runTime);
-            view.setOnClickListener(this);
         }
 
-        @Override
-        public void onClick(View v) {
-        }
     }
 
 }

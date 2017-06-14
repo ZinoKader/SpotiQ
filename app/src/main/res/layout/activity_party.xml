@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout
-    xmlns:fab="http://schemas.android.com/apk/res-auto"
+<layout xmlns:fab="http://schemas.android.com/apk/res-auto"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:clipChildren="false">
 
         <android.support.v7.widget.Toolbar
             android:id="@+id/toolbar"
@@ -20,18 +20,20 @@
             app:layout_constraintStart_toStartOf="parent"
             android:layout_marginStart="0dp"
             android:layout_marginEnd="0dp"
-            app:layout_constraintEnd_toEndOf="parent">
+            app:layout_constraintEnd_toEndOf="parent"
+            android:clipChildren="false">
 
             <android.support.constraint.ConstraintLayout
                 android:background="@color/colorPrimary"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="match_parent"
+                android:clipChildren="false">
 
                 <TextView
                     android:id="@+id/partyTitle"
                     android:layout_width="160dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="28dp"
+                    android:layout_marginTop="34dp"
                     android:textAlignment="center"
                     android:textColor="@color/colorMaterialWhite"
                     android:shadowColor="@color/colorMaterialGray"
@@ -67,6 +69,7 @@
                     app:layout_constraintStart_toStartOf="parent"
                     android:layout_marginStart="0dp" />
 
+
             </android.support.constraint.ConstraintLayout>
 
         </android.support.v7.widget.Toolbar>
@@ -99,15 +102,6 @@
             android:layout_marginBottom="24dp"
             app:layout_constraintBottom_toTopOf="@+id/bottomBar" />
 
-        <com.github.fabtransitionactivity.SheetLayout
-            android:id="@+id/searchTransitionSheet"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_gravity="bottom"
-            app:ft_container_gravity="center"
-            app:ft_color="@color/colorAccent"
-            android:elevation="100dp"/>
-
         <com.roughike.bottombar.BottomBar
             android:id="@+id/bottomBar"
             android:layout_width="match_parent"
@@ -125,6 +119,22 @@
             app:layout_constraintEnd_toEndOf="parent" >
 
         </com.roughike.bottombar.BottomBar>
+
+        <com.github.fabtransitionactivity.SheetLayout
+            android:id="@+id/searchTransitionSheet"
+            android:clickable="false"
+            android:focusable="false"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="bottom"
+            android:layout_marginTop="0dp"
+            android:elevation="100dp"
+            app:ft_color="@color/colorAccent"
+            app:ft_container_gravity="center"
+            fab:layout_constraintEnd_toEndOf="parent"
+            fab:layout_constraintHorizontal_bias="0.5"
+            fab:layout_constraintStart_toStartOf="parent"
+            fab:layout_constraintTop_toTopOf="@+id/toolbar" />
 
 
     </android.support.constraint.ConstraintLayout>

@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/trackViewHolder"
+    android:layout_width="match_parent"
+    android:layout_height="235dp"
+    android:background="@color/colorPrimary"
+    android:foreground="?selectableItemBackground"
+    android:clickable="true"
+    android:focusable="true">
+
+
+    <ImageView
+        android:id="@+id/albumArt"
+        android:layout_width="85dp"
+        android:layout_height="85dp"
+        android:layout_marginTop="20dp"
+        android:background="@color/colorPrimary"
+        android:elevation="10dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/songName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="15dp"
+        android:ellipsize="end"
+        android:fontFamily="@font/roboto_light"
+        android:maxLines="1"
+        android:maxWidth="270dp"
+        android:shadowColor="@color/colorMaterialGray"
+        android:textAlignment="viewStart"
+        android:textColor="@color/colorMaterialWhite"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/albumArt"
+        tools:layout_editor_absoluteX="99dp" />
+
+    <TextView
+        android:id="@+id/artistsName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="7dp"
+        android:ellipsize="end"
+        android:fontFamily="@font/roboto_light"
+        android:maxLines="1"
+        android:maxWidth="260dp"
+        android:shadowColor="@color/colorMaterialGray"
+        android:textAlignment="viewStart"
+        android:textColor="@color/colorMaterialWhite"
+        android:textSize="14sp"
+        android:textStyle="normal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/songName"
+        tools:layout_editor_absoluteX="99dp" />
+
+
+    <TextView
+        android:id="@+id/albumName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="7dp"
+        android:ellipsize="end"
+        android:fontFamily="@font/roboto_light"
+        android:maxLines="1"
+        android:maxWidth="240dp"
+        android:shadowColor="@color/colorMaterialGray"
+        android:textAlignment="viewStart"
+        android:textColor="@color/colorMaterialWhite"
+        android:textSize="14sp"
+        android:textStyle="normal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/artistsName"
+        tools:layout_editor_absoluteX="116dp" />
+
+    <TextView
+        android:id="@+id/runTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="7dp"
+        android:ellipsize="end"
+        android:fontFamily="@font/roboto_light"
+        android:maxLines="1"
+        android:maxWidth="250dp"
+        android:shadowColor="@color/colorMaterialGray"
+        android:textAlignment="viewStart"
+        android:textColor="@color/colorMaterialWhite"
+        android:textSize="12sp"
+        android:textStyle="normal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/albumName"
+        tools:layout_editor_absoluteX="99dp" />
+
+
+</android.support.constraint.ConstraintLayout>
+
