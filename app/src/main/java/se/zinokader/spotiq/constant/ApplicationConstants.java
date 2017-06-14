@@ -28,7 +28,6 @@ public class ApplicationConstants {
     public static final int TAB_PARTY_MEMBERS_INDEX = 1;
 
     /* Search-related */
-    public static final String SONG_ADD_EXTRA = "song_add_extra";
     public static final int DEFAULT_DEBOUNCE_MS = 400;
 
 }

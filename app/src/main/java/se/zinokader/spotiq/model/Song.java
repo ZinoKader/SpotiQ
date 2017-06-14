@@ -76,7 +76,7 @@ public class Song {
     @Exclude
     public String getAlbumArtUrl() {
         return album.images.isEmpty()
-                ? ApplicationConstants.PROFILE_IMAGE_PLACEHOLDER_URL
+                ? ApplicationConstants.ALBUM_ART_PLACEHOLDER_URL
                 : album.images.get(0).url;
     }
 }

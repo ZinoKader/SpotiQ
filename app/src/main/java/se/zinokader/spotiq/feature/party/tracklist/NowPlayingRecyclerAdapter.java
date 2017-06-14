@@ -62,20 +62,30 @@ public class NowPlayingRecyclerAdapter extends RecyclerView.Adapter<NowPlayingRe
                 TimeUnit.MILLISECONDS.toSeconds(song.getDurationMs())
                         - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(song.getDurationMs())));
 
-        Glide.with(songHolder.itemView.getContext())
-                .load(song.getAlbumArtUrl())
-                .bitmapTransform(songHolder.blurTransformation, songHolder.cropTransformation, songHolder.colorFilterTransformation)
-                .into(new SimpleTarget<GlideDrawable>() {
-                    @Override
-                    public void onResourceReady(GlideDrawable drawable, GlideAnimation<? super GlideDrawable> glideAnimation) {
-                        songHolder.cardViewRoot.setBackground(drawable);
-                    }
-                });
+        if (songs.get(position) != null) {
+            Glide.with(songHolder.itemView.getContext())
+                    .load(song.getAlbumArtUrl())
+                    .placeholder(R.drawable.image_album_placeholder)
+                    .bitmapTransform(songHolder.blurTransformation, songHolder.cropTransformation, songHolder.colorFilterTransformation)
+                    .into(new SimpleTarget<GlideDrawable>() {
+                        @Override
+                        public void onResourceReady(GlideDrawable drawable, GlideAnimation<? super GlideDrawable> glideAnimation) {
+                            songHolder.cardViewRoot.setBackground(drawable);
+                        }
+                    });
 
-        Glide.with(context)
-                .load(song.getAlbumArtUrl())
-                .fitCenter()
-                .into(songHolder.albumArt);
+            Glide.with(context)
+                    .load(song.getAlbumArtUrl())
+                    .placeholder(R.drawable.image_album_placeholder)
+                    .fitCenter()
+                    .into(songHolder.albumArt);
+        }
+        else {
+            songHolder.cardViewRoot.setBackground(null);
+            songHolder.albumArt.setImageDrawable(null);
+            Glide.clear(songHolder.cardViewRoot);
+            Glide.clear(songHolder.albumArt);
+        }
 
         songHolder.songName.setText(song.getName());
         songHolder.artistsName.setText(artistsName);
