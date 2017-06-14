@@ -83,7 +83,6 @@ public class PartyPresenter extends TiPresenter<PartyView> implements Connection
                             sendToView(view -> view.addPartyMember(partyMember));
                             break;
                         case CHANGED:
-                            Log.d("changed", "changggggeeed");
                             sendToView(view -> view.changePartyMember(partyMember));
                             break;
                     }

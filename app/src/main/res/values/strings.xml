@@ -25,4 +25,6 @@
     <string name="profile_image_transition">profileImageTransition</string>
     <string name="user_name_transition">userNameTransition</string>
     <string name="spotify_artists_album_separator">●</string>
+    <string name="now_playing">Now playing</string>
+    <string name="up_next">Up next</string>
 </resources>

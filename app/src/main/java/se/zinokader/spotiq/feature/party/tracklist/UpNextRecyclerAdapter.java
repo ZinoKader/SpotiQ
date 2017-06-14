@@ -33,6 +33,7 @@ public class UpNextRecyclerAdapter extends RecyclerView.Adapter<UpNextRecyclerAd
 
     UpNextRecyclerAdapter(List<Song> songs) {
         this.songs = songs;
+        setHasStableIds(true);
     }
 
     @Override
@@ -73,30 +74,22 @@ public class UpNextRecyclerAdapter extends RecyclerView.Adapter<UpNextRecyclerAd
         songHolder.blurTransformation = new BlurTransformation(context, ApplicationConstants.DEFAULT_TRACKLIST_BLUR_RADIUS);
         songHolder.colorFilterTransformation = new ColorFilterTransformation(context, R.color.colorPrimary);
 
-        if (songs.get(position) != null) {
-            Glide.with(songHolder.itemView.getContext())
-                    .load(song.getAlbumArtUrl())
-                    .placeholder(R.drawable.image_album_placeholder)
-                    .bitmapTransform(songHolder.blurTransformation, songHolder.cropTransformation, songHolder.colorFilterTransformation)
-                    .into(new SimpleTarget<GlideDrawable>() {
-                        @Override
-                        public void onResourceReady(GlideDrawable drawable, GlideAnimation<? super GlideDrawable> glideAnimation) {
-                            songHolder.cardViewRoot.setBackground(drawable);
-                        }
-                    });
+        Glide.with(songHolder.itemView.getContext())
+                .load(song.getAlbumArtUrl())
+                .placeholder(R.drawable.image_album_placeholder)
+                .bitmapTransform(songHolder.blurTransformation, songHolder.cropTransformation, songHolder.colorFilterTransformation)
+                .into(new SimpleTarget<GlideDrawable>() {
+                    @Override
+                    public void onResourceReady(GlideDrawable drawable, GlideAnimation<? super GlideDrawable> glideAnimation) {
+                        songHolder.cardViewRoot.setBackground(drawable);
+                    }
+                });
 
-            Glide.with(context)
-                    .load(song.getAlbumArtUrl())
-                    .placeholder(R.drawable.image_album_placeholder)
-                    .fitCenter()
-                    .into(songHolder.albumArt);
-        }
-        else {
-            songHolder.cardViewRoot.setBackground(null);
-            songHolder.albumArt.setImageDrawable(null);
-            Glide.clear(songHolder.cardViewRoot);
-            Glide.clear(songHolder.albumArt);
-        }
+        Glide.with(context)
+                .load(song.getAlbumArtUrl())
+                .placeholder(R.drawable.image_album_placeholder)
+                .fitCenter()
+                .into(songHolder.albumArt);
 
         songHolder.songName.setText(song.getName());
         songHolder.artistsName.setText(artistsName);
@@ -105,8 +98,24 @@ public class UpNextRecyclerAdapter extends RecyclerView.Adapter<UpNextRecyclerAd
     }
 
     @Override
+    public void onViewRecycled(SongHolder songHolder) {
+        if(songHolder != null) {
+            songHolder.cardViewRoot.setBackground(null);
+            songHolder.albumArt.setImageDrawable(null);
+            Glide.clear(songHolder.cardViewRoot);
+            Glide.clear(songHolder.albumArt);
+        }
+        super.onViewRecycled(songHolder);
+    }
+
+    @Override
     public int getItemCount() {
         return songs.size() > 1 ? songs.size() - 1 : 0; //handle all items except the first one
+    }
+
+    @Override
+    public long getItemId(int position) {
+        return songs.get(position).getSongSpotifyId().hashCode();
     }
 
     class SongHolder extends RecyclerView.ViewHolder {

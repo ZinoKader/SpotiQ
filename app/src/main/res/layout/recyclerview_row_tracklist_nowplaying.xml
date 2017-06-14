@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/trackViewHolder"
     android:layout_width="match_parent"
     android:layout_height="235dp"
@@ -40,8 +39,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/albumArt"
-        tools:layout_editor_absoluteX="99dp" />
+        app:layout_constraintTop_toBottomOf="@+id/albumArt" />
 
     <TextView
         android:id="@+id/artistsName"
@@ -60,8 +58,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/songName"
-        tools:layout_editor_absoluteX="99dp" />
+        app:layout_constraintTop_toBottomOf="@+id/songName" />
 
 
     <TextView
@@ -81,8 +78,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/artistsName"
-        tools:layout_editor_absoluteX="116dp" />
+        app:layout_constraintTop_toBottomOf="@+id/artistsName" />
 
     <TextView
         android:id="@+id/runTime"
@@ -101,8 +97,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/albumName"
-        tools:layout_editor_absoluteX="99dp" />
+        app:layout_constraintTop_toBottomOf="@+id/albumName" />
 
 
 </android.support.constraint.ConstraintLayout>
