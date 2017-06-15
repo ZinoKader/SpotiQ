@@ -45,7 +45,7 @@ public class SearchPresenter extends TiPresenter<SearchView> {
 
     private PreviewPlayer songPreviewPlayer = new PreviewPlayer();
     private String partyTitle;
-    private User me;
+    private User user;
 
     @Override
     protected void onAttachView(@NonNull SearchView view) {
@@ -61,9 +61,9 @@ public class SearchPresenter extends TiPresenter<SearchView> {
 
     void init() {
         spotifyRepository.getMe(spotifyCommunicatorService.getWebApi())
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(userPrivate -> me = new User(userPrivate.id, userPrivate.display_name, userPrivate.images));
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(userPrivate -> user = new User(userPrivate.id, userPrivate.display_name, userPrivate.images));
     }
 
     @Override
@@ -82,17 +82,17 @@ public class SearchPresenter extends TiPresenter<SearchView> {
 
     void requestSong(Song song) {
         tracklistRepository.addSong(song, partyTitle)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(succeeded -> {
-                    if (succeeded) {
-                        sendToView(view -> view.finishWithSuccess("Song added to the tracklist!"));
-                        partiesRepository.incrementUserSongRequestCount(me, partyTitle);
-                    }
-                    else {
-                        sendToView(view -> view.showMessage("Song could not be added to the tracklist"));
-                    }
-                });
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(succeeded -> {
+                if (succeeded) {
+                    sendToView(view -> view.finishWithSuccess("Song added to the tracklist!"));
+                    partiesRepository.incrementUserSongRequestCount(user, partyTitle);
+                }
+                else {
+                    sendToView(view -> view.showMessage("Song could not be added to the tracklist"));
+                }
+            });
     }
 
     void searchTracks(String query) {
@@ -104,31 +104,31 @@ public class SearchPresenter extends TiPresenter<SearchView> {
         searchOptions.put(SpotifyService.OFFSET, 0);
 
         searchTracksRecursively(query, searchOptions)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .concatMap(tracksPager -> Observable.fromArray(TrackMapper.tracksToSongs(tracksPager.tracks.items, me.getUserId())))
-                .subscribe(new Observer<List<Song>>() {
-                    @Override
-                    public void onSubscribe(Disposable d) {
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .concatMap(tracksPager -> Observable.fromArray(TrackMapper.tracksToSongs(tracksPager.tracks.items, user)))
+            .subscribe(new Observer<List<Song>>() {
+                @Override
+                public void onSubscribe(Disposable d) {
 
-                    }
+                }
 
-                    @Override
-                    public void onNext(List<Song> songs) {
-                        Log.d("songs", "yeah " + songs.size());
-                        sendToView(view -> view.updateSearch(songs, false));
-                    }
+                @Override
+                public void onNext(List<Song> songs) {
+                    Log.d("songs", "yeah " + songs.size());
+                    sendToView(view -> view.updateSearch(songs, false));
+                }
 
-                    @Override
-                    public void onError(Throwable e) {
+                @Override
+                public void onError(Throwable e) {
 
-                    }
+                }
 
-                    @Override
-                    public void onComplete() {
+                @Override
+                public void onComplete() {
 
-                    }
-                });
+                }
+            });
 
     }
 
@@ -137,16 +137,16 @@ public class SearchPresenter extends TiPresenter<SearchView> {
         int lastOffset = (int) searchOptions.get(SpotifyService.OFFSET);
 
         return spotifyRepository.searchTracks(query, searchOptions, spotifyCommunicatorService.getWebApi())
-                .concatMap(tracksPager -> {
-                    if (lastOffset + tracksPager.tracks.limit >= SpotifyConstants.TOTAL_ITEMS_LIMIT) {
-                        return Observable.just(tracksPager);
-                    }
-                    searchOptions.put(SpotifyService.OFFSET, lastOffset + tracksPager.tracks.limit);
-                    return Observable.just(tracksPager)
-                            .concatWith(searchTracksRecursively(query, searchOptions));
+            .concatMap(tracksPager -> {
+                if (lastOffset + tracksPager.tracks.limit >= SpotifyConstants.TOTAL_ITEMS_LIMIT) {
+                    return Observable.just(tracksPager);
+                }
+                searchOptions.put(SpotifyService.OFFSET, lastOffset + tracksPager.tracks.limit);
+                return Observable.just(tracksPager)
+                    .concatWith(searchTracksRecursively(query, searchOptions));
 
 
-                });
+            });
     }
 
 }

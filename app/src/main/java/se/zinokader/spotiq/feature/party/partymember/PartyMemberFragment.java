@@ -38,7 +38,7 @@ public class PartyMemberFragment extends Fragment {
         partyMemberRecyclerAdapter = new PartyMemberRecyclerAdapter(partyMembers);
         binding.membersRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         binding.membersRecyclerView.addItemDecoration(new DividerItemDecoration(getContext()
-                .getDrawable(R.drawable.search_list_divider),false, false));
+            .getDrawable(R.drawable.search_list_divider),false, false));
         binding.membersRecyclerView.setAdapter(partyMemberRecyclerAdapter);
         return binding.getRoot();
     }

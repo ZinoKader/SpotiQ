@@ -12,6 +12,7 @@ import se.zinokader.spotiq.constant.ApplicationConstants;
 public class Song {
 
     private String addedBySpotifyId;
+    private String addedByUserName;
     private String songSpotifyId;
     private AlbumSimple album;
     private List<ArtistSimple> artists;
@@ -22,9 +23,12 @@ public class Song {
     public Song() {
     }
 
-    public Song(String addedBySpotifyId, String songSpotifyId, List<ArtistSimple> artists, AlbumSimple album, long durationMs, String name, String previewUrl) {
+    public Song(String addedBySpotifyId, String addedByUserName, String songSpotifyId,
+                List<ArtistSimple> artists, AlbumSimple album, long durationMs,
+                String name, String previewUrl) {
         this.addedBySpotifyId = addedBySpotifyId;
         this.songSpotifyId = songSpotifyId;
+        this.addedByUserName = addedByUserName;
         this.artists = artists;
         this.album = album;
         this.durationMs = durationMs;
@@ -36,16 +40,14 @@ public class Song {
         return addedBySpotifyId;
     }
 
-    public void setAddedBySpotifyId(String addedBySpotifyId) {
-        this.addedBySpotifyId = addedBySpotifyId;
+    public String getAddedByUserName() {
+        return addedByUserName != null
+            ? addedByUserName
+            : addedBySpotifyId;
     }
 
     public String getSongSpotifyId() {
         return songSpotifyId;
-    }
-
-    public void setSongSpotifyId(String songSpotifyId) {
-        this.songSpotifyId = songSpotifyId;
     }
 
     public List<ArtistSimple> getArtists() {
@@ -76,7 +78,7 @@ public class Song {
     @Exclude
     public String getAlbumArtUrl() {
         return album.images.isEmpty()
-                ? ApplicationConstants.ALBUM_ART_PLACEHOLDER_URL
-                : album.images.get(0).url;
+            ? ApplicationConstants.ALBUM_ART_PLACEHOLDER_URL
+            : album.images.get(0).url;
     }
 }

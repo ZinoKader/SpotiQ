@@ -5,20 +5,21 @@ import java.util.List;
 
 import kaaes.spotify.webapi.android.models.Track;
 import se.zinokader.spotiq.model.Song;
+import se.zinokader.spotiq.model.User;
 
 public class TrackMapper {
 
     private TrackMapper() {}
 
-    public static List<Song> tracksToSongs(List<Track> tracks, String addedBySpotifyId) {
+    public static List<Song> tracksToSongs(List<Track> tracks, User user) {
         List<Song> songs = new ArrayList<>();
         for (Track track : tracks) {
-            songs.add(trackToSong(track, addedBySpotifyId));
+            songs.add(trackToSong(track, user));
         }
         return songs;
     }
 
-    public static Song trackToSong(Track track, String addedBySpotifyId) {
-        return new Song(addedBySpotifyId, track.id, track.artists, track.album, track.duration_ms, track.name, track.preview_url);
+    private static Song trackToSong(Track track, User user) {
+        return new Song(user.getUserId(), user.getUserName(), track.id, track.artists, track.album, track.duration_ms, track.name, track.preview_url);
     }
 }

@@ -63,25 +63,25 @@ public class SearchActivity extends BaseActivity implements SearchView {
         });
 
         searchRecyclerAdapter.observeClicks()
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::showConfirmSongRequest);
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(this::showConfirmSongRequest);
 
         searchRecyclerAdapter.observeLongClicks()
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(song -> {
-                    vibrator.vibrate(ApplicationConstants.SHORT_VIBRATION_DURATION);
-                    if (song.getPreviewUrl() != null) {
-                        presenter.startPreview(song.getPreviewUrl());
-                    }
-                    else {
-                        showMessage("Song preview not available");
-                    }
-                });
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(song -> {
+                vibrator.vibrate(ApplicationConstants.SHORT_VIBRATION_DURATION);
+                if (song.getPreviewUrl() != null) {
+                    presenter.startPreview(song.getPreviewUrl());
+                }
+                else {
+                    showMessage("Song preview not available");
+                }
+            });
 
         //Stop preview when the user lets go from with the item's bounds
         searchRecyclerAdapter.observeLongClickEnd()
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(ended -> presenter.stopPreview());
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(ended -> presenter.stopPreview());
 
         //Also stop preview if user lifts finger from outside of the item's bounds
         binding.songSearchRecyclerView.setOnTouchListener((view, motionEvent) -> {
@@ -95,16 +95,16 @@ public class SearchActivity extends BaseActivity implements SearchView {
 
     public void showConfirmSongRequest(Song song) {
         new SnackbarBuilder(getRootView())
-                .duration(Snackbar.LENGTH_LONG)
-                .message("Confirm song request")
-                .actionText("Queue song")
-                .actionTextColor(getResources().getColor(R.color.colorAccent))
-                .actionClickListener(confirmed -> {
-                    presenter.requestSong(song);
-                    finish();
-                })
-                .build()
-                .show();
+            .duration(Snackbar.LENGTH_LONG)
+            .message("Confirm song request")
+            .actionText("Queue song")
+            .actionTextColor(getResources().getColor(R.color.colorAccent))
+            .actionClickListener(confirmed -> {
+                presenter.requestSong(song);
+                finish();
+            })
+            .build()
+            .show();
     }
 
     @Override

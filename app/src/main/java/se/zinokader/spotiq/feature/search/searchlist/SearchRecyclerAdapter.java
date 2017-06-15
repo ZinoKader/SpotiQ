@@ -1,6 +1,5 @@
 package se.zinokader.spotiq.feature.search.searchlist;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
@@ -34,12 +33,11 @@ public class SearchRecyclerAdapter extends RecyclerView.Adapter<SearchRecyclerAd
     @Override
     public SongHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
         View inflatedView = LayoutInflater.from(viewGroup.getContext())
-                .inflate(R.layout.recyclerview_row_search_song, viewGroup, false);
+            .inflate(R.layout.recyclerview_row_search_song, viewGroup, false);
         inflatedView.getLayoutParams().width = viewGroup.getWidth();
         return new SongHolder(inflatedView);
     }
 
-    @SuppressLint("ClickableViewAccessibility")
     @Override
     public void onBindViewHolder(SongHolder songHolder, int i) {
 
@@ -69,9 +67,9 @@ public class SearchRecyclerAdapter extends RecyclerView.Adapter<SearchRecyclerAd
         String artistsName = TextUtils.join(", ", artists);
 
         Glide.with(context)
-                .load(song.getAlbumArtUrl())
-                .fitCenter()
-                .into(songHolder.albumArt);
+            .load(song.getAlbumArtUrl())
+            .fitCenter()
+            .into(songHolder.albumArt);
         songHolder.songName.setText(song.getName());
         songHolder.artistsName.setText(artistsName);
         songHolder.albumName.setText(song.getAlbum().name);

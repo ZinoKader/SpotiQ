@@ -5,8 +5,11 @@ import android.content.Intent;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Log;
+
 import java.util.concurrent.TimeUnit;
+
 import javax.inject.Singleton;
+
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
@@ -52,18 +55,18 @@ public class SpotifyCommunicatorService extends Service {
 
     private void startJob() {
         tokenRenewalJob = Observable.interval(0, 5, TimeUnit.MINUTES)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(interval -> {
-                    if (spotifyAuthenticator.getExpiresIn() <= ServiceConstants.TOKEN_EXPIRY_CUTOFF) {
-                        Intent loginIntent = new Intent(this, SpotifyAuthenticationActivity.class);
-                        startActivity(loginIntent);
-                        Log.d(LogTag.LOG_TOKEN_SERVICE, "Token was updated");
-                    }
-                    else {
-                        Log.d(LogTag.LOG_TOKEN_SERVICE, "Token wasn't updated - existing token still valid");
-                    }
-                });
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(interval -> {
+                if (spotifyAuthenticator.getExpiresIn() <= ServiceConstants.TOKEN_EXPIRY_CUTOFF) {
+                    Intent loginIntent = new Intent(this, SpotifyAuthenticationActivity.class);
+                    startActivity(loginIntent);
+                    Log.d(LogTag.LOG_TOKEN_SERVICE, "Token was updated");
+                }
+                else {
+                    Log.d(LogTag.LOG_TOKEN_SERVICE, "Token wasn't updated - existing token still valid");
+                }
+            });
     }
 
     private void stopJob() {

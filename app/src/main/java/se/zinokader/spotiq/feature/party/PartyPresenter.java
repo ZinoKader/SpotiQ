@@ -14,6 +14,9 @@ import com.spotify.sdk.android.player.SpotifyPlayer;
 
 import net.grandcentrix.thirtyinch.TiPresenter;
 
+import org.threeten.bp.LocalDateTime;
+import org.threeten.bp.temporal.ChronoUnit;
+
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -44,6 +47,7 @@ public class PartyPresenter extends TiPresenter<PartyView> implements Connection
     @Inject
     SpotifyRepository spotifyRepository;
 
+    private LocalDateTime initializedTimeStamp;
     private SpotifyPlayer spotifyPlayer;
     private String partyTitle;
 
@@ -56,10 +60,12 @@ public class PartyPresenter extends TiPresenter<PartyView> implements Connection
     }
 
     void init() {
+        initializedTimeStamp = LocalDateTime.now();
         loadPartyListener();
         loadTracklistListener();
         loadUser();
     }
+
 
     @Override
     protected void onDestroy() {
@@ -71,58 +77,69 @@ public class PartyPresenter extends TiPresenter<PartyView> implements Connection
         this.partyTitle = partyTitle;
     }
 
+    private boolean isLoadUpTimeUp() {
+        Log.d("oK", String.valueOf(ChronoUnit.SECONDS.between(initializedTimeStamp, LocalDateTime.now()) >= ApplicationConstants.LOAD_UP_TIME_SEC));
+        return ChronoUnit.SECONDS.between(initializedTimeStamp, LocalDateTime.now()) >= ApplicationConstants.LOAD_UP_TIME_SEC;
+    }
+
     private void loadPartyListener() {
         partiesRepository.listenToPartyMemberChanges(partyTitle)
-                .delay(ApplicationConstants.DEFAULT_DELAY_MS, TimeUnit.MILLISECONDS)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(childEvent -> {
-                    User partyMember = childEvent.getDataSnapshot().getValue(User.class);
-                    switch (childEvent.getChangeType()) {
-                        case ADDED:
-                            sendToView(view -> view.addPartyMember(partyMember));
-                            break;
-                        case CHANGED:
-                            sendToView(view -> view.changePartyMember(partyMember));
-                            break;
-                    }
-                });
+            .delay(ApplicationConstants.DEFAULT_DELAY_MS, TimeUnit.MILLISECONDS)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(childEvent -> {
+                User partyMember = childEvent.getDataSnapshot().getValue(User.class);
+                switch (childEvent.getChangeType()) {
+                    case ADDED:
+                        sendToView(view -> {
+                            view.addPartyMember(partyMember);
+                            if (isLoadUpTimeUp()) view.showMessage(partyMember.getUserName() + " has joined the party");
+                        });
+                        break;
+                    case CHANGED:
+                        sendToView(view -> view.changePartyMember(partyMember));
+                        break;
+                }
+            });
     }
 
     private void loadTracklistListener() {
         tracklistRepository.listenToTracklistChanges(partyTitle)
-                .delay(ApplicationConstants.DEFAULT_DELAY_MS, TimeUnit.MILLISECONDS)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(childEvent -> {
-                    if (childEvent.getChangeType().equals(ChildEvent.Type.ADDED)) {
-                        Song song = childEvent.getDataSnapshot().getValue(Song.class);
-                        sendToView(view -> view.addSong(song));
-                    }
-                });
+            .delay(ApplicationConstants.DEFAULT_DELAY_MS, TimeUnit.MILLISECONDS)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(childEvent -> {
+                if (childEvent.getChangeType().equals(ChildEvent.Type.ADDED)) {
+                    Song song = childEvent.getDataSnapshot().getValue(Song.class);
+                    sendToView(view -> {
+                        view.addSong(song);
+                        if (isLoadUpTimeUp()) view.showMessage(song.getName() + " queued by " + song.getAddedByUserName());
+                    });
+                }
+            });
     }
 
     private void loadUser() {
         spotifyRepository.getMe(spotifyCommunicatorService.getWebApi())
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(userPrivate -> {
-                    User user = new User(userPrivate.id, userPrivate.display_name, userPrivate.images);
-                    sendToView(view -> view.setUserDetails(user.getUserName(), user.getUserImageUrl()));
-                    loadHost(user.getUserId());
-                });
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(userPrivate -> {
+                User user = new User(userPrivate.id, userPrivate.display_name, userPrivate.images);
+                sendToView(view -> view.setUserDetails(user.getUserName(), user.getUserImageUrl()));
+                loadHost(user.getUserId());
+            });
     }
 
     private void loadHost(String userId) {
         partiesRepository.isHostOfParty(userId, partyTitle)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(userIsHost -> {
-                    if (userIsHost) {
-                        sendToView(PartyView::setHostPriviliges);
-                        loadPlayer();
-                    }
-                });
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(userIsHost -> {
+                if (userIsHost) {
+                    sendToView(PartyView::setHostPriviliges);
+                    loadPlayer();
+                }
+            });
     }
 
     private void loadPlayer() {

@@ -20,18 +20,18 @@ public abstract class BaseActivity extends CompositeActivity implements BaseView
 
     public void showMessage(String message) {
         new SnackbarBuilder(getRootView())
-                .message(message)
-                .build()
-                .show();
+            .message(message)
+            .build()
+            .show();
     }
 
     public void finishWithSuccess(String message) {
         new SnackbarBuilder(getRootView())
-                .duration(Snackbar.LENGTH_SHORT)
-                .message(message)
-                .timeoutDismissCallback(dismissed -> finish())
-                .build()
-                .show();
+            .duration(Snackbar.LENGTH_SHORT)
+            .message(message)
+            .timeoutDismissCallback(dismissed -> finish())
+            .build()
+            .show();
     }
 
     public void hideKeyboard() {

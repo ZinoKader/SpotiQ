@@ -31,8 +31,9 @@ import se.zinokader.spotiq.feature.search.SearchActivity;
 import se.zinokader.spotiq.model.Song;
 import se.zinokader.spotiq.model.User;
 import se.zinokader.spotiq.util.di.Injector;
+import se.zinokader.spotiq.util.listener.FabListener;
 
-public class PartyActivity extends BaseActivity implements PartyView {
+public class PartyActivity extends BaseActivity implements PartyView, FabListener {
 
     ActivityPartyBinding binding;
     private PartyPresenter presenter;
@@ -50,11 +51,12 @@ public class PartyActivity extends BaseActivity implements PartyView {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_party);
-        postponeEnterTransition();
         partyInfo = getIntent().getExtras();
         if (partyInfo != null) {
             binding.partyTitle.setText(partyInfo.getString(ApplicationConstants.PARTY_NAME_EXTRA));
         }
+
+        postponeEnterTransition();
 
         partyViewPagerAdapter = new PartyViewPagerAdapter(getSupportFragmentManager());
         tracklistFragment = TracklistFragmentBuilder.newInstance();
@@ -81,7 +83,6 @@ public class PartyActivity extends BaseActivity implements PartyView {
                     break;
             }
         });
-
     }
 
     @Override
@@ -113,24 +114,24 @@ public class PartyActivity extends BaseActivity implements PartyView {
     public void setUserDetails(String userName, String userImageUrl) {
         binding.userName.setText(userName);
         Glide.with(this)
-                .load(userImageUrl)
-                .placeholder(R.drawable.image_profile_placeholder)
-                .dontAnimate()
-                .dontTransform()
-                .listener(new RequestListener<String, GlideDrawable>() {
-                    @Override
-                    public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
-                        startPostponedEnterTransition();
-                        return false;
-                    }
+            .load(userImageUrl)
+            .placeholder(R.drawable.image_profile_placeholder)
+            .dontAnimate()
+            .dontTransform()
+            .listener(new RequestListener<String, GlideDrawable>() {
+                @Override
+                public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
+                    startPostponedEnterTransition();
+                    return false;
+                }
 
-                    @Override
-                    public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
-                        startPostponedEnterTransition();
-                        return false;
-                    }
-                })
-                .into(binding.userImage);
+                @Override
+                public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
+                    startPostponedEnterTransition();
+                    return false;
+                }
+            })
+            .into(binding.userImage);
     }
 
     @Override
@@ -156,20 +157,30 @@ public class PartyActivity extends BaseActivity implements PartyView {
     @Override
     public void onBackPressed() {
         new AlertDialog.Builder(this)
-                .setTitle("Confirm exit")
-                .setMessage("Are you sure you want to exit the party?")
-                .setPositiveButton("Yes", (dialogInterface, i) -> {
-                    dialogInterface.dismiss();
-                    super.onBackPressed();
-                })
-                .setNegativeButton("No", (dialogInterface, i) -> dialogInterface.dismiss())
-                .create()
-                .show();
+            .setTitle("Confirm exit")
+            .setMessage("Are you sure you want to exit the party?")
+            .setPositiveButton("Yes", (dialogInterface, i) -> {
+                dialogInterface.dismiss();
+                super.onBackPressed();
+            })
+            .setNegativeButton("No", (dialogInterface, i) -> dialogInterface.dismiss())
+            .create()
+            .show();
     }
 
     @Override
     public Config setupPlayerConfig(String accessToken) {
         return new Config(this, accessToken, SpotifyConstants.CLIENT_ID);
+    }
+
+    @Override
+    public void showFab() {
+        binding.searchFab.show();
+    }
+
+    @Override
+    public void hideFab() {
+        binding.searchFab.hide();
     }
 
     @Override
@@ -182,7 +193,7 @@ public class PartyActivity extends BaseActivity implements PartyView {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == ApplicationConstants.SEARCH_INTENT_REQUEST_CODE) {
             binding.searchTransitionSheet.contractFab();
-
         }
     }
+
 }

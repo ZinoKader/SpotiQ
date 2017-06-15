@@ -74,17 +74,17 @@ public class LobbyActivity extends BaseActivity implements LobbyView {
     public void setUserDetails(String userName, String userImageUrl) {
         binding.userName.setText(userName);
         Glide.with(this)
-                .load(userImageUrl)
-                .placeholder(R.drawable.image_profile_placeholder)
-                .dontAnimate()
-                .dontTransform()
-                .into(binding.userImage);
+            .load(userImageUrl)
+            .placeholder(R.drawable.image_profile_placeholder)
+            .dontAnimate()
+            .dontTransform()
+            .into(binding.userImage);
     }
 
     public void goToParty(String partyTitle) {
         ActivityOptions transitionOptions = ActivityOptions.makeSceneTransitionAnimation(this,
-                new Pair<>(binding.userImage, getResources().getString(R.string.profile_image_transition)),
-                new Pair<>(binding.userName, getResources().getString(R.string.user_name_transition)));
+            new Pair<>(binding.userImage, getResources().getString(R.string.profile_image_transition)),
+            new Pair<>(binding.userName, getResources().getString(R.string.user_name_transition)));
         Intent intent = new Intent(this, PartyActivity.class);
         intent.putExtra(ApplicationConstants.PARTY_NAME_EXTRA, partyTitle);
         startActivity(intent, transitionOptions.toBundle());
@@ -137,9 +137,9 @@ public class LobbyActivity extends BaseActivity implements LobbyView {
         });
 
         mockDialog.findViewById(R.id.closeDialogButton).setOnClickListener(c ->
-                animateDialog(DialogAction.CLOSE, dialogType, dialogView, mockDialog));
+            animateDialog(DialogAction.CLOSE, dialogType, dialogView, mockDialog));
         mockDialog.setOnShowListener(dialogInterface ->
-                animateDialog(DialogAction.OPEN, dialogType, dialogView, null));
+            animateDialog(DialogAction.OPEN, dialogType, dialogView, null));
         mockDialog.setOnKeyListener((dialogInterface, i, keyEvent) -> {
             if (i == KeyEvent.KEYCODE_BACK) {
                 animateDialog(DialogAction.CLOSE, dialogType, dialogView, mockDialog);
@@ -170,7 +170,7 @@ public class LobbyActivity extends BaseActivity implements LobbyView {
         switch (dialogAction) {
             case OPEN:
                 Animator circularDialogReveal = ViewAnimationUtils.createCircularReveal(dialogRoot,
-                        x, y, binding.createPartyButton.getWidth() / 2, endRadius);
+                    x, y, binding.createPartyButton.getWidth() / 2, endRadius);
                 circularDialogReveal.setInterpolator(new AccelerateDecelerateInterpolator());
                 dialogRoot.setVisibility(View.VISIBLE);
                 circularDialogReveal.setDuration(DIALOG_ANIMATION_DURATION);
@@ -178,7 +178,7 @@ public class LobbyActivity extends BaseActivity implements LobbyView {
                 break;
             case CLOSE:
                 Animator circularDialogClose = ViewAnimationUtils.createCircularReveal(dialogRoot,
-                        x, y, endRadius, 0);
+                    x, y, endRadius, 0);
                 circularDialogClose.setInterpolator(new AccelerateDecelerateInterpolator());
                 circularDialogClose.addListener(new AnimatorListenerAdapter() {
                     @Override

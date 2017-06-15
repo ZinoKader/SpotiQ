@@ -20,47 +20,47 @@ public class TracklistRepository {
 
     public Observable<Boolean> addSong(Song song, String partyTitle) {
         return Observable.create(subscriber -> databaseReference
-                .child(partyTitle)
-                .child(FirebaseConstants.CHILD_TRACKLIST)
-                .push() //push is timestamp-based, items are chronologically ordered
-                .setValue(song)
-                .addOnCompleteListener(task -> {
-                    subscriber.onNext(task.isSuccessful());
-                    subscriber.onComplete();
-                })
-                .addOnFailureListener(subscriber::onError));
+            .child(partyTitle)
+            .child(FirebaseConstants.CHILD_TRACKLIST)
+            .push() //push is timestamp-based, items are chronologically ordered
+            .setValue(song)
+            .addOnCompleteListener(task -> {
+                subscriber.onNext(task.isSuccessful());
+                subscriber.onComplete();
+            })
+            .addOnFailureListener(subscriber::onError));
     }
 
     public Observable<ChildEvent> listenToTracklistChanges(String partyTitle) {
         return Observable.create(subscriber -> databaseReference
-                .child(partyTitle)
-                .child(FirebaseConstants.CHILD_TRACKLIST)
-                .addChildEventListener(new ChildEventListener() {
-                    @Override
-                    public void onChildAdded(DataSnapshot dataSnapshot, String previousChildName) {
-                        subscriber.onNext(new ChildEvent(dataSnapshot, ChildEvent.Type.ADDED, previousChildName));
-                    }
+            .child(partyTitle)
+            .child(FirebaseConstants.CHILD_TRACKLIST)
+            .addChildEventListener(new ChildEventListener() {
+                @Override
+                public void onChildAdded(DataSnapshot dataSnapshot, String previousChildName) {
+                    subscriber.onNext(new ChildEvent(dataSnapshot, ChildEvent.Type.ADDED, previousChildName));
+                }
 
-                    @Override
-                    public void onChildChanged(DataSnapshot dataSnapshot, String previousChildName) {
-                        subscriber.onNext(new ChildEvent(dataSnapshot, ChildEvent.Type.CHANGED, previousChildName));
-                    }
+                @Override
+                public void onChildChanged(DataSnapshot dataSnapshot, String previousChildName) {
+                    subscriber.onNext(new ChildEvent(dataSnapshot, ChildEvent.Type.CHANGED, previousChildName));
+                }
 
-                    @Override
-                    public void onChildRemoved(DataSnapshot dataSnapshot) {
-                        subscriber.onNext(new ChildEvent(dataSnapshot, ChildEvent.Type.REMOVED));
-                    }
+                @Override
+                public void onChildRemoved(DataSnapshot dataSnapshot) {
+                    subscriber.onNext(new ChildEvent(dataSnapshot, ChildEvent.Type.REMOVED));
+                }
 
-                    @Override
-                    public void onChildMoved(DataSnapshot dataSnapshot, String previousChildName) {
-                        subscriber.onNext(new ChildEvent(dataSnapshot, ChildEvent.Type.MOVED, previousChildName));
-                    }
+                @Override
+                public void onChildMoved(DataSnapshot dataSnapshot, String previousChildName) {
+                    subscriber.onNext(new ChildEvent(dataSnapshot, ChildEvent.Type.MOVED, previousChildName));
+                }
 
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-                        subscriber.onError(databaseError.toException());
-                    }
-                }));
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    subscriber.onError(databaseError.toException());
+                }
+            }));
     }
 
 }

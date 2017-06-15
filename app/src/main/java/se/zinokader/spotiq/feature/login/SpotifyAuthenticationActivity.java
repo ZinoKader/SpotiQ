@@ -4,12 +4,15 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+
 import com.spotify.sdk.android.authentication.AuthenticationClient;
 import com.spotify.sdk.android.authentication.AuthenticationRequest;
 import com.spotify.sdk.android.authentication.AuthenticationResponse;
 import com.spotify.sdk.android.player.ConnectionStateCallback;
 import com.spotify.sdk.android.player.Error;
+
 import javax.inject.Inject;
+
 import se.zinokader.spotiq.R;
 import se.zinokader.spotiq.constant.ApplicationConstants;
 import se.zinokader.spotiq.constant.LogTag;
@@ -33,15 +36,15 @@ public class SpotifyAuthenticationActivity extends AppCompatActivity implements 
         ((Injector) getApplication()).inject(this);
 
         AuthenticationRequest authRequest = new AuthenticationRequest.Builder(
-                SpotifyConstants.CLIENT_ID,
-                AuthenticationResponse.Type.TOKEN,
-                SpotifyConstants.REDIRECT_URI)
-                .setScopes(SpotifyConstants.DEFAULT_USER_SCOPES)
-                .build();
+            SpotifyConstants.CLIENT_ID,
+            AuthenticationResponse.Type.TOKEN,
+            SpotifyConstants.REDIRECT_URI)
+            .setScopes(SpotifyConstants.DEFAULT_USER_SCOPES)
+            .build();
 
         AuthenticationClient.openLoginActivity(this,
-                ApplicationConstants.LOGIN_INTENT_REQUEST_CODE,
-                authRequest);
+            ApplicationConstants.LOGIN_INTENT_REQUEST_CODE,
+            authRequest);
     }
 
     @Override
@@ -71,7 +74,7 @@ public class SpotifyAuthenticationActivity extends AppCompatActivity implements 
             setResult(RESULT_CANCELED);
             Log.d(LogTag.LOG_LOGIN, "Wrong request code for Spotify login");
         }
-        
+
         finish();
     }
 

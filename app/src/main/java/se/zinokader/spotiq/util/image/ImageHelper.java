@@ -4,10 +4,6 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
-import android.support.v7.graphics.Palette;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 public class ImageHelper {
 
@@ -22,6 +18,7 @@ public class ImageHelper {
         return mutableBitmap;
     }
 
+    /*
     public static int getDominantColor(Bitmap bitmap) {
         List<Palette.Swatch> swatchesTemp = Palette.from(bitmap).generate().getSwatches();
         List<Palette.Swatch> swatches = new ArrayList<>(swatchesTemp);
@@ -30,5 +27,6 @@ public class ImageHelper {
                 ? swatches.get(0).getRgb()
                 : FALLBACK_COLOR;
     }
+    */
 
 }

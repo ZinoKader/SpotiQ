@@ -20,7 +20,7 @@ public class DividerItemDecoration extends RecyclerView.ItemDecoration {
 
     public DividerItemDecoration(Context context, AttributeSet attrs) {
         final TypedArray a = context
-                .obtainStyledAttributes(attrs, new int[]{android.R.attr.listDivider});
+            .obtainStyledAttributes(attrs, new int[]{android.R.attr.listDivider});
         mDivider = a.getDrawable(0);
         a.recycle();
     }
@@ -145,7 +145,7 @@ public class DividerItemDecoration extends RecyclerView.ItemDecoration {
                 mOrientation = layoutManager.getOrientation();
             } else {
                 throw new IllegalStateException(
-                        "DividerItemDecoration can only be used with a LinearLayoutManager.");
+                    "DividerItemDecoration can only be used with a LinearLayoutManager.");
             }
         }
         return mOrientation;

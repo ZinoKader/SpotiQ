@@ -14,9 +14,8 @@ public class PreviewPlayer extends MediaPlayer implements MediaPlayer.OnPrepared
 
     public PreviewPlayer() {
         AudioAttributes audioAttributes = new AudioAttributes.Builder()
-                .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-
-                .build();
+            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+            .build();
         mediaPlayer.setAudioAttributes(audioAttributes);
     }
 

@@ -6,8 +6,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+
 import com.bumptech.glide.Glide;
+
 import java.util.List;
+
 import se.zinokader.spotiq.R;
 import se.zinokader.spotiq.model.User;
 
@@ -22,7 +25,7 @@ public class PartyMemberRecyclerAdapter extends RecyclerView.Adapter<PartyMember
     @Override
     public UserHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
         View inflatedView = LayoutInflater.from(viewGroup.getContext())
-                .inflate(R.layout.recyclerview_row_party_members, viewGroup, false);
+            .inflate(R.layout.recyclerview_row_party_members, viewGroup, false);
         inflatedView.getLayoutParams().width = viewGroup.getWidth();
         return new UserHolder(inflatedView);
     }
@@ -31,14 +34,14 @@ public class PartyMemberRecyclerAdapter extends RecyclerView.Adapter<PartyMember
     public void onBindViewHolder(UserHolder userHolder, int i) {
         User partyMember = partyMembers.get(i);
         Glide.with(userHolder.itemView.getContext())
-                .load(partyMember.getUserImageUrl())
-                .into(userHolder.userImage);
+            .load(partyMember.getUserImageUrl())
+            .into(userHolder.userImage);
         userHolder.userName.setText(partyMember.getUserName());
         userHolder.songsRequested.setText(String.format(
-                partyMember.getSongsRequested() == 1
-                        ? "Requested %d song"
-                        : "Requested %d songs",
-                partyMember.getSongsRequested()));
+            partyMember.getSongsRequested() == 1
+                ? "Requested %d song"
+                : "Requested %d songs",
+            partyMember.getSongsRequested()));
         userHolder.memberType.setText(partyMember.getHasHostPriviliges() ? "Host" : "Member");
     }
 

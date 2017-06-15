@@ -12,8 +12,10 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.view.animation.AccelerateDecelerateInterpolator;
+
 import net.grandcentrix.thirtyinch.TiPresenter;
 import net.grandcentrix.thirtyinch.plugin.TiActivityPlugin;
+
 import se.zinokader.spotiq.R;
 import se.zinokader.spotiq.constant.ApplicationConstants;
 import se.zinokader.spotiq.constant.LogTag;
@@ -55,7 +57,7 @@ public class StartupActivity extends BaseActivity implements StartupView {
 
     public void finishProgress() {
         binding.logInButton.doneLoadingAnimation(ContextCompat.getColor(this, R.color.colorAccent),
-                BitmapFactory.decodeResource(getResources(), R.drawable.ic_finished_white));
+            BitmapFactory.decodeResource(getResources(), R.drawable.ic_finished_white));
     }
 
     public void resetProgress() {
@@ -64,7 +66,7 @@ public class StartupActivity extends BaseActivity implements StartupView {
 
     public void goToSpotifyAuthentication() {
         startActivityForResult(new Intent(this, SpotifyAuthenticationActivity.class),
-                ApplicationConstants.LOGIN_INTENT_REQUEST_CODE);
+            ApplicationConstants.LOGIN_INTENT_REQUEST_CODE);
         overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
     }
 
@@ -101,7 +103,7 @@ public class StartupActivity extends BaseActivity implements StartupView {
         binding.root.setVisibility(View.VISIBLE);
 
         circularRevealAnimation = ViewAnimationUtils.createCircularReveal(binding.root,
-                x, y, startRadius, endRadius);
+            x, y, startRadius, endRadius);
         circularRevealAnimation.setInterpolator(new AccelerateDecelerateInterpolator());
 
         return circularRevealAnimation;
@@ -115,7 +117,7 @@ public class StartupActivity extends BaseActivity implements StartupView {
             binding.logInButton.setVisibility(View.VISIBLE);
             binding.spotiqLogo.setVisibility(View.VISIBLE);
             binding.root.setBackgroundColor(ContextCompat.getColor(getApplicationContext(),
-                    R.color.colorPrimary));
+                R.color.colorPrimary));
         }, 1000);
     }
 
@@ -125,7 +127,7 @@ public class StartupActivity extends BaseActivity implements StartupView {
 
         if (requestCode != ApplicationConstants.LOGIN_INTENT_REQUEST_CODE) {
             Log.d(LogTag.LOG_LOGIN, "Wrong request code on Spotify auth. Expected: " +
-                    ApplicationConstants.LOGIN_INTENT_REQUEST_CODE + ", received: " + requestCode);
+                ApplicationConstants.LOGIN_INTENT_REQUEST_CODE + ", received: " + requestCode);
             return;
         }
 

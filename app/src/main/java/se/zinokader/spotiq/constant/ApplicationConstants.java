@@ -23,6 +23,7 @@ public class ApplicationConstants {
     /* Activity & Lifecycle-related */
     //Party-related
     public static final String PARTY_NAME_EXTRA = "party_name_extra";
+    public static final int LOAD_UP_TIME_SEC = 10;
     public static final int DEFAULT_DELAY_MS = 500;
     public static final int TAB_TRACKLIST_INDEX = 0;
     public static final int TAB_PARTY_MEMBERS_INDEX = 1;
