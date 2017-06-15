@@ -59,7 +59,7 @@ public class TracklistFragment extends Fragment {
         binding.tracklistRecyclerView.setOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-                if (dy > 10) {
+                if (dy > 0) {
                     fabListener.hideFab();
                 }
                 else if (dy < 0) {

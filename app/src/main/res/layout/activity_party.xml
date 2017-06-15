@@ -3,122 +3,38 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <android.support.constraint.ConstraintLayout
+    <android.support.design.widget.CoordinatorLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:clipChildren="false">
-
-        <android.support.v7.widget.Toolbar
-            android:id="@+id/toolbar"
-            android:background="@color/colorPrimary"
-            android:elevation="15dp"
-            app:contentInsetStart="0dp"
-            android:layout_width="match_parent"
-            android:layout_height="110dp"
-            android:layout_marginTop="0dp"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            android:layout_marginStart="0dp"
-            android:layout_marginEnd="0dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:clipChildren="false">
-
-            <android.support.constraint.ConstraintLayout
-                android:background="@color/colorPrimary"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:clipChildren="false">
-
-                <TextView
-                    android:id="@+id/partyTitle"
-                    android:layout_width="160dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="34dp"
-                    android:textAlignment="center"
-                    android:textColor="@color/colorMaterialWhite"
-                    android:shadowColor="@color/colorMaterialGray"
-                    android:textSize="18sp"
-                    android:textStyle="bold"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <com.mikhaellopez.circularimageview.CircularImageView
-                    android:id="@+id/userImage"
-                    android:layout_width="45dp"
-                    android:layout_height="45dp"
-                    android:layout_marginStart="25dp"
-                    android:layout_marginTop="25dp"
-                    android:scaleType="centerCrop"
-                    android:transitionName="@string/profile_image_transition"
-                    app:civ_border_width="1dp"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <TextView
-                    android:id="@+id/userName"
-                    android:layout_width="95dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:textAlignment="center"
-                    android:textColor="@color/colorMaterialWhite"
-                    android:textSize="10sp"
-                    android:textStyle="bold"
-                    android:transitionName="@string/user_name_transition"
-                    app:layout_constraintTop_toBottomOf="@+id/userImage"
-                    app:layout_constraintStart_toStartOf="parent"
-                    android:layout_marginStart="0dp" />
-
-
-            </android.support.constraint.ConstraintLayout>
-
-        </android.support.v7.widget.Toolbar>
-
-        <se.zinokader.spotiq.feature.party.navigation.PartyViewPager
-            android:id="@+id/tabPager"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:translationZ="-5dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/toolbar"
-            android:layout_marginBottom="0dp"
-            app:layout_constraintBottom_toTopOf="@+id/bottomBar" />
-
-        <android.support.design.widget.FloatingActionButton
-            android:id="@+id/searchFab"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_queue_song"
-            android:background="?selectableItemBackground"
-            fab:borderWidth="0dp"
-            fab:fabSize="normal"
-            fab:rippleColor="@color/colorAccentDark"
-            fab:elevation="8dp"
-            fab:pressedTranslationZ="10dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginEnd="24dp"
-            android:layout_marginBottom="24dp"
-            app:layout_constraintBottom_toTopOf="@+id/bottomBar" />
+        android:fitsSystemWindows="true">
 
         <com.roughike.bottombar.BottomBar
             android:id="@+id/bottomBar"
             android:layout_width="match_parent"
             android:layout_height="60dp"
             android:layout_alignParentBottom="true"
+            android:layout_gravity="bottom"
             android:background="@color/colorPrimary"
-            app:bb_tabXmlResource="@xml/party_bottom_bar"
+            app:bb_behavior="shy"
             app:bb_activeTabAlpha="1"
             app:bb_activeTabColor="@color/colorPrimary"
             app:bb_inActiveTabAlpha="0.5"
             app:bb_inActiveTabColor="@color/colorPrimary"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintEnd_toEndOf="parent" >
+            app:bb_tabXmlResource="@xml/party_bottom_bar">
 
         </com.roughike.bottombar.BottomBar>
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/searchFab"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="?selectableItemBackground"
+            android:src="@drawable/ic_queue_song"
+            fab:elevation="12dp"
+            fab:fabSize="normal"
+            fab:rippleColor="@color/colorAccentDark"
+            fab:layout_anchorGravity="right|top"
+            fab:layout_anchor="@+id/bottomBar" />
 
         <com.github.fabtransitionactivity.SheetLayout
             android:id="@+id/searchTransitionSheet"
@@ -130,12 +46,97 @@
             android:layout_marginTop="0dp"
             android:elevation="100dp"
             app:ft_color="@color/colorAccent"
-            app:ft_container_gravity="center"
-            fab:layout_constraintEnd_toEndOf="parent"
-            fab:layout_constraintHorizontal_bias="0.5"
-            fab:layout_constraintStart_toStartOf="parent"
-            fab:layout_constraintTop_toTopOf="@+id/toolbar" />
+            app:ft_container_gravity="center">
+
+        </com.github.fabtransitionactivity.SheetLayout>
 
 
-    </android.support.constraint.ConstraintLayout>
+        <se.zinokader.spotiq.feature.party.navigation.PartyViewPager
+            android:id="@+id/tabPager"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_anchor="@+id/toolbarHolder"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+
+        <android.support.design.widget.AppBarLayout
+            android:id="@+id/toolbarHolder"
+            android:layout_above="@id/tabPager"
+            android:layout_width="match_parent"
+            android:layout_height="110dp"
+            android:clipChildren="false"
+            android:fitsSystemWindows="false">
+
+            <android.support.v7.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="110dp"
+                android:layout_marginEnd="0dp"
+                android:layout_marginStart="0dp"
+                android:layout_marginTop="0dp"
+                android:background="@color/colorPrimary"
+                android:clipChildren="false"
+                android:elevation="15dp"
+                app:contentInsetStart="0dp"
+                app:layout_scrollFlags="scroll|enterAlways"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <android.support.constraint.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@color/colorPrimary"
+                    android:clipChildren="false">
+
+                    <TextView
+                        android:id="@+id/partyTitle"
+                        android:layout_width="160dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="34dp"
+                        android:shadowColor="@color/colorMaterialGray"
+                        android:textAlignment="center"
+                        android:textColor="@color/colorMaterialWhite"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <com.mikhaellopez.circularimageview.CircularImageView
+                        android:id="@+id/userImage"
+                        android:layout_width="45dp"
+                        android:layout_height="45dp"
+                        android:layout_marginStart="25dp"
+                        android:layout_marginTop="25dp"
+                        android:scaleType="centerCrop"
+                        android:transitionName="@string/profile_image_transition"
+                        app:civ_border_width="1dp"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <TextView
+                        android:id="@+id/userName"
+                        android:layout_width="95dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="0dp"
+                        android:layout_marginTop="8dp"
+                        android:textAlignment="center"
+                        android:textColor="@color/colorMaterialWhite"
+                        android:textSize="10sp"
+                        android:textStyle="bold"
+                        android:transitionName="@string/user_name_transition"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/userImage" />
+
+
+                </android.support.constraint.ConstraintLayout>
+
+            </android.support.v7.widget.Toolbar>
+
+        </android.support.design.widget.AppBarLayout>
+
+
+
+    </android.support.design.widget.CoordinatorLayout>
+
 </layout>

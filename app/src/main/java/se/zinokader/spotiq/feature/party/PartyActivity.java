@@ -77,12 +77,15 @@ public class PartyActivity extends BaseActivity implements PartyView, FabListene
             switch (tabId) {
                 case R.id.tab_tracklist:
                     binding.tabPager.setCurrentItem(ApplicationConstants.TAB_TRACKLIST_INDEX);
+                    showFab();
                     break;
                 case R.id.tab_party_members:
                     binding.tabPager.setCurrentItem(ApplicationConstants.TAB_PARTY_MEMBERS_INDEX);
+                    hideFab();
                     break;
             }
         });
+
     }
 
     @Override
@@ -195,5 +198,4 @@ public class PartyActivity extends BaseActivity implements PartyView, FabListene
             binding.searchTransitionSheet.contractFab();
         }
     }
-
 }

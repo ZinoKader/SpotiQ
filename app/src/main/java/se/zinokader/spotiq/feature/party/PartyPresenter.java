@@ -78,7 +78,6 @@ public class PartyPresenter extends TiPresenter<PartyView> implements Connection
     }
 
     private boolean isLoadUpTimeUp() {
-        Log.d("oK", String.valueOf(ChronoUnit.SECONDS.between(initializedTimeStamp, LocalDateTime.now()) >= ApplicationConstants.LOAD_UP_TIME_SEC));
         return ChronoUnit.SECONDS.between(initializedTimeStamp, LocalDateTime.now()) >= ApplicationConstants.LOAD_UP_TIME_SEC;
     }
 
