@@ -48,10 +48,7 @@
             android:layout_marginTop="0dp"
             android:elevation="100dp"
             app:ft_color="@color/colorAccent"
-            app:ft_container_gravity="center">
-
-        </com.github.fabtransitionactivity.SheetLayout>
-
+            app:ft_container_gravity="center" />
 
         <se.zinokader.spotiq.feature.party.navigation.PartyViewPager
             android:id="@+id/tabPager"
@@ -135,8 +132,23 @@
 
             </android.support.v7.widget.Toolbar>
 
+
         </android.support.design.widget.AppBarLayout>
 
+        <be.rijckaert.tim.animatedvector.FloatingMusicActionButton
+            android:id="@+id/playPauseFab"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="530dp"
+            android:layout_marginEnd="35dp"
+            app:backgroundTint="@color/colorAccent"
+            app:mode="playToPause"
+            fab:elevation="10dp"
+            fab:fabSize="normal"
+            fab:rippleColor="@color/colorAccentDark"
+            fab:layout_anchor="@id/toolbarHolder"
+            fab:layout_anchorGravity="bottom|end"
+            fab:layout_behavior="se.zinokader.spotiq.util.view.ShrinkBehavior" />
 
 
     </android.support.design.widget.CoordinatorLayout>

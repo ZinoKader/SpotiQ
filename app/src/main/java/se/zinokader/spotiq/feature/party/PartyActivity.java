@@ -181,13 +181,15 @@ public class PartyActivity extends BaseActivity implements PartyView, FabListene
         if (!binding.searchFab.isShown()
             && (binding.tabPager.getCurrentItem() == ApplicationConstants.TAB_TRACKLIST_INDEX )
             && !isSnackbarShowing()) {
-            binding.searchFab.show(); //TODO: figure out how to auto-indent stuff like this a tab in
+            binding.searchFab.show();
+            binding.playPauseFab.show();
         }
     }
 
     @Override
     public void hideFab() {
         binding.searchFab.hide();
+        binding.playPauseFab.hide();
     }
 
     @Override
