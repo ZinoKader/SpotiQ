@@ -27,15 +27,14 @@ public class ShrinkBehavior extends CoordinatorLayout.Behavior<FloatingActionBut
     public boolean onDependentViewChanged(CoordinatorLayout parent, FloatingActionButton child, View dependency) {
         float translationY = getFabTranslationYForSnackbar(parent, child);
         float percentComplete = -translationY / dependency.getHeight();
-        float scaleFactor = (float) ((1 - percentComplete) * 1.5);
+        float scaleFactor = 1 - percentComplete;
 
         child.setScaleX(scaleFactor);
         child.setScaleY(scaleFactor);
         return false;
     }
 
-    private float getFabTranslationYForSnackbar(CoordinatorLayout parent,
-                                                FloatingActionButton fab) {
+    private float getFabTranslationYForSnackbar(CoordinatorLayout parent, FloatingActionButton fab) {
         float minOffset = 0;
         final List<View> dependencies = parent.getDependencies(fab);
         for (int i = 0, z = dependencies.size(); i < z; i++) {

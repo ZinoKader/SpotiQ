@@ -17,15 +17,19 @@ import net.grandcentrix.thirtyinch.TiPresenter;
 import org.threeten.bp.LocalDateTime;
 import org.threeten.bp.temporal.ChronoUnit;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
+import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import se.zinokader.spotiq.constant.ApplicationConstants;
 import se.zinokader.spotiq.constant.LogTag;
 import se.zinokader.spotiq.model.ChildEvent;
+import se.zinokader.spotiq.model.PartyChangePublisher;
 import se.zinokader.spotiq.model.Song;
 import se.zinokader.spotiq.model.User;
 import se.zinokader.spotiq.repository.PartiesRepository;
@@ -47,6 +51,11 @@ public class PartyPresenter extends TiPresenter<PartyView> implements Connection
     @Inject
     SpotifyRepository spotifyRepository;
 
+    private boolean isPaused = false;
+    private boolean wasPausedOnStartup = true;
+    private List<Song> tracklist = new ArrayList<>();
+    private static final PartyChangePublisher partyChangePublisher = new PartyChangePublisher();
+
     private LocalDateTime initializedTimeStamp;
     private SpotifyPlayer spotifyPlayer;
     private String partyTitle;
@@ -61,11 +70,11 @@ public class PartyPresenter extends TiPresenter<PartyView> implements Connection
 
     void init() {
         initializedTimeStamp = LocalDateTime.now();
+        sendToView(view -> view.delegateDataChanges(partyChangePublisher));
         loadPartyListener();
         loadTracklistListener();
         loadUser();
     }
-
 
     @Override
     protected void onDestroy() {
@@ -90,13 +99,13 @@ public class PartyPresenter extends TiPresenter<PartyView> implements Connection
                 User partyMember = childEvent.getDataSnapshot().getValue(User.class);
                 switch (childEvent.getChangeType()) {
                     case ADDED:
+                        partyChangePublisher.getNewPartyMemberPublisher().onNext(partyMember);
                         sendToView(view -> {
-                            view.addPartyMember(partyMember);
                             if (isLoadUpTimeUp()) view.showMessage(partyMember.getUserName() + " has joined the party");
                         });
                         break;
                     case CHANGED:
-                        sendToView(view -> view.changePartyMember(partyMember));
+                        partyChangePublisher.getChangedPartyMemberPublisher().onNext(partyMember);
                         break;
                 }
             });
@@ -110,8 +119,9 @@ public class PartyPresenter extends TiPresenter<PartyView> implements Connection
             .subscribe(childEvent -> {
                 if (childEvent.getChangeType().equals(ChildEvent.Type.ADDED)) {
                     Song song = childEvent.getDataSnapshot().getValue(Song.class);
+                    tracklist.add(song);
+                    partyChangePublisher.getNewTrackPublisher().onNext(song);
                     sendToView(view -> {
-                        view.addSong(song);
                         if (isLoadUpTimeUp()) view.showMessage(song.getName() + " queued by " + song.getAddedByUserName());
                     });
                 }
@@ -135,8 +145,8 @@ public class PartyPresenter extends TiPresenter<PartyView> implements Connection
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(userIsHost -> {
                 if (userIsHost) {
-                    sendToView(PartyView::setHostPriviliges);
                     loadPlayer();
+                    sendToView(PartyView::setHostPriviliges);
                 }
             });
     }
@@ -175,21 +185,62 @@ public class PartyPresenter extends TiPresenter<PartyView> implements Connection
         });
     }
 
-    @Override
-    public void onLoggedIn() {
-        /*
-        spotifyPlayer.playUri(new Player.OperationCallback() {
+    Observable<Boolean> play() {
+        if (tracklist.isEmpty()) {
+            sendToView(view -> view.showMessage("No songs in the tracklist, try adding some!"));
+            return Observable.just(false);
+        }
+        else if (isPaused) {
+            return Observable.create(subscriber -> spotifyPlayer.resume(new Player.OperationCallback() {
+                @Override
+                public void onSuccess() {
+                    subscriber.onNext(true);
+                    subscriber.onComplete();
+                }
+
+                @Override
+                public void onError(Error error) {
+                    subscriber.onNext(false);
+                    subscriber.onComplete();
+                }
+            }));
+        }
+        else {
+            return Observable.create(subscriber -> spotifyPlayer.playUri(new Player.OperationCallback() {
+                @Override
+                public void onSuccess() {
+                    subscriber.onNext(true);
+                    subscriber.onComplete();
+                }
+
+                @Override
+                public void onError(Error error) {
+                    subscriber.onNext(false);
+                    subscriber.onComplete();
+                }
+            }, tracklist.get(0).getSongUri(), 0, 0));
+        }
+    }
+
+    Observable<Boolean> pause() {
+        return Observable.create(subscriber -> spotifyPlayer.pause(new Player.OperationCallback() {
             @Override
             public void onSuccess() {
-
+                subscriber.onNext(true);
+                subscriber.onComplete();
             }
 
             @Override
             public void onError(Error error) {
-
+                subscriber.onNext(false);
+                subscriber.onComplete();
             }
-        }, "spotify:track:3n3Ppam7vgaVa1iaRUc9Lp", 0, 0);
-        */
+        }));
+    }
+
+    @Override
+    public void onLoggedIn() {
+
     }
 
     @Override
@@ -214,6 +265,22 @@ public class PartyPresenter extends TiPresenter<PartyView> implements Connection
 
     @Override
     public void onPlaybackEvent(PlayerEvent playerEvent) {
+        Log.d(LogTag.LOG_PARTY, "Spotify playback event " + playerEvent.name());
+        switch (playerEvent) {
+            //This gets called when the player initializes too. Checks if that was the case as well.
+            //This SDK is so hacky
+            case kSpPlaybackNotifyPause:
+                if (!wasPausedOnStartup) {
+                    isPaused = true;
+                }
+                else {
+                    wasPausedOnStartup = false;
+                }
+                break;
+            case kSpPlaybackNotifyPlay:
+                isPaused = false;
+                break;
+        }
     }
 
     @Override

@@ -69,7 +69,7 @@ public class SearchActivity extends BaseActivity implements SearchView {
         searchRecyclerAdapter.observeLongClicks()
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(song -> {
-                vibrator.vibrate(ApplicationConstants.SHORT_VIBRATION_DURATION);
+                vibrator.vibrate(ApplicationConstants.SHORT_VIBRATION_DURATION_MS);
                 if (song.getPreviewUrl() != null) {
                     presenter.startPreview(song.getPreviewUrl());
                 }

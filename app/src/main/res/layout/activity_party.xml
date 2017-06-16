@@ -137,6 +137,7 @@
 
         <be.rijckaert.tim.animatedvector.FloatingMusicActionButton
             android:id="@+id/playPauseFab"
+            android:visibility="invisible"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="530dp"

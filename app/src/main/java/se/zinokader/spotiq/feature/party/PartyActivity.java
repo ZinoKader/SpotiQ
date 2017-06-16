@@ -17,6 +17,7 @@ import net.grandcentrix.thirtyinch.plugin.TiActivityPlugin;
 
 import java.util.Arrays;
 
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import se.zinokader.spotiq.R;
 import se.zinokader.spotiq.constant.ApplicationConstants;
 import se.zinokader.spotiq.constant.SpotifyConstants;
@@ -28,8 +29,7 @@ import se.zinokader.spotiq.feature.party.partymember.PartyMemberFragmentBuilder;
 import se.zinokader.spotiq.feature.party.tracklist.TracklistFragment;
 import se.zinokader.spotiq.feature.party.tracklist.TracklistFragmentBuilder;
 import se.zinokader.spotiq.feature.search.SearchActivity;
-import se.zinokader.spotiq.model.Song;
-import se.zinokader.spotiq.model.User;
+import se.zinokader.spotiq.model.PartyChangePublisher;
 import se.zinokader.spotiq.util.di.Injector;
 import se.zinokader.spotiq.util.listener.FabListener;
 
@@ -42,6 +42,8 @@ public class PartyActivity extends BaseActivity implements PartyView, FabListene
     private PartyViewPagerAdapter partyViewPagerAdapter;
     private TracklistFragment tracklistFragment;
     private PartyMemberFragment partyMemberFragment;
+
+    private boolean shouldDisplayPlayPauseButton = false;
 
     public PartyActivity() {
         addPlugin(new TiActivityPlugin<>(PartyPresenter::new));
@@ -77,12 +79,35 @@ public class PartyActivity extends BaseActivity implements PartyView, FabListene
             switch (tabId) {
                 case R.id.tab_tracklist:
                     binding.tabPager.setCurrentItem(ApplicationConstants.TAB_TRACKLIST_INDEX);
-                    showFab();
+                    showControls();
                     break;
                 case R.id.tab_party_members:
                     binding.tabPager.setCurrentItem(ApplicationConstants.TAB_PARTY_MEMBERS_INDEX);
-                    hideFab();
+                    hideControls();
                     break;
+            }
+        });
+
+        if (!binding.playPauseFab.getCurrentMode().isShowingPlayIcon()) {
+            binding.playPauseFab.playAnimation();
+        }
+
+        binding.playPauseFab.setOnMusicFabClickListener(view -> {
+            if (binding.playPauseFab.getCurrentMode().isShowingPlayIcon()) {
+                presenter.play()
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(didPlay -> {
+                        //reset button state if play unsuccessful
+                        if (!didPlay) binding.playPauseFab.playAnimation();
+                    });
+            }
+            else {
+                presenter.pause()
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(didPause -> {
+                        //reset button state if pause unsuccessful
+                        if (!didPause) binding.playPauseFab.playAnimation();
+                    });
             }
         });
 
@@ -114,6 +139,14 @@ public class PartyActivity extends BaseActivity implements PartyView, FabListene
     }
 
     @Override
+    public void delegateDataChanges(PartyChangePublisher partyChangePublisher) {
+        tracklistFragment.setChangePublisher(partyChangePublisher);
+        partyMemberFragment.setChangePublisher(partyChangePublisher);
+        tracklistFragment.startListening();
+        partyMemberFragment.startListening();
+    }
+
+    @Override
     public void setUserDetails(String userName, String userImageUrl) {
         binding.userName.setText(userName);
         Glide.with(this)
@@ -138,23 +171,9 @@ public class PartyActivity extends BaseActivity implements PartyView, FabListene
     }
 
     @Override
-    public void addSong(Song song) {
-        tracklistFragment.addSong(song);
-    }
-
-    @Override
-    public void addPartyMember(User partyMember) {
-        partyMemberFragment.addMember(partyMember);
-    }
-
-    @Override
-    public void changePartyMember(User partyMember) {
-        partyMemberFragment.changePartyMember(partyMember);
-    }
-
-    @Override
     public void setHostPriviliges() {
-
+        shouldDisplayPlayPauseButton = true;
+        binding.playPauseFab.setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -177,17 +196,17 @@ public class PartyActivity extends BaseActivity implements PartyView, FabListene
     }
 
     @Override
-    public void showFab() {
+    public void showControls() {
         if (!binding.searchFab.isShown()
-            && (binding.tabPager.getCurrentItem() == ApplicationConstants.TAB_TRACKLIST_INDEX )
+            && (binding.tabPager.getCurrentItem() == ApplicationConstants.TAB_TRACKLIST_INDEX)
             && !isSnackbarShowing()) {
             binding.searchFab.show();
-            binding.playPauseFab.show();
+            if (shouldDisplayPlayPauseButton) binding.playPauseFab.show();
         }
     }
 
     @Override
-    public void hideFab() {
+    public void hideControls() {
         binding.searchFab.hide();
         binding.playPauseFab.hide();
     }

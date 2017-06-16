@@ -196,10 +196,10 @@ public class LobbyPresenter extends TiPresenter<LobbyView> {
     }
 
     private void navigateToParty(String partyTitle) {
-        Observable.just(ApplicationConstants.SHORT_ACTION_DELAY)
+        Observable.just(ApplicationConstants.SHORT_ACTION_DELAY_SEC)
             .observeOn(AndroidSchedulers.mainThread())
             .doOnNext(next -> sendToView(view -> view.showMessage("Entering party " + partyTitle + "...")))
-            .delay(ApplicationConstants.SHORT_ACTION_DELAY, TimeUnit.SECONDS, AndroidSchedulers.mainThread())
+            .delay(ApplicationConstants.SHORT_ACTION_DELAY_SEC, TimeUnit.SECONDS, AndroidSchedulers.mainThread())
             .subscribe(success -> sendToView(view -> view.goToParty(partyTitle)));
 
     }
