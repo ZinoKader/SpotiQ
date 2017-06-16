@@ -12,6 +12,8 @@ import se.zinokader.spotiq.service.SpotifyCommunicatorService;
 
 public abstract class BaseActivity extends CompositeActivity implements BaseView {
 
+    private boolean snackbarShowing = false;
+
     @Override
     public void onPause() {
         hideKeyboard();
@@ -19,8 +21,10 @@ public abstract class BaseActivity extends CompositeActivity implements BaseView
     }
 
     public void showMessage(String message) {
+        snackbarShowing = true;
         new SnackbarBuilder(getRootView())
             .message(message)
+            .timeoutDismissCallback(snackbar -> snackbarShowing = false)
             .build()
             .show();
     }
@@ -47,4 +51,7 @@ public abstract class BaseActivity extends CompositeActivity implements BaseView
         stopService(new Intent(this, SpotifyCommunicatorService.class));
     }
 
+    public boolean isSnackbarShowing() {
+        return snackbarShowing;
+    }
 }

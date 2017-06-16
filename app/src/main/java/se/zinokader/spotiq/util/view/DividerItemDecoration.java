@@ -63,7 +63,7 @@ public class DividerItemDecoration extends RecyclerView.ItemDecoration {
         }
 
         int position = parent.getChildAdapterPosition(view);
-        if (position == RecyclerView.NO_POSITION || (position == 0 && !mShowFirstDivider)) {
+        if (position == RecyclerView.NO_POSITION || position <= 2) {
             return;
         }
 

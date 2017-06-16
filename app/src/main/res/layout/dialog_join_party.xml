@@ -43,7 +43,7 @@
     <com.rengwuxian.materialedittext.MaterialEditText
         android:id="@+id/partyTitle"
         android:layout_width="250dp"
-        android:layout_height="80dp"
+        android:layout_height="85dp"
         android:hint="@string/party_title"
         android:inputType="textNoSuggestions"
         tools:layout_editor_absoluteX="80dp"
@@ -62,7 +62,7 @@
     <com.rengwuxian.materialedittext.MaterialEditText
         android:id="@+id/partyPassword"
         android:layout_width="250dp"
-        android:layout_height="80dp"
+        android:layout_height="85dp"
         android:hint="@string/password"
         android:inputType="textPassword"
         tools:layout_editor_absoluteX="80dp"

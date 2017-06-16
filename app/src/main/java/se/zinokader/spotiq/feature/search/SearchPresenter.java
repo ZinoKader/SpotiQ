@@ -1,7 +1,6 @@
 package se.zinokader.spotiq.feature.search;
 
 import android.support.annotation.NonNull;
-import android.util.Log;
 
 import net.grandcentrix.thirtyinch.TiPresenter;
 
@@ -115,7 +114,6 @@ public class SearchPresenter extends TiPresenter<SearchView> {
 
                 @Override
                 public void onNext(List<Song> songs) {
-                    Log.d("songs", "yeah " + songs.size());
                     sendToView(view -> view.updateSearch(songs, false));
                 }
 

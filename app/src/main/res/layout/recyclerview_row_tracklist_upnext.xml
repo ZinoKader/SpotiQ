@@ -1,115 +1,123 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/trackViewHolder"
-    android:clipToPadding="false"
-    android:outlineProvider="bounds"
-    android:elevation="10dp"
     android:layout_width="match_parent"
     android:layout_height="120dp"
-    android:background="@color/colorPrimary"
-    android:foreground="?selectableItemBackground"
-    android:clickable="true">
+    android:gravity="center">
 
-
-    <ImageView
-        android:id="@+id/albumArt"
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/trackViewHolder"
+        android:layout_width="365dp"
+        android:layout_height="120dp"
+        android:layout_gravity="center"
         android:background="@color/colorPrimary"
+        android:clickable="true"
+        android:clipToPadding="false"
         android:elevation="10dp"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
-        android:layout_marginBottom="8dp"
-        android:layout_marginStart="24dp"
-        android:layout_marginTop="8dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
-        android:id="@+id/songName"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="15dp"
-        android:layout_marginTop="32dp"
-        android:ellipsize="end"
-        android:fontFamily="@font/roboto_light"
-        android:maxLines="1"
-        android:maxWidth="260dp"
-        android:shadowColor="@color/colorMaterialGray"
-        android:textAlignment="viewStart"
-        android:textColor="@color/colorMaterialWhite"
-        android:textSize="14sp"
-        android:textStyle="bold"
-        app:layout_constraintStart_toEndOf="@+id/albumArt"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
-        android:id="@+id/artistsName"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="15dp"
-        android:layout_marginTop="5dp"
-        android:ellipsize="end"
-        android:fontFamily="@font/roboto_light"
-        android:maxLines="1"
-        android:maxWidth="130dp"
-        android:shadowColor="@color/colorMaterialGray"
-        android:textAlignment="viewStart"
-        android:textColor="@color/colorMaterialWhite"
-        android:textSize="10sp"
-        android:textStyle="normal"
-        app:layout_constraintStart_toEndOf="@+id/albumArt"
-        app:layout_constraintTop_toBottomOf="@+id/songName" />
+        android:focusable="true"
+        android:foreground="?selectableItemBackground"
+        android:outlineProvider="bounds">
 
 
-    <TextView
-        android:id="@+id/separator"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="5dp"
-        android:layout_marginTop="5dp"
-        android:text="@string/spotify_artists_album_separator"
-        android:textColor="@color/colorMaterialWhite"
-        android:textSize="10sp"
-        app:layout_constraintStart_toEndOf="@+id/artistsName"
-        app:layout_constraintTop_toBottomOf="@+id/songName" />
+        <ImageView
+            android:id="@+id/albumArt"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_marginBottom="8dp"
+            android:layout_marginStart="24dp"
+            android:layout_marginTop="8dp"
+            android:background="@color/colorPrimary"
+            android:elevation="15dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-    <TextView
-        android:id="@+id/albumName"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="6dp"
-        android:layout_marginTop="5dp"
-        android:ellipsize="end"
-        android:fontFamily="@font/roboto_light"
-        android:maxLines="1"
-        android:maxWidth="120dp"
-        android:shadowColor="@color/colorMaterialGray"
-        android:textAlignment="viewStart"
-        android:textColor="@color/colorMaterialWhite"
-        android:textSize="10sp"
-        android:textStyle="normal"
-        app:layout_constraintStart_toEndOf="@+id/separator"
-        app:layout_constraintTop_toBottomOf="@+id/songName" />
+        <TextView
+            android:id="@+id/songName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="15dp"
+            android:layout_marginTop="32dp"
+            android:ellipsize="end"
+            android:fontFamily="@font/roboto_light"
+            android:maxLines="1"
+            android:maxWidth="260dp"
+            android:shadowColor="@color/colorMaterialGray"
+            android:textAlignment="viewStart"
+            android:textColor="@color/colorMaterialWhite"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toEndOf="@+id/albumArt"
+            app:layout_constraintTop_toTopOf="parent" />
 
-    <TextView
-        android:id="@+id/runTime"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:ellipsize="end"
-        android:fontFamily="@font/roboto_light"
-        android:maxLines="1"
-        android:maxWidth="130dp"
-        android:shadowColor="@color/colorMaterialGray"
-        android:textAlignment="viewStart"
-        android:textColor="@color/colorMaterialWhite"
-        android:textSize="9sp"
-        android:textStyle="normal"
-        app:layout_constraintStart_toEndOf="@+id/albumArt"
-        android:layout_marginStart="15dp"
-        android:layout_marginTop="24dp"
-        app:layout_constraintTop_toBottomOf="@+id/songName" />
+        <TextView
+            android:id="@+id/artistsName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="15dp"
+            android:layout_marginTop="5dp"
+            android:ellipsize="end"
+            android:fontFamily="@font/roboto_light"
+            android:maxLines="1"
+            android:maxWidth="130dp"
+            android:shadowColor="@color/colorMaterialGray"
+            android:textAlignment="viewStart"
+            android:textColor="@color/colorMaterialWhite"
+            android:textSize="10sp"
+            android:textStyle="normal"
+            app:layout_constraintStart_toEndOf="@+id/albumArt"
+            app:layout_constraintTop_toBottomOf="@+id/songName" />
 
 
-</android.support.constraint.ConstraintLayout>
+        <TextView
+            android:id="@+id/separator"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:layout_marginTop="5dp"
+            android:text="@string/spotify_artists_album_separator"
+            android:textColor="@color/colorMaterialWhite"
+            android:textSize="10sp"
+            app:layout_constraintStart_toEndOf="@+id/artistsName"
+            app:layout_constraintTop_toBottomOf="@+id/songName" />
 
+        <TextView
+            android:id="@+id/albumName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="6dp"
+            android:layout_marginTop="5dp"
+            android:ellipsize="end"
+            android:fontFamily="@font/roboto_light"
+            android:maxLines="1"
+            android:maxWidth="120dp"
+            android:shadowColor="@color/colorMaterialGray"
+            android:textAlignment="viewStart"
+            android:textColor="@color/colorMaterialWhite"
+            android:textSize="10sp"
+            android:textStyle="normal"
+            app:layout_constraintStart_toEndOf="@+id/separator"
+            app:layout_constraintTop_toBottomOf="@+id/songName" />
+
+        <TextView
+            android:id="@+id/runTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="15dp"
+            android:layout_marginTop="24dp"
+            android:ellipsize="end"
+            android:fontFamily="@font/roboto_light"
+            android:maxLines="1"
+            android:maxWidth="130dp"
+            android:shadowColor="@color/colorMaterialGray"
+            android:textAlignment="viewStart"
+            android:textColor="@color/colorMaterialWhite"
+            android:textSize="9sp"
+            android:textStyle="normal"
+            app:layout_constraintStart_toEndOf="@+id/albumArt"
+            app:layout_constraintTop_toBottomOf="@+id/songName" />
+
+
+    </android.support.constraint.ConstraintLayout>
+
+</LinearLayout>

@@ -21,6 +21,7 @@ import se.zinokader.spotiq.R;
 import se.zinokader.spotiq.databinding.FragmentTracklistBinding;
 import se.zinokader.spotiq.model.Song;
 import se.zinokader.spotiq.util.listener.FabListener;
+import se.zinokader.spotiq.util.view.DividerItemDecoration;
 import su.j2e.rvjoiner.JoinableAdapter;
 import su.j2e.rvjoiner.JoinableLayout;
 import su.j2e.rvjoiner.RvJoiner;
@@ -45,7 +46,7 @@ public class TracklistFragment extends Fragment {
         }
         else {
             throw new ClassCastException(context.getClass().getSimpleName()
-                    + " must implement " + fabListener.getClass().getSimpleName());
+                + " must implement " + fabListener.getClass().getSimpleName());
         }
         super.onAttach(context);
     }
@@ -69,6 +70,7 @@ public class TracklistFragment extends Fragment {
             }
         });
 
+        binding.tracklistRecyclerView.addItemDecoration(new DividerItemDecoration(getResources().getDrawable(R.drawable.track_list_divider)));
         binding.tracklistRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
         nowPlayingRecyclerAdapter = new NowPlayingRecyclerAdapter(songs);

@@ -7,6 +7,8 @@
         <item name="android:windowBackground">@color/colorPrimary</item>
         <item name="android:colorControlActivated">@color/colorMaterialWhite</item>
         <item name="android:textCursorDrawable">@color/colorMaterialWhite</item>
+        <item name="android:navigationBarColor">@color/colorPrimaryDark</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
     </style>
 
     <style name="AppThemeNoActionBar" parent="Theme.AppCompat.NoActionBar">
@@ -16,6 +18,8 @@
         <item name="android:windowBackground">@color/colorPrimary</item>
         <item name="android:colorControlActivated">@color/colorMaterialWhite</item>
         <item name="android:textCursorDrawable">@color/colorMaterialWhite</item>
+        <item name="android:navigationBarColor">@color/colorPrimaryDark</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
     </style>
 
     <style name="AppThemeToolBar" parent="AppThemeNoActionBar">
@@ -29,6 +33,8 @@
 
     <style name="FullScreenDialogStyle" parent="AppThemeNoActionBar">
         <item name="android:windowIsFloating">false</item>
+        <item name="android:navigationBarColor">@color/colorAccent</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
     </style>
 
 </resources>

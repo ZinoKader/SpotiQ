@@ -178,7 +178,11 @@ public class PartyActivity extends BaseActivity implements PartyView, FabListene
 
     @Override
     public void showFab() {
-        binding.searchFab.show();
+        if (!binding.searchFab.isShown()
+            && (binding.tabPager.getCurrentItem() == ApplicationConstants.TAB_TRACKLIST_INDEX )
+            && !isSnackbarShowing()) {
+            binding.searchFab.show(); //TODO: figure out how to auto-indent stuff like this a tab in
+        }
     }
 
     @Override
@@ -188,7 +192,7 @@ public class PartyActivity extends BaseActivity implements PartyView, FabListene
 
     @Override
     public View getRootView() {
-        return binding.getRoot();
+        return binding.coordinatorContainer;
     }
 
     @Override
