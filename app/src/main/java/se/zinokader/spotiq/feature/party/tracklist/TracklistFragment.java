@@ -7,6 +7,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -44,7 +45,9 @@ public class TracklistFragment extends Fragment {
     private FabListener fabListener;
 
     private RvJoiner recyclerViewJoiner = new RvJoiner(true);
+    private JoinableLayout emptyTracklistLayout = new JoinableLayout(R.layout.recyclerview_empty_placeholder_view);
     private boolean emptyTracklistNoticeAttached = true;
+    private JoinableLayout upNextHeaderLayout = new JoinableLayout(R.layout.recyclerview_row_tracklist_upnext_header);
     private boolean upNextHeaderAttached = false;
 
     private String partyTitle;
@@ -120,11 +123,12 @@ public class TracklistFragment extends Fragment {
             getResources().getDrawable(R.drawable.track_list_divider), false, true));
         binding.tracklistRecyclerView.setLayoutManager(new LinearLayoutManager(inflater.getContext()));
 
-        NowPlayingRecyclerAdapter nowPlayingRecyclerAdapter = new NowPlayingRecyclerAdapter(songs);
-        UpNextRecyclerAdapter upNextRecyclerAdapter = new UpNextRecyclerAdapter(songs);
-        recyclerViewJoiner.add(new JoinableLayout(R.layout.recyclerview_empty_placeholder_view));
-        recyclerViewJoiner.add(new JoinableAdapter(nowPlayingRecyclerAdapter, true));
-        recyclerViewJoiner.add(new JoinableAdapter(upNextRecyclerAdapter, true));
+        JoinableAdapter nowPlayingJoinable = new JoinableAdapter(new NowPlayingRecyclerAdapter(songs), true);
+        JoinableAdapter upNextJoinable = new JoinableAdapter(new UpNextRecyclerAdapter(songs), true);
+
+        recyclerViewJoiner.add(emptyTracklistLayout, 0);
+        recyclerViewJoiner.add(nowPlayingJoinable);
+        recyclerViewJoiner.add(upNextJoinable);
 
         SlideInBottomAnimationAdapter animatedAdapter =
             new SlideInBottomAnimationAdapter(recyclerViewJoiner.getAdapter());
@@ -152,18 +156,22 @@ public class TracklistFragment extends Fragment {
     private void addSong(Song song) {
 
         if (emptyTracklistNoticeAttached) {
-            recyclerViewJoiner.remove(new JoinableLayout(R.layout.recyclerview_empty_placeholder_view));
+            Log.d("Removed shit", "okokokok");
+            recyclerViewJoiner.remove(emptyTracklistLayout);
             emptyTracklistNoticeAttached = false;
             recyclerViewJoiner.getAdapter().notifyItemRemoved(0);
         }
 
         songs.add(song);
         int songPosition = getSongPosition(song);
-        if (songs.size() > 1 && !upNextHeaderAttached) {
+
+        if (songs.size() == 1) {
             recyclerViewJoiner.getAdapter().notifyItemInserted(songPosition);
-            recyclerViewJoiner.add(new JoinableLayout(R.layout.recyclerview_row_tracklist_upnext_header), 1);
+        }
+        else if (songs.size() >= 2 && !upNextHeaderAttached) {
+            recyclerViewJoiner.add(upNextHeaderLayout, 1);
             upNextHeaderAttached = true;
-            recyclerViewJoiner.getAdapter().notifyItemInserted(1);
+            recyclerViewJoiner.getAdapter().notifyItemRangeInserted(1, 2);
         }
         else {
             recyclerViewJoiner.getAdapter().notifyItemInserted(songPosition + 1);
@@ -172,20 +180,22 @@ public class TracklistFragment extends Fragment {
 
     private void removeSong(Song song) {
         int songPosition = getSongPosition(song);
-        songs.remove(song);
-        if (songs.size() <= 1) {
-            //recyclerViewJoiner.getAdapter().notifyItemRemoved(songPosition);
-            recyclerViewJoiner.remove(new JoinableLayout(R.layout.recyclerview_row_tracklist_upnext_header));
+        songs.remove(songPosition);
+
+        if (songs.size() <= 1 && upNextHeaderAttached) {
+            recyclerViewJoiner.remove(upNextHeaderLayout);
             upNextHeaderAttached = false;
-            recyclerViewJoiner.getAdapter().notifyItemRemoved(1);
+            recyclerViewJoiner.getAdapter().notifyItemRangeRemoved(songPosition, 2);
         }
         else {
             recyclerViewJoiner.getAdapter().notifyItemRemoved(songPosition + 1);
         }
 
+
         if (songs.isEmpty() && !emptyTracklistNoticeAttached) {
-            recyclerViewJoiner.add(new JoinableLayout(R.layout.recyclerview_empty_placeholder_view));
+            recyclerViewJoiner.add(emptyTracklistLayout, 0);
             emptyTracklistNoticeAttached = true;
+            recyclerViewJoiner.getAdapter().notifyItemInserted(0);
         }
     }
 
