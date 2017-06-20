@@ -31,6 +31,42 @@ public class TracklistRepository {
             .addOnFailureListener(subscriber::onError));
     }
 
+    public Observable<Boolean> removeFirstSong(String partyTitle) {
+        return Observable.create(subscriber -> databaseReference
+            .child(partyTitle)
+            .child(FirebaseConstants.CHILD_TRACKLIST)
+            .orderByKey()
+            .limitToFirst(1)
+            .addChildEventListener(new ChildEventListener() {
+                @Override
+                public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                    dataSnapshot.getRef().removeValue((databaseError, databaseReference) -> {
+                        subscriber.onNext(true);
+                        subscriber.onComplete();
+                    });
+                }
+
+                @Override
+                public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+                }
+
+                @Override
+                public void onChildRemoved(DataSnapshot dataSnapshot) {
+                }
+
+                @Override
+                public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    subscriber.onNext(false);
+                    subscriber.onComplete();
+                }
+            }));
+    }
+
     public Observable<ChildEvent> listenToTracklistChanges(String partyTitle) {
         return Observable.create(subscriber -> databaseReference
             .child(partyTitle)

@@ -2,17 +2,32 @@ package se.zinokader.spotiq.feature.base;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.view.inputmethod.InputMethodManager;
 
 import com.github.andrewlord1990.snackbarbuilder.SnackbarBuilder;
-import com.pascalwelsch.compositeandroid.activity.CompositeActivity;
 
+import nucleus5.factory.PresenterFactory;
+import nucleus5.presenter.Presenter;
+import nucleus5.view.NucleusAppCompatActivity;
 import se.zinokader.spotiq.service.SpotifyCommunicatorService;
+import se.zinokader.spotiq.util.di.Injector;
 
-public abstract class BaseActivity extends CompositeActivity implements BaseView {
+public abstract class BaseActivity<P extends Presenter> extends NucleusAppCompatActivity<P> implements BaseView {
 
     private boolean snackbarShowing = false;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        final PresenterFactory<P> superFactory = super.getPresenterFactory();
+        setPresenterFactory(superFactory == null ? null : (PresenterFactory<P>) () -> {
+            P presenter = superFactory.createPresenter();
+            ((Injector) getApplication()).inject(presenter);
+            return presenter;
+        });
+    }
 
     @Override
     public void onPause() {

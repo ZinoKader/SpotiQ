@@ -8,6 +8,7 @@
 
     <com.mikhaellopez.circularimageview.CircularImageView
         android:id="@+id/userImage"
+        android:src="@drawable/image_profile_placeholder"
         android:layout_width="80dp"
         android:layout_height="80dp"
         android:scaleType="centerCrop"
@@ -21,6 +22,7 @@
 
     <TextView
         android:id="@+id/userName"
+        android:text="@string/username_placeholder"
         android:layout_width="150dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="28dp"

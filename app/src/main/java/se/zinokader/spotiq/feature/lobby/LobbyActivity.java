@@ -18,26 +18,19 @@ import android.view.animation.AccelerateDecelerateInterpolator;
 import com.bumptech.glide.Glide;
 import com.rengwuxian.materialedittext.MaterialEditText;
 
-import net.grandcentrix.thirtyinch.TiPresenter;
-import net.grandcentrix.thirtyinch.plugin.TiActivityPlugin;
-
+import nucleus5.factory.RequiresPresenter;
 import se.zinokader.spotiq.R;
 import se.zinokader.spotiq.constant.ApplicationConstants;
 import se.zinokader.spotiq.databinding.ActivityLobbyBinding;
 import se.zinokader.spotiq.feature.base.BaseActivity;
 import se.zinokader.spotiq.feature.party.PartyActivity;
-import se.zinokader.spotiq.util.di.Injector;
 import se.zinokader.spotiq.util.validator.PartyPasswordValidator;
 import se.zinokader.spotiq.util.validator.PartyTitleValidator;
 
-public class LobbyActivity extends BaseActivity implements LobbyView {
+@RequiresPresenter(LobbyPresenter.class)
+public class LobbyActivity extends BaseActivity<LobbyPresenter> implements LobbyView {
 
     ActivityLobbyBinding binding;
-    private LobbyPresenter presenter;
-
-    public LobbyActivity() {
-        addPlugin(new TiActivityPlugin<>(LobbyPresenter::new));
-    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -57,18 +50,6 @@ public class LobbyActivity extends BaseActivity implements LobbyView {
     public void onPause() {
         super.onPause();
         super.stopForegroundTokenRenewalService();
-    }
-
-    @Override
-    public void setPresenter(TiPresenter presenter) {
-        this.presenter = (LobbyPresenter) presenter;
-        ((Injector) getApplication()).inject(presenter);
-        this.presenter.init();
-    }
-
-    @Override
-    public boolean isPresenterAttached() {
-        return presenter != null;
     }
 
     public void setUserDetails(String userName, String userImageUrl) {
@@ -126,12 +107,12 @@ public class LobbyActivity extends BaseActivity implements LobbyView {
                 case JOIN_DIALOG:
                     if(!(partyTitle.validate() & partyPassword.validate())) return;
                     animateDialog(DialogAction.CLOSE, dialogType, dialogView, mockDialog);
-                    presenter.joinParty(partyTitle.getText().toString(), partyPassword.getText().toString());
+                    getPresenter().joinParty(partyTitle.getText().toString(), partyPassword.getText().toString());
                     break;
                 case CREATE_DIALOG:
                     if(!(partyTitle.validate() & partyPassword.validate())) return;
                     animateDialog(DialogAction.CLOSE, dialogType, dialogView, mockDialog);
-                    presenter.createParty(partyTitle.getText().toString(), partyPassword.getText().toString());
+                    getPresenter().createParty(partyTitle.getText().toString(), partyPassword.getText().toString());
                     break;
             }
         });

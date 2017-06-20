@@ -12,42 +12,79 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
 
-import com.dilpreet2028.fragmenter_annotations.Fragmenter;
-import com.dilpreet2028.fragmenter_annotations.annotations.FragModule;
-
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
-import io.reactivex.Observable;
+import javax.inject.Inject;
+
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
-import jp.wasabeef.recyclerview.animators.LandingAnimator;
+import jp.wasabeef.recyclerview.adapters.SlideInBottomAnimationAdapter;
+import jp.wasabeef.recyclerview.animators.FadeInDownAnimator;
 import se.zinokader.spotiq.R;
 import se.zinokader.spotiq.constant.ApplicationConstants;
 import se.zinokader.spotiq.databinding.FragmentTracklistBinding;
-import se.zinokader.spotiq.model.PartyChangePublisher;
 import se.zinokader.spotiq.model.Song;
+import se.zinokader.spotiq.repository.TracklistRepository;
+import se.zinokader.spotiq.util.di.Injector;
 import se.zinokader.spotiq.util.listener.FabListener;
-import se.zinokader.spotiq.util.type.Ignore;
 import se.zinokader.spotiq.util.view.DividerItemDecoration;
 import su.j2e.rvjoiner.JoinableAdapter;
 import su.j2e.rvjoiner.JoinableLayout;
 import su.j2e.rvjoiner.RvJoiner;
 
-@FragModule
 public class TracklistFragment extends Fragment {
 
     FragmentTracklistBinding binding;
 
+    @Inject
+    TracklistRepository tracklistRepository;
+
     private FabListener fabListener;
+
     private RvJoiner recyclerViewJoiner = new RvJoiner(true);
-    private LandingAnimator animator = new LandingAnimator();
+    private boolean emptyTracklistNoticeAttached = true;
     private boolean upNextHeaderAttached = false;
 
-    private Observable<Song> newSongObserver;
-    private Observable<Ignore> firstSongFinishedObserver;
-
+    private String partyTitle;
     private List<Song> songs = new ArrayList<>();
+
+    public static TracklistFragment newInstance(String partyTitle) {
+        TracklistFragment tracklistFragment = new TracklistFragment();
+        Bundle newInstanceArguments = new Bundle();
+        newInstanceArguments.putString("partyTitle", partyTitle);
+        tracklistFragment.setArguments(newInstanceArguments);
+        return tracklistFragment;
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        ((Injector) getContext().getApplicationContext()).inject(this);
+        super.onCreate(savedInstanceState);
+        this.partyTitle = getArguments().getString("partyTitle");
+
+        tracklistRepository.listenToTracklistChanges(partyTitle)
+            .delay(ApplicationConstants.DEFAULT_DELAY_MS, TimeUnit.MILLISECONDS)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(childEvent -> {
+                Song song = childEvent.getDataSnapshot().getValue(Song.class);
+                switch (childEvent.getChangeType()) {
+                    case ADDED:
+                        addSong(song);
+                        break;
+                    case REMOVED:
+                        removeSong(song);
+                        break;
+                }});
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle bundle) {
+        super.onSaveInstanceState(bundle);
+        bundle.putString("partyTitle", getArguments().getString("partyTitle"));
+    }
 
     @Override
     public void onAttach(Context context) {
@@ -65,7 +102,6 @@ public class TracklistFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_tracklist, container, false);
-        Fragmenter.inject(this);
 
         binding.tracklistRecyclerView.setOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
@@ -80,67 +116,87 @@ public class TracklistFragment extends Fragment {
             }
         });
 
-
-        animator.setInterpolator(new AccelerateDecelerateInterpolator());
-        animator.setAddDuration(ApplicationConstants.DEFAULT_ITEM_ANIMATION_DURATION_MS);
-        animator.setRemoveDuration(ApplicationConstants.DEFAULT_ITEM_ANIMATION_DURATION_MS);
-        animator.setMoveDuration(ApplicationConstants.DEFAULT_ITEM_ANIMATION_DURATION_MS);
-        animator.setChangeDuration(ApplicationConstants.DEFAULT_ITEM_ANIMATION_DURATION_MS);
-        binding.tracklistRecyclerView.setItemAnimator(animator);
-
         binding.tracklistRecyclerView.addItemDecoration(new DividerItemDecoration(
             getResources().getDrawable(R.drawable.track_list_divider), false, true));
-        binding.tracklistRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        binding.tracklistRecyclerView.setLayoutManager(new LinearLayoutManager(inflater.getContext()));
 
         NowPlayingRecyclerAdapter nowPlayingRecyclerAdapter = new NowPlayingRecyclerAdapter(songs);
         UpNextRecyclerAdapter upNextRecyclerAdapter = new UpNextRecyclerAdapter(songs);
+        recyclerViewJoiner.add(new JoinableLayout(R.layout.recyclerview_empty_placeholder_view));
         recyclerViewJoiner.add(new JoinableAdapter(nowPlayingRecyclerAdapter, true));
         recyclerViewJoiner.add(new JoinableAdapter(upNextRecyclerAdapter, true));
 
-        binding.tracklistRecyclerView.setAdapter(recyclerViewJoiner.getAdapter());
+        SlideInBottomAnimationAdapter animatedAdapter =
+            new SlideInBottomAnimationAdapter(recyclerViewJoiner.getAdapter());
+        animatedAdapter.setInterpolator(new AccelerateDecelerateInterpolator());
+        animatedAdapter.setHasStableIds(true);
+        animatedAdapter.setStartPosition(ApplicationConstants.DEFAULT_LIST_ANIMATION_ITEM_POSITION_START);
+        animatedAdapter.setDuration(ApplicationConstants.DEFAULT_LIST_ANIMATION_DURATION_MS);
+
+        FadeInDownAnimator itemAnimator = new FadeInDownAnimator();
+        itemAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
+        itemAnimator.setAddDuration(ApplicationConstants.DEFAULT_ITEM_ADD_DURATION_MS);
+        itemAnimator.setRemoveDuration(ApplicationConstants.DEFAULT_ITEM_REMOVE_DURATION_MS);
+        itemAnimator.setMoveDuration(ApplicationConstants.DEFAULT_ITEM_MOVE_DURATION_MS);
+        binding.tracklistRecyclerView.setItemAnimator(itemAnimator);
+
+        binding.tracklistRecyclerView.setAdapter(animatedAdapter);
 
         return binding.getRoot();
     }
 
-    public void setChangePublisher(PartyChangePublisher partyChangePublisher) {
-        this.newSongObserver = partyChangePublisher.observeNewSongs();
-        this.firstSongFinishedObserver = partyChangePublisher.observeFirstSongFinished();
-    }
-
-    public void startListening() {
-
-        newSongObserver
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(this::addSong);
-
-        firstSongFinishedObserver
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(ignore -> removeFirstSong());
-
+    public void scrollToTop() {
+        binding.tracklistRecyclerView.smoothScrollToPosition(0);
     }
 
     private void addSong(Song song) {
+
+        if (emptyTracklistNoticeAttached) {
+            recyclerViewJoiner.remove(new JoinableLayout(R.layout.recyclerview_empty_placeholder_view));
+            emptyTracklistNoticeAttached = false;
+            recyclerViewJoiner.getAdapter().notifyItemRemoved(0);
+        }
+
         songs.add(song);
+        int songPosition = getSongPosition(song);
         if (songs.size() > 1 && !upNextHeaderAttached) {
+            recyclerViewJoiner.getAdapter().notifyItemInserted(songPosition);
             recyclerViewJoiner.add(new JoinableLayout(R.layout.recyclerview_row_tracklist_upnext_header), 1);
             upNextHeaderAttached = true;
+            recyclerViewJoiner.getAdapter().notifyItemInserted(1);
         }
-        recyclerViewJoiner.getAdapter().notifyItemInserted(songs.size());
+        else {
+            recyclerViewJoiner.getAdapter().notifyItemInserted(songPosition + 1);
+        }
     }
 
-    private void removeFirstSong() {
-        removeSong(0);
-    }
-
-    private void removeSong(int position) {
-        songs.remove(position);
+    private void removeSong(Song song) {
+        int songPosition = getSongPosition(song);
+        songs.remove(song);
         if (songs.size() <= 1) {
+            //recyclerViewJoiner.getAdapter().notifyItemRemoved(songPosition);
             recyclerViewJoiner.remove(new JoinableLayout(R.layout.recyclerview_row_tracklist_upnext_header));
             upNextHeaderAttached = false;
+            recyclerViewJoiner.getAdapter().notifyItemRemoved(1);
         }
-        recyclerViewJoiner.getAdapter().notifyDataSetChanged();
+        else {
+            recyclerViewJoiner.getAdapter().notifyItemRemoved(songPosition + 1);
+        }
+
+        if (songs.isEmpty() && !emptyTracklistNoticeAttached) {
+            recyclerViewJoiner.add(new JoinableLayout(R.layout.recyclerview_empty_placeholder_view));
+            emptyTracklistNoticeAttached = true;
+        }
     }
+
+    private int getSongPosition(Song song) {
+        for (int songPosition = 0; songPosition < songs.size(); songPosition++) {
+            if (song.getSongSpotifyId().equals(songs.get(songPosition).getSongSpotifyId())) {
+                return songPosition;
+            }
+        }
+        return -1;
+    }
+
 
 }

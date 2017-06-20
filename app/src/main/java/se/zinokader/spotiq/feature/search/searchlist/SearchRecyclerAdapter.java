@@ -20,13 +20,13 @@ import io.reactivex.subjects.PublishSubject;
 import kaaes.spotify.webapi.android.models.ArtistSimple;
 import se.zinokader.spotiq.R;
 import se.zinokader.spotiq.model.Song;
-import se.zinokader.spotiq.util.type.Ignore;
+import se.zinokader.spotiq.util.type.Empty;
 
 public class SearchRecyclerAdapter extends RecyclerView.Adapter<SearchRecyclerAdapter.SongHolder> {
 
     private final PublishSubject<Song> onClickSubject = PublishSubject.create();
     private final PublishSubject<Song> onLongClickSubject = PublishSubject.create();
-    private final PublishSubject<Ignore> onLongClickEndSubject = PublishSubject.create();
+    private final PublishSubject<Empty> onLongClickEndSubject = PublishSubject.create();
     private boolean curentlyLongClicking = false;
     private List<Song> songs = new ArrayList<>();
 
@@ -53,7 +53,7 @@ public class SearchRecyclerAdapter extends RecyclerView.Adapter<SearchRecyclerAd
         songHolder.itemView.setOnTouchListener((view, motionEvent) -> {
             view.onTouchEvent(motionEvent);
             if (motionEvent.getAction() == MotionEvent.ACTION_UP && curentlyLongClicking) {
-                onLongClickEndSubject.onNext(new Ignore());
+                onLongClickEndSubject.onNext(new Empty());
                 curentlyLongClicking = false;
             }
             return true;
@@ -88,12 +88,12 @@ public class SearchRecyclerAdapter extends RecyclerView.Adapter<SearchRecyclerAd
         this.songs.addAll(songs);
     }
 
-    public Song getSong(int itemId) {
-        return songs.get(itemId);
-    }
-
     public void clearSongs() {
         songs.clear();
+    }
+
+    public Song getSong(int itemId) {
+        return songs.get(itemId);
     }
 
     public Observable<Song> observeClicks() {
@@ -104,7 +104,7 @@ public class SearchRecyclerAdapter extends RecyclerView.Adapter<SearchRecyclerAd
         return onLongClickSubject;
     }
 
-    public Observable<Ignore> observeLongClickEnd() {
+    public Observable<Empty> observeLongClickEnd() {
         return onLongClickEndSubject;
     }
 

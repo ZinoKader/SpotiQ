@@ -13,42 +13,24 @@ import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.view.animation.AccelerateDecelerateInterpolator;
 
-import net.grandcentrix.thirtyinch.TiPresenter;
-import net.grandcentrix.thirtyinch.plugin.TiActivityPlugin;
-
+import nucleus5.factory.RequiresPresenter;
 import se.zinokader.spotiq.R;
 import se.zinokader.spotiq.constant.ApplicationConstants;
 import se.zinokader.spotiq.constant.LogTag;
 import se.zinokader.spotiq.databinding.ActivityStartupBinding;
 import se.zinokader.spotiq.feature.base.BaseActivity;
 import se.zinokader.spotiq.feature.lobby.LobbyActivity;
-import se.zinokader.spotiq.util.di.Injector;
 
-public class StartupActivity extends BaseActivity implements StartupView {
+@RequiresPresenter(StartupPresenter.class)
+public class StartupActivity extends BaseActivity<StartupPresenter> implements StartupView {
 
     ActivityStartupBinding binding;
-    private StartupPresenter presenter;
-
-    public StartupActivity() {
-        addPlugin(new TiActivityPlugin<>(StartupPresenter::new));
-    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_startup);
-        binding.logInButton.setOnClickListener(c -> presenter.logIn());
-    }
-
-    @Override
-    public void setPresenter(TiPresenter presenter) {
-        this.presenter = (StartupPresenter) presenter;
-        ((Injector) getApplication()).inject(presenter);
-    }
-
-    @Override
-    public boolean isPresenterAttached() {
-        return presenter != null;
+        binding.logInButton.setOnClickListener(c -> getPresenter().request(StartupPresenter.LOG_IN_RESTARTABLE_ID));
     }
 
     public void startProgress() {
@@ -131,11 +113,12 @@ public class StartupActivity extends BaseActivity implements StartupView {
             return;
         }
 
+
         if (resultCode == RESULT_OK) {
-            presenter.logInFinished();
+            getPresenter().request(StartupPresenter.LOG_IN_FINISHED_RESTARTABLE_ID);
         }
         else {
-            presenter.logInFailed();
+            getPresenter().request(StartupPresenter.LOG_IN_FAILED_RESTARTABLE_ID);
         }
     }
 

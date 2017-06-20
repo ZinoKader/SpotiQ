@@ -3,7 +3,10 @@ package se.zinokader.spotiq.feature.party;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.view.View;
 
 import com.bumptech.glide.Glide;
@@ -12,61 +15,41 @@ import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.spotify.sdk.android.player.Config;
 
-import net.grandcentrix.thirtyinch.TiPresenter;
-import net.grandcentrix.thirtyinch.plugin.TiActivityPlugin;
-
-import java.util.Arrays;
-
-import io.reactivex.android.schedulers.AndroidSchedulers;
+import be.rijckaert.tim.animatedvector.FloatingMusicActionButton;
+import nucleus5.factory.RequiresPresenter;
 import se.zinokader.spotiq.R;
 import se.zinokader.spotiq.constant.ApplicationConstants;
 import se.zinokader.spotiq.constant.SpotifyConstants;
 import se.zinokader.spotiq.databinding.ActivityPartyBinding;
 import se.zinokader.spotiq.feature.base.BaseActivity;
-import se.zinokader.spotiq.feature.party.navigation.PartyViewPagerAdapter;
 import se.zinokader.spotiq.feature.party.partymember.PartyMemberFragment;
-import se.zinokader.spotiq.feature.party.partymember.PartyMemberFragmentBuilder;
 import se.zinokader.spotiq.feature.party.tracklist.TracklistFragment;
-import se.zinokader.spotiq.feature.party.tracklist.TracklistFragmentBuilder;
 import se.zinokader.spotiq.feature.search.SearchActivity;
-import se.zinokader.spotiq.model.PartyChangePublisher;
-import se.zinokader.spotiq.util.di.Injector;
 import se.zinokader.spotiq.util.listener.FabListener;
 
-public class PartyActivity extends BaseActivity implements PartyView, FabListener {
+@RequiresPresenter(PartyPresenter.class)
+public class PartyActivity extends BaseActivity<PartyPresenter> implements PartyView, FabListener {
 
     ActivityPartyBinding binding;
-    private PartyPresenter presenter;
-    private Bundle partyInfo;
+    private String partyTitle;
+    private boolean displayHostControls = false;
 
-    private PartyViewPagerAdapter partyViewPagerAdapter;
-    private TracklistFragment tracklistFragment;
-    private PartyMemberFragment partyMemberFragment;
-
-    private boolean shouldDisplayPlayPauseButton = false;
-
-    public PartyActivity() {
-        addPlugin(new TiActivityPlugin<>(PartyPresenter::new));
-    }
+    private Fragment selectedFragment;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_party);
-        partyInfo = getIntent().getExtras();
+
+        Bundle partyInfo = getIntent().getExtras();
         if (partyInfo != null) {
-            binding.partyTitle.setText(partyInfo.getString(ApplicationConstants.PARTY_NAME_EXTRA));
+            partyTitle = partyInfo.getString(ApplicationConstants.PARTY_NAME_EXTRA);
+            getPresenter().setPartyTitle(partyTitle);
         }
 
         postponeEnterTransition();
 
-        partyViewPagerAdapter = new PartyViewPagerAdapter(getSupportFragmentManager());
-        tracklistFragment = TracklistFragmentBuilder.newInstance();
-        partyMemberFragment = PartyMemberFragmentBuilder.newInstance();
-
-        partyViewPagerAdapter.addFragments(Arrays.asList(tracklistFragment, partyMemberFragment));
-        binding.tabPager.setAdapter(partyViewPagerAdapter);
-
+        binding.partyTitle.setText(partyTitle);
         binding.searchTransitionSheet.setFab(binding.searchFab);
         binding.searchFab.setOnClickListener(view -> binding.searchTransitionSheet.expandFab());
         binding.searchTransitionSheet.setFabAnimationEndListener(() -> {
@@ -78,38 +61,37 @@ public class PartyActivity extends BaseActivity implements PartyView, FabListene
         binding.bottomBar.setOnTabSelectListener(tabId -> {
             switch (tabId) {
                 case R.id.tab_tracklist:
-                    binding.tabPager.setCurrentItem(ApplicationConstants.TAB_TRACKLIST_INDEX);
+                    selectedFragment = TracklistFragment.newInstance(partyTitle);
                     showControls();
                     break;
                 case R.id.tab_party_members:
-                    binding.tabPager.setCurrentItem(ApplicationConstants.TAB_PARTY_MEMBERS_INDEX);
+                    selectedFragment = PartyMemberFragment.newInstance(partyTitle);
+                    //binding.tabPager.setCurrentItem(ApplicationConstants.TAB_PARTY_MEMBERS_INDEX);
                     hideControls();
+            }
+            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+            transaction.replace(R.id.fragmentHolder, selectedFragment);
+            transaction.commit();
+        });
+
+        binding.bottomBar.setOnTabReselectListener(tabId -> {
+            switch (tabId) {
+                case R.id.tab_tracklist:
+                    ((TracklistFragment) selectedFragment).scrollToTop();
                     break;
+                case R.id.tab_party_members:
+                    ((PartyMemberFragment) selectedFragment).scrollToTop();
             }
         });
 
-        if (!binding.playPauseFab.getCurrentMode().isShowingPlayIcon()) {
-            binding.playPauseFab.playAnimation();
-        }
+        binding.playPauseFab.changeMode(FloatingMusicActionButton.Mode.PLAY_TO_PAUSE);
 
-        binding.playPauseFab.setOnMusicFabClickListener(view -> {
-            if (binding.playPauseFab.getCurrentMode().isShowingPlayIcon()) {
-                presenter.play()
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(didPlay -> {
-                        //reset button state if play unsuccessful
-                        if (!didPlay) binding.playPauseFab.playAnimation();
-                    });
+        binding.playPauseFab.setOnMusicFabClickListener(view -> getPresenter().musicAction().subscribe(didPlay -> {
+            if (!didPlay) { //resets the button to display the play button
+                binding.playPauseFab.playAnimation();
             }
-            else {
-                presenter.pause()
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(didPause -> {
-                        //reset button state if pause unsuccessful
-                        if (!didPause) binding.playPauseFab.playAnimation();
-                    });
-            }
-        });
+        }));
+
 
     }
 
@@ -123,27 +105,6 @@ public class PartyActivity extends BaseActivity implements PartyView, FabListene
     public void onPause() {
         super.onPause();
         super.stopForegroundTokenRenewalService();
-    }
-
-    @Override
-    public void setPresenter(TiPresenter presenter) {
-        this.presenter = (PartyPresenter) presenter;
-        ((Injector) getApplication()).inject(presenter);
-        this.presenter.setPartyTitle(partyInfo.getString(ApplicationConstants.PARTY_NAME_EXTRA));
-        this.presenter.init();
-    }
-
-    @Override
-    public boolean isPresenterAttached() {
-        return presenter != null;
-    }
-
-    @Override
-    public void delegateDataChanges(PartyChangePublisher partyChangePublisher) {
-        tracklistFragment.setChangePublisher(partyChangePublisher);
-        partyMemberFragment.setChangePublisher(partyChangePublisher);
-        tracklistFragment.startListening();
-        partyMemberFragment.startListening();
     }
 
     @Override
@@ -172,7 +133,7 @@ public class PartyActivity extends BaseActivity implements PartyView, FabListene
 
     @Override
     public void setHostPriviliges() {
-        shouldDisplayPlayPauseButton = true;
+        displayHostControls = true;
         binding.playPauseFab.setVisibility(View.VISIBLE);
     }
 
@@ -197,11 +158,10 @@ public class PartyActivity extends BaseActivity implements PartyView, FabListene
 
     @Override
     public void showControls() {
-        if (!binding.searchFab.isShown()
-            && (binding.tabPager.getCurrentItem() == ApplicationConstants.TAB_TRACKLIST_INDEX)
-            && !isSnackbarShowing()) {
+        Log.d("Current tab position", String.valueOf(binding.bottomBar.getCurrentTabPosition()));
+        if (!binding.searchFab.isShown() && (binding.bottomBar.getCurrentTabPosition() == 0) && !isSnackbarShowing()) {
             binding.searchFab.show();
-            if (shouldDisplayPlayPauseButton) binding.playPauseFab.show();
+            if (displayHostControls) binding.playPauseFab.show();
         }
     }
 

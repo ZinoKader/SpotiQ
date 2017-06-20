@@ -24,7 +24,20 @@
     <!-- Transition names -->
     <string name="profile_image_transition">profileImageTransition</string>
     <string name="user_name_transition">userNameTransition</string>
+
+    <!-- Placeholders and symbols -->
     <string name="spotify_artists_album_separator">●</string>
+    <string name="text_placeholder_line">⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯</string>
+    <string name="username_placeholder">Username</string>
+    <string name="party_title_placeholder">Party Title</string>
+    <string name="empty_tracklist_notice_header">The tracklist is empty</string>
+
+    <!-- Application-wide -->
     <string name="now_playing">Now playing</string>
     <string name="up_next">Up next</string>
+
+    <!-- Notification -->
+    <string name="media_notification_channel_name">Music controls</string>
+    <string name="media_notification_channel_description">View and control the currently playing track</string>
+
 </resources>

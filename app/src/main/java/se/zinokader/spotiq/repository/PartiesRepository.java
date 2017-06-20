@@ -9,7 +9,6 @@ import com.google.firebase.database.Transaction;
 import com.google.firebase.database.ValueEventListener;
 
 import io.reactivex.Observable;
-import io.reactivex.Single;
 import se.zinokader.spotiq.constant.FirebaseConstants;
 import se.zinokader.spotiq.model.ChildEvent;
 import se.zinokader.spotiq.model.Party;
@@ -121,8 +120,8 @@ public class PartiesRepository {
             }));
     }
 
-    public Single<Boolean> isHostOfParty(String spotifyUserId, String partyTitle) {
-        return Single.create(subscriber -> databaseReference
+    public Observable<Boolean> isHostOfParty(String spotifyUserId, String partyTitle) {
+        return Observable.create(subscriber -> databaseReference
             .child(partyTitle)
             .child(FirebaseConstants.CHILD_PARTYINFO)
             .addListenerForSingleValueEvent(new ValueEventListener() {
@@ -130,7 +129,8 @@ public class PartiesRepository {
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     Party dbParty = dataSnapshot.getValue(Party.class);
                     boolean isHost = dbParty != null && dbParty.getHostSpotifyId().equals(spotifyUserId);
-                    subscriber.onSuccess(isHost);
+                    subscriber.onNext(isHost);
+                    subscriber.onComplete();
                 }
 
                 @Override

@@ -8,81 +8,116 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
-import com.dilpreet2028.fragmenter_annotations.Fragmenter;
-import com.dilpreet2028.fragmenter_annotations.annotations.FragModule;
+import android.view.animation.AccelerateDecelerateInterpolator;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
-import io.reactivex.Observable;
+import javax.inject.Inject;
+
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
+import jp.wasabeef.recyclerview.adapters.AlphaInAnimationAdapter;
 import se.zinokader.spotiq.R;
+import se.zinokader.spotiq.constant.ApplicationConstants;
 import se.zinokader.spotiq.databinding.FragmentPartyMembersBinding;
-import se.zinokader.spotiq.model.PartyChangePublisher;
 import se.zinokader.spotiq.model.User;
+import se.zinokader.spotiq.repository.PartiesRepository;
 import se.zinokader.spotiq.util.comparator.PartyMemberComparator;
+import se.zinokader.spotiq.util.di.Injector;
 import se.zinokader.spotiq.util.view.DividerItemDecoration;
 
-@FragModule
 public class PartyMemberFragment extends Fragment {
 
     FragmentPartyMembersBinding binding;
+
+    @Inject
+    PartiesRepository partiesRepository;
+
     private PartyMemberRecyclerAdapter partyMemberRecyclerAdapter;
 
-    private Observable<User> newPartyMemberObserver;
-    private Observable<User> partyMemberChangeObserver;
-
+    private String partyTitle;
     private List<User> partyMembers = new ArrayList<>();
+
+    public static PartyMemberFragment newInstance(String partyTitle) {
+        PartyMemberFragment partyMemberFragment = new PartyMemberFragment();
+        Bundle newInstanceArguments = new Bundle();
+        newInstanceArguments.putString("partyTitle", partyTitle);
+        partyMemberFragment.setArguments(newInstanceArguments);
+        return partyMemberFragment;
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        ((Injector) getContext().getApplicationContext()).inject(this);
+        super.onCreate(savedInstanceState);
+        this.partyTitle = getArguments().getString("partyTitle");
+
+        partiesRepository.listenToPartyMemberChanges(partyTitle)
+            .delay(ApplicationConstants.DEFAULT_DELAY_MS, TimeUnit.MILLISECONDS)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(childEvent -> {
+                User partyMember = childEvent.getDataSnapshot().getValue(User.class);
+                switch (childEvent.getChangeType()) {
+                    case ADDED:
+                        addMember(partyMember);
+                        break;
+                    case CHANGED:
+                        changePartyMember(partyMember);
+                        break;
+                }
+            });
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle bundle) {
+        super.onSaveInstanceState(bundle);
+        bundle.putString("partyTitle", getArguments().getString("partyTitle"));
+    }
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_party_members, container, false);
-        Fragmenter.inject(this);
 
         partyMemberRecyclerAdapter = new PartyMemberRecyclerAdapter(partyMembers);
         binding.membersRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         binding.membersRecyclerView.addItemDecoration(new DividerItemDecoration(getContext()
             .getDrawable(R.drawable.search_list_divider),false, false));
-        binding.membersRecyclerView.setAdapter(partyMemberRecyclerAdapter);
+
+        AlphaInAnimationAdapter animatedAdapter =
+            new AlphaInAnimationAdapter(partyMemberRecyclerAdapter);
+        animatedAdapter.setInterpolator(new AccelerateDecelerateInterpolator());
+        animatedAdapter.setHasStableIds(true);
+        animatedAdapter.setStartPosition(ApplicationConstants.DEFAULT_LIST_ANIMATION_ITEM_POSITION_START);
+        animatedAdapter.setDuration(ApplicationConstants.DEFAULT_LIST_ANIMATION_DURATION_MS);
+
+        binding.membersRecyclerView.setAdapter(animatedAdapter);
         return binding.getRoot();
     }
 
-    public void setChangePublisher(PartyChangePublisher partyChangePublisher) {
-        this.newPartyMemberObserver = partyChangePublisher.observeNewPartyMembers();
-        this.partyMemberChangeObserver= partyChangePublisher.observePartyMemberChanges();
+    public void scrollToTop() {
+        binding.membersRecyclerView.smoothScrollToPosition(0);
     }
 
-    public void startListening() {
-
-        newPartyMemberObserver
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(this::addMember);
-
-        partyMemberChangeObserver
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(this::changePartyMember);
-
-    }
-
-    public void addMember(User partyMember) {
+    private void addMember(User partyMember) {
         partyMembers.add(partyMember);
         Collections.sort(partyMembers, PartyMemberComparator.getByJoinedTimeComparator());
         partyMemberRecyclerAdapter.notifyDataSetChanged();
     }
 
-    public void changePartyMember(User changedPartyMember) {
+    private void changePartyMember(User changedPartyMember) {
+        List<User> toRemove = new ArrayList<>();
         for (User existingPartyMember : partyMembers) {
             if (existingPartyMember.getUserId().equals(changedPartyMember.getUserId())) {
-                partyMembers.remove(existingPartyMember);
-                addMember(changedPartyMember);
+                toRemove.add(existingPartyMember);
             }
         }
+        partyMembers.removeAll(toRemove);
+        addMember(changedPartyMember);
     }
 
 }

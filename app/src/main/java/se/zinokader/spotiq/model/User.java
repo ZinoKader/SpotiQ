@@ -1,5 +1,8 @@
 package se.zinokader.spotiq.model;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import org.threeten.bp.LocalDateTime;
 
 import java.util.List;
@@ -7,7 +10,7 @@ import java.util.List;
 import kaaes.spotify.webapi.android.models.Image;
 import se.zinokader.spotiq.constant.ApplicationConstants;
 
-public class User {
+public class User implements Parcelable {
 
     private String userId;
     private String userName;
@@ -73,4 +76,41 @@ public class User {
     public void setJoinedNowTimeStamp() {
         this.joinedTimeStamp = LocalDateTime.now().toString();
     }
+
+    protected User(Parcel in) {
+        userId = in.readString();
+        userName = in.readString();
+        userImageUrl = in.readString();
+        joinedTimeStamp = in.readString();
+        songsRequested = in.readInt();
+        hasHostPriviliges = in.readByte() != 0x00;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(userId);
+        dest.writeString(userName);
+        dest.writeString(userImageUrl);
+        dest.writeString(joinedTimeStamp);
+        dest.writeInt(songsRequested);
+        dest.writeByte((byte) (hasHostPriviliges ? 0x01 : 0x00));
+    }
+
+    @SuppressWarnings("unused")
+    public static final Parcelable.Creator<User> CREATOR = new Parcelable.Creator<User>() {
+        @Override
+        public User createFromParcel(Parcel in) {
+            return new User(in);
+        }
+
+        @Override
+        public User[] newArray(int size) {
+            return new User[size];
+        }
+    };
 }

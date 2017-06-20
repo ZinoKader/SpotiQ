@@ -1,10 +1,8 @@
 package se.zinokader.spotiq.feature.search;
 
-import android.support.annotation.NonNull;
+import android.os.Bundle;
+import android.util.Log;
 
-import net.grandcentrix.thirtyinch.TiPresenter;
-
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,7 +16,9 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import kaaes.spotify.webapi.android.SpotifyService;
 import kaaes.spotify.webapi.android.models.TracksPager;
+import se.zinokader.spotiq.constant.LogTag;
 import se.zinokader.spotiq.constant.SpotifyConstants;
+import se.zinokader.spotiq.feature.base.BasePresenter;
 import se.zinokader.spotiq.feature.search.preview.PreviewPlayer;
 import se.zinokader.spotiq.model.Song;
 import se.zinokader.spotiq.model.User;
@@ -28,7 +28,7 @@ import se.zinokader.spotiq.repository.TracklistRepository;
 import se.zinokader.spotiq.service.SpotifyCommunicatorService;
 import se.zinokader.spotiq.util.mapper.TrackMapper;
 
-public class SearchPresenter extends TiPresenter<SearchView> {
+public class SearchPresenter extends BasePresenter<SearchView> {
 
     @Inject
     SpotifyCommunicatorService spotifyCommunicatorService;
@@ -46,23 +46,31 @@ public class SearchPresenter extends TiPresenter<SearchView> {
     private String partyTitle;
     private User user;
 
-    @Override
-    protected void onAttachView(@NonNull SearchView view) {
-        super.onAttachView(view);
-        if (!view.isPresenterAttached()) {
-            view.setPresenter(this);
-        }
-    }
+    private static final int LOAD_USER_RESTARTABLE_ID = 764;
 
     void setPartyTitle(String partyTitle) {
         this.partyTitle = partyTitle;
     }
 
-    void init() {
-        spotifyRepository.getMe(spotifyCommunicatorService.getWebApi())
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(userPrivate -> user = new User(userPrivate.id, userPrivate.display_name, userPrivate.images));
+    @Override
+    protected void onCreate(Bundle savedState) {
+        super.onCreate(savedState);
+
+        //load user
+        restartableLatestCache(LOAD_USER_RESTARTABLE_ID,
+            () -> spotifyRepository.getMe(spotifyCommunicatorService.getWebApi())
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread()),
+            (lobbyView, userPrivate) -> {
+                user = new User(userPrivate.id, userPrivate.display_name, userPrivate.images);
+            }, (lobbyView, throwable) -> {
+                Log.d(LogTag.LOG_LOBBY, "Error when getting user Spotify data");
+                throwable.printStackTrace();
+            });
+
+        if (savedState == null) {
+            start(LOAD_USER_RESTARTABLE_ID);
+        }
     }
 
     @Override
@@ -83,20 +91,20 @@ public class SearchPresenter extends TiPresenter<SearchView> {
         tracklistRepository.addSong(song, partyTitle)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(succeeded -> {
-                if (succeeded) {
-                    sendToView(view -> view.finishWithSuccess("Song added to the tracklist!"));
-                    partiesRepository.incrementUserSongRequestCount(user, partyTitle);
+            .subscribe(succeeded -> view().subscribe(searchViewOptionalView -> {
+                if (searchViewOptionalView.view != null) {
+                    if (succeeded) {
+                        searchViewOptionalView.view.finishWithSuccess("Song added to the tracklist!");
+                        partiesRepository.incrementUserSongRequestCount(user, partyTitle);
+                    }
+                    else {
+                        searchViewOptionalView.view.showMessage("Song could not be added to the tracklist");
+                    }
                 }
-                else {
-                    sendToView(view -> view.showMessage("Song could not be added to the tracklist"));
-                }
-            });
+            }));
     }
 
     void searchTracks(String query) {
-
-        sendToView(view -> view.updateSearch(new ArrayList<Song>(), true));
 
         Map<String, Object> searchOptions = new HashMap<>();
         searchOptions.put(SpotifyService.LIMIT, SpotifyConstants.SEARCH_QUERY_RESPONSE_LIMIT);
@@ -114,7 +122,11 @@ public class SearchPresenter extends TiPresenter<SearchView> {
 
                 @Override
                 public void onNext(List<Song> songs) {
-                    sendToView(view -> view.updateSearch(songs, false));
+                    view().subscribe(searchViewOptionalView -> {
+                        if (searchViewOptionalView.view != null) {
+                            searchViewOptionalView.view.updateSearch(songs, false);
+                        }
+                    });
                 }
 
                 @Override

@@ -46,6 +46,11 @@ public class PartyMemberRecyclerAdapter extends RecyclerView.Adapter<PartyMember
     }
 
     @Override
+    public long getItemId(int position) {
+        return partyMembers.get(position).getUserId().hashCode();
+    }
+
+    @Override
     public int getItemCount() {
         return partyMembers.size();
     }

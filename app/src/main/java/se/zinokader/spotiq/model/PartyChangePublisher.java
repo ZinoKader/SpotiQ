@@ -2,12 +2,12 @@ package se.zinokader.spotiq.model;
 
 import io.reactivex.Observable;
 import io.reactivex.subjects.PublishSubject;
-import se.zinokader.spotiq.util.type.Ignore;
+import se.zinokader.spotiq.util.type.Empty;
 
 public class PartyChangePublisher {
 
     private static final PublishSubject<Song> newTrackPublisher = PublishSubject.create();
-    private static final PublishSubject<Ignore> removeLatestTrackPublisher = PublishSubject.create();
+    private static final PublishSubject<Empty> removeLatestTrackPublisher = PublishSubject.create();
     private static final PublishSubject<User> newPartyMemberPublisher = PublishSubject.create();
     private static final PublishSubject<User> changedPartyMemberPublisher = PublishSubject.create();
 
@@ -17,7 +17,7 @@ public class PartyChangePublisher {
         return newTrackPublisher;
     }
 
-    public PublishSubject<Ignore> getRemoveLatestTrackPublisher() {
+    public PublishSubject<Empty> getRemoveLatestTrackPublisher() {
         return removeLatestTrackPublisher;
     }
 
@@ -33,7 +33,7 @@ public class PartyChangePublisher {
         return newTrackPublisher;
     }
 
-    public Observable<Ignore> observeFirstSongFinished() {
+    public Observable<Empty> observeFirstSongFinished() {
         return removeLatestTrackPublisher;
     }
 
