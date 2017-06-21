@@ -30,7 +30,7 @@ public class StartupActivity extends BaseActivity<StartupPresenter> implements S
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_startup);
-        binding.logInButton.setOnClickListener(c -> getPresenter().request(StartupPresenter.LOG_IN_RESTARTABLE_ID));
+        binding.logInButton.setOnClickListener(c -> getPresenter().logIn());
     }
 
     public void startProgress() {
@@ -113,12 +113,11 @@ public class StartupActivity extends BaseActivity<StartupPresenter> implements S
             return;
         }
 
-
         if (resultCode == RESULT_OK) {
-            getPresenter().request(StartupPresenter.LOG_IN_FINISHED_RESTARTABLE_ID);
+            getPresenter().logInFinished();
         }
         else {
-            getPresenter().request(StartupPresenter.LOG_IN_FAILED_RESTARTABLE_ID);
+            getPresenter().logInFailed();
         }
     }
 

@@ -2,6 +2,7 @@ package se.zinokader.spotiq.feature.party;
 
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
@@ -24,6 +25,7 @@ import se.zinokader.spotiq.feature.base.BaseActivity;
 import se.zinokader.spotiq.feature.party.partymember.PartyMemberFragment;
 import se.zinokader.spotiq.feature.party.tracklist.TracklistFragment;
 import se.zinokader.spotiq.feature.search.SearchActivity;
+import se.zinokader.spotiq.util.ShortcutUtil;
 import se.zinokader.spotiq.util.listener.FabListener;
 
 @RequiresPresenter(PartyPresenter.class)
@@ -47,6 +49,10 @@ public class PartyActivity extends BaseActivity<PartyPresenter> implements Party
         if (partyInfo != null) {
             partyTitle = partyInfo.getString(ApplicationConstants.PARTY_NAME_EXTRA);
             getPresenter().setPartyTitle(partyTitle);
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
+            ShortcutUtil.addSearchShortcut(this, partyTitle);
         }
 
         postponeEnterTransition();
@@ -95,7 +101,14 @@ public class PartyActivity extends BaseActivity<PartyPresenter> implements Party
             }
         }));
 
+    }
 
+    @Override
+    protected void onDestroy() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
+            ShortcutUtil.removeAllShortcuts(this);
+        }
+        super.onDestroy();
     }
 
     @Override

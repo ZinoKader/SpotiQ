@@ -1,71 +1,81 @@
 package se.zinokader.spotiq.feature.login;
 
-import android.os.Bundle;
-
-import com.google.firebase.auth.FirebaseAuth;
-
 import java.util.concurrent.TimeUnit;
+
+import javax.inject.Inject;
 
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.schedulers.Schedulers;
 import se.zinokader.spotiq.constant.ApplicationConstants;
 import se.zinokader.spotiq.feature.base.BasePresenter;
+import se.zinokader.spotiq.repository.UserRepository;
 import se.zinokader.spotiq.util.type.Empty;
 
 
 public class StartupPresenter extends BasePresenter<StartupView> {
 
-    public static final int LOG_IN_RESTARTABLE_ID = 8265;
-    public static final int LOG_IN_FINISHED_RESTARTABLE_ID = 7161;
-    public static final int LOG_IN_FAILED_RESTARTABLE_ID = 4716;
+    @Inject
+    UserRepository userRepository;
 
-    @Override
-    protected void onCreate(Bundle savedState) {
-        super.onCreate(savedState);
+    private CompositeDisposable disposableActions = new CompositeDisposable();
 
-        //Log in //TODO: Move this to a repository and return Observable<Boolean> to handle failure correctly
-        restartableFirst(LOG_IN_RESTARTABLE_ID,
-            () -> Observable.create(subscriber -> FirebaseAuth.getInstance().signInAnonymously()
-                .addOnSuccessListener(authResult -> {
-                    subscriber.onNext(true);
-                    subscriber.onComplete();
-                })
-                .addOnFailureListener(subscriber::onError)),
-            (startupView, o) -> {
-                startupView.showMessage("Connected to SpotiQ servers");
-                startupView.startProgress();
-                Observable.just(ApplicationConstants.SHORT_ACTION_DELAY_SEC)
-                    .delay(ApplicationConstants.SHORT_ACTION_DELAY_SEC, TimeUnit.SECONDS)
-                    .subscribe(delay -> startupView.goToSpotifyAuthentication());
-            },
-            (startupView, throwable) -> {
-                startupView.showMessage("Could not connect to SpotiQ servers");
-            });
+    void logIn() {
+        view().subscribe(startupViewOptionalView -> {
+            if (startupViewOptionalView.view != null) {
+                userRepository.logInFirebaseUser()
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(didLogin -> {
+                        if (didLogin) {
+                            startupViewOptionalView.view.showMessage("Registering and authenticating user...");
+                        } else {
+                            startupViewOptionalView.view.showMessage("Could not connect to SpotiQ servers");
+                        }
+                        startupViewOptionalView.view.startProgress();
+                        Observable.just(ApplicationConstants.SHORT_ACTION_DELAY_SEC)
+                            .delay(ApplicationConstants.SHORT_ACTION_DELAY_SEC, TimeUnit.SECONDS)
+                            .subscribe(delay -> startupViewOptionalView.view.goToSpotifyAuthentication());
+                    }, throwable -> {
 
+                    });
+            }
+        }).dispose();
+    }
 
-        //Connect finished
-        restartableFirst(LOG_IN_FINISHED_RESTARTABLE_ID,
-            () -> Observable.just(new Empty())
-                .observeOn(AndroidSchedulers.mainThread())
-                .delay(ApplicationConstants.SHORT_ACTION_DELAY_SEC, TimeUnit.SECONDS, AndroidSchedulers.mainThread()),
-            (startupView, empty) -> {
-                startupView.finishProgress();
-                startupView.showMessage("Connected to Spotify successfully");
+    void logInFinished() {
+        disposableActions.add(view().subscribe(startupViewOptionalView -> {
+            if (startupViewOptionalView.view != null) {
                 Observable.just(new Empty())
+                    .observeOn(AndroidSchedulers.mainThread())
                     .delay(ApplicationConstants.SHORT_ACTION_DELAY_SEC, TimeUnit.SECONDS, AndroidSchedulers.mainThread())
-                    .subscribe(delayFinished -> startupView.goToLobby());
-            });
+                    .doOnNext(firstDelayFinished -> {
+                        startupViewOptionalView.view.finishProgress();
+                        startupViewOptionalView.view.showMessage("Successfully authenticated with Spotify");
+                    })
+                    .delay(ApplicationConstants.LONG_ACTION_DELAY_SEC, TimeUnit.SECONDS, AndroidSchedulers.mainThread())
+                    .subscribe(delayFinished -> {
+                        disposableActions.clear();
+                        startupViewOptionalView.view.goToLobby();
+                    });
+            }
+        }));
+    }
 
-
-        //Connect failed
-        restartableFirst(LOG_IN_FAILED_RESTARTABLE_ID,
-            () -> Observable.just(new Empty())
-                .observeOn(AndroidSchedulers.mainThread())
-                .delay(ApplicationConstants.SHORT_ACTION_DELAY_SEC, TimeUnit.SECONDS, AndroidSchedulers.mainThread()),
-            (startupView, empty) -> {
-                startupView.resetProgress();
-                startupView.showMessage("Something went wrong when connecting to Spotify");
-            });
+    void logInFailed() {
+        disposableActions.add(view().subscribe(startupViewOptionalView -> {
+            if (startupViewOptionalView.view != null) {
+                Observable.just(new Empty())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .delay(ApplicationConstants.SHORT_ACTION_DELAY_SEC, TimeUnit.SECONDS, AndroidSchedulers.mainThread())
+                    .subscribe(delayFinished -> {
+                        disposableActions.clear();
+                        startupViewOptionalView.view.resetProgress();
+                        startupViewOptionalView.view.showMessage("Something went wrong on Spotify authentication");
+                    });
+            }
+        }));
     }
 
 }

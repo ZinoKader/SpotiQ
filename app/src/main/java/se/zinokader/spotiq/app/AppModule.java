@@ -13,6 +13,7 @@ import se.zinokader.spotiq.model.SpotifyAuthenticator;
 import se.zinokader.spotiq.repository.PartiesRepository;
 import se.zinokader.spotiq.repository.SpotifyRepository;
 import se.zinokader.spotiq.repository.TracklistRepository;
+import se.zinokader.spotiq.repository.UserRepository;
 import se.zinokader.spotiq.service.SpotifyCommunicatorService;
 
 @Module
@@ -42,6 +43,11 @@ class AppModule {
         DatabaseReference databaseReference = firebaseDatabase.getReference()
                 .child(FirebaseConstants.CHILD_PARTYLIST);
         return new PartiesRepository(databaseReference);
+    }
+
+    @Provides
+    UserRepository provideUserRepository() {
+        return new UserRepository();
     }
 
     @Provides

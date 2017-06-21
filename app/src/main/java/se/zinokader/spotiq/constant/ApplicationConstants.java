@@ -9,9 +9,11 @@ public class ApplicationConstants {
     public static final int SEARCH_INTENT_REQUEST_CODE = 3125;
 
     /* Time and timing-related */
+    public static final int DEFER_SNACKBAR_DELAY = 1000;
     public static final int SHORT_VIBRATION_DURATION_MS = 30;
     public static final int SHORT_ACTION_DELAY_SEC = 1;
     public static final int MEDIUM_ACTION_DELAY_SEC = 2;
+    public static final int LONG_ACTION_DELAY_SEC = 3;
 
     /* Image-related */
     public static final String ALBUM_ART_PLACEHOLDER_URL = "https://www.zinokader.se/img/spotiq-album-placeholder.png";
@@ -23,6 +25,8 @@ public class ApplicationConstants {
     /* Notification-related */
     public static final String MEDIA_NOTIFICATION_CHANNEL_ID = "media_notification_channel";
 
+    /* App shortcut-related */
+    public static final String SEARCH_SHORTCUT_ID = "spotiq_search_shortcut";
 
     /* Activity & Lifecycle-related */
 
@@ -39,6 +43,6 @@ public class ApplicationConstants {
     public static final int DEFAULT_ITEM_MOVE_DURATION_MS = 300;
 
     /* Search-related */
-    public static final int DEFAULT_DEBOUNCE_MS = 400;
+    public static final int DEFAULT_DEBOUNCE_MS = 550;
 
 }

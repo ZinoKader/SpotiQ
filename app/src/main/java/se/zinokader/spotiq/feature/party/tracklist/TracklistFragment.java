@@ -7,11 +7,10 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.DecelerateInterpolator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,7 +49,6 @@ public class TracklistFragment extends Fragment {
     private JoinableLayout upNextHeaderLayout = new JoinableLayout(R.layout.recyclerview_row_tracklist_upnext_header);
     private boolean upNextHeaderAttached = false;
 
-    private String partyTitle;
     private List<Song> songs = new ArrayList<>();
 
     public static TracklistFragment newInstance(String partyTitle) {
@@ -65,7 +63,7 @@ public class TracklistFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         ((Injector) getContext().getApplicationContext()).inject(this);
         super.onCreate(savedInstanceState);
-        this.partyTitle = getArguments().getString("partyTitle");
+        String partyTitle = getArguments().getString("partyTitle");
 
         tracklistRepository.listenToTracklistChanges(partyTitle)
             .delay(ApplicationConstants.DEFAULT_DELAY_MS, TimeUnit.MILLISECONDS)
@@ -112,7 +110,7 @@ public class TracklistFragment extends Fragment {
                 if (dy > 0) {
                     fabListener.hideControls();
                 }
-                else if (dy < 0) {
+                else {
                     fabListener.showControls();
                 }
                 super.onScrolled(recyclerView, dx, dy);
@@ -132,13 +130,13 @@ public class TracklistFragment extends Fragment {
 
         SlideInBottomAnimationAdapter animatedAdapter =
             new SlideInBottomAnimationAdapter(recyclerViewJoiner.getAdapter());
-        animatedAdapter.setInterpolator(new AccelerateDecelerateInterpolator());
+        animatedAdapter.setInterpolator(new DecelerateInterpolator());
+        animatedAdapter.setFirstOnly(true);
         animatedAdapter.setHasStableIds(true);
-        animatedAdapter.setStartPosition(ApplicationConstants.DEFAULT_LIST_ANIMATION_ITEM_POSITION_START);
         animatedAdapter.setDuration(ApplicationConstants.DEFAULT_LIST_ANIMATION_DURATION_MS);
 
         FadeInDownAnimator itemAnimator = new FadeInDownAnimator();
-        itemAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
+        itemAnimator.setInterpolator(new DecelerateInterpolator());
         itemAnimator.setAddDuration(ApplicationConstants.DEFAULT_ITEM_ADD_DURATION_MS);
         itemAnimator.setRemoveDuration(ApplicationConstants.DEFAULT_ITEM_REMOVE_DURATION_MS);
         itemAnimator.setMoveDuration(ApplicationConstants.DEFAULT_ITEM_MOVE_DURATION_MS);
@@ -156,7 +154,6 @@ public class TracklistFragment extends Fragment {
     private void addSong(Song song) {
 
         if (emptyTracklistNoticeAttached) {
-            Log.d("Removed shit", "okokokok");
             recyclerViewJoiner.remove(emptyTracklistLayout);
             emptyTracklistNoticeAttached = false;
             recyclerViewJoiner.getAdapter().notifyItemRemoved(0);
@@ -168,7 +165,7 @@ public class TracklistFragment extends Fragment {
         if (songs.size() == 1) {
             recyclerViewJoiner.getAdapter().notifyItemInserted(songPosition);
         }
-        else if (songs.size() >= 2 && !upNextHeaderAttached) {
+        else if (songs.size() == 2 && !upNextHeaderAttached) {
             recyclerViewJoiner.add(upNextHeaderLayout, 1);
             upNextHeaderAttached = true;
             recyclerViewJoiner.getAdapter().notifyItemRangeInserted(1, 2);
