@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AlertDialog;
-import android.util.Log;
 import android.view.View;
 
 import com.bumptech.glide.Glide;
@@ -35,6 +34,9 @@ public class PartyActivity extends BaseActivity<PartyPresenter> implements Party
     private boolean displayHostControls = false;
 
     private Fragment selectedFragment;
+    private SelectedTab selectedTab = SelectedTab.TRACKLIST_TAB;
+
+    private enum SelectedTab { TRACKLIST_TAB, PARTY_MEMBERS_TAB }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -62,11 +64,12 @@ public class PartyActivity extends BaseActivity<PartyPresenter> implements Party
             switch (tabId) {
                 case R.id.tab_tracklist:
                     selectedFragment = TracklistFragment.newInstance(partyTitle);
+                    selectedTab = SelectedTab.TRACKLIST_TAB;
                     showControls();
                     break;
                 case R.id.tab_party_members:
                     selectedFragment = PartyMemberFragment.newInstance(partyTitle);
-                    //binding.tabPager.setCurrentItem(ApplicationConstants.TAB_PARTY_MEMBERS_INDEX);
+                    selectedTab = SelectedTab.PARTY_MEMBERS_TAB;
                     hideControls();
             }
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
@@ -158,8 +161,7 @@ public class PartyActivity extends BaseActivity<PartyPresenter> implements Party
 
     @Override
     public void showControls() {
-        Log.d("Current tab position", String.valueOf(binding.bottomBar.getCurrentTabPosition()));
-        if (!binding.searchFab.isShown() && (binding.bottomBar.getCurrentTabPosition() == 0) && !isSnackbarShowing()) {
+        if (!binding.searchFab.isShown() && selectedTab.equals(SelectedTab.TRACKLIST_TAB)) {
             binding.searchFab.show();
             if (displayHostControls) binding.playPauseFab.show();
         }

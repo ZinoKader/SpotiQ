@@ -40,7 +40,6 @@
             android:theme="@style/AppThemeNoActionBar"/>
 
         <activity android:name=".feature.party.PartyActivity"
-            android:screenOrientation="portrait"
             android:theme="@style/AppThemeToolBar"/>
 
         <activity android:name=".feature.search.SearchActivity"
