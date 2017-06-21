@@ -88,14 +88,30 @@ public class SearchPresenter extends BasePresenter<SearchView> {
     }
 
     void requestSong(Song song) {
-        tracklistRepository.addSong(song, partyTitle)
+        tracklistRepository.checkSongInDbPlaylist(song, partyTitle)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(succeeded -> view().subscribe(searchViewOptionalView -> {
+            .flatMap(songExists -> {
+                if (songExists) {
+                    view().subscribe(searchViewOptionalView -> {
+                        if (searchViewOptionalView.view != null) {
+                            searchViewOptionalView.view.showMessage("This song is already in the queue");
+                        }
+                    });
+                    return Observable.just(false);
+                }
+                else {
+                    return tracklistRepository.addSong(song, partyTitle);
+                }
+            })
+            .map(didSucceed -> {
+                if (didSucceed) partiesRepository.incrementUserSongRequestCount(user, partyTitle);
+                return didSucceed;
+            })
+            .subscribe(songWasAdded -> view().subscribe(searchViewOptionalView -> {
                 if (searchViewOptionalView.view != null) {
-                    if (succeeded) {
+                    if (songWasAdded) {
                         searchViewOptionalView.view.finishWithSuccess("Song added to the tracklist!");
-                        partiesRepository.incrementUserSongRequestCount(user, partyTitle);
                     }
                     else {
                         searchViewOptionalView.view.showMessage("Song could not be added to the tracklist");
@@ -154,8 +170,6 @@ public class SearchPresenter extends BasePresenter<SearchView> {
                 searchOptions.put(SpotifyService.OFFSET, lastOffset + tracksPager.tracks.limit);
                 return Observable.just(tracksPager)
                     .concatWith(searchTracksRecursively(query, searchOptions));
-
-
             });
     }
 

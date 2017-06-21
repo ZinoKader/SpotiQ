@@ -3,6 +3,7 @@ package se.zinokader.spotiq.feature.base;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.design.widget.Snackbar;
 import android.view.inputmethod.InputMethodManager;
 
@@ -36,12 +37,28 @@ public abstract class BaseActivity<P extends Presenter> extends NucleusAppCompat
     }
 
     public void showMessage(String message) {
-        snackbarShowing = true;
-        new SnackbarBuilder(getRootView())
-            .message(message)
-            .timeoutDismissCallback(snackbar -> snackbarShowing = false)
-            .build()
-            .show();
+        if (snackbarShowing) {
+            deferMessage(message);
+        }
+        else {
+            snackbarShowing = true;
+            new SnackbarBuilder(getRootView())
+                .message(message)
+                .timeoutDismissCallback(snackbar -> snackbarShowing = false)
+                .build()
+                .show();
+        }
+    }
+
+    private void deferMessage(String message) {
+        new Handler().postDelayed(() -> {
+            snackbarShowing = true;
+            new SnackbarBuilder(getRootView())
+                .message(message)
+                .timeoutDismissCallback(snackbar -> snackbarShowing = false)
+                .build()
+                .show();
+        }, 1500);
     }
 
     public void finishWithSuccess(String message) {
