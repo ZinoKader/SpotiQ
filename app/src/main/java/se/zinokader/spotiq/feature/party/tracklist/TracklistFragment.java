@@ -10,6 +10,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 
 import java.util.ArrayList;
@@ -136,7 +137,7 @@ public class TracklistFragment extends Fragment {
         animatedAdapter.setDuration(ApplicationConstants.DEFAULT_LIST_ANIMATION_DURATION_MS);
 
         FadeInDownAnimator itemAnimator = new FadeInDownAnimator();
-        itemAnimator.setInterpolator(new DecelerateInterpolator());
+        itemAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
         itemAnimator.setAddDuration(ApplicationConstants.DEFAULT_ITEM_ADD_DURATION_MS);
         itemAnimator.setRemoveDuration(ApplicationConstants.DEFAULT_ITEM_REMOVE_DURATION_MS);
         itemAnimator.setMoveDuration(ApplicationConstants.DEFAULT_ITEM_MOVE_DURATION_MS);

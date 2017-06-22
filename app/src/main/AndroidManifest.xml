@@ -14,7 +14,7 @@
         android:fullBackupContent="@xml/backup_config"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
+        android:roundIcon="@mipmap/ic_launcher"
         android:theme="@style/AppTheme">
 
         <service android:name=".service.SpotiqPlayerService" />
@@ -22,8 +22,7 @@
         <service android:name=".service.SpotifyCommunicatorService"/>
 
         <activity android:name=".feature.login.StartupActivity"
-            android:theme="@style/AppThemeNoActionBar"
-            android:launchMode="singleTask">
+            android:theme="@style/AppThemeNoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <action android:name="android.intent.action.MAIN" />
@@ -32,21 +31,17 @@
         </activity>
 
         <activity android:name=".feature.login.SpotifyAuthenticationActivity"
-            android:theme="@style/AppThemeNoActionBar"
-            android:launchMode="singleTask"/>
+            android:theme="@style/AppThemeNoActionBar" />
 
         <activity
             android:name="com.spotify.sdk.android.authentication.LoginActivity"
-            android:theme="@android:style/Theme.Translucent.NoTitleBar"
-            android:launchMode="singleTask" />
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
 
         <activity android:name=".feature.lobby.LobbyActivity"
-            android:theme="@style/AppThemeNoActionBar"
-            android:launchMode="singleTask" />
+            android:theme="@style/AppThemeNoActionBar" />
 
         <activity android:name=".feature.party.PartyActivity"
-            android:theme="@style/AppThemeToolBar"
-            android:launchMode="singleTask" />
+            android:theme="@style/AppThemeToolBar" />
 
         <activity android:name=".feature.search.SearchActivity"
             android:theme="@style/AppThemeToolBarSearch"
