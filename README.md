@@ -17,4 +17,7 @@ Built using:
 
 ![](https://github.com/ZinoKader/SpotiQ/blob/master/spotiqbanner.png?raw=true)
 
-![](https://github.com/ZinoKader/SpotiQ/blob/master/in-app.png?raw=true?)
+<p align="center"> 
+<img src="https://github.com/ZinoKader/SpotiQ/blob/master/in-app.png?raw=true?">
+</p>
+
