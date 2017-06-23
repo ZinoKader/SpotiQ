@@ -59,14 +59,15 @@
 @retrofit.http.* <methods>; }
 -keepattributes Signature
 
--dontwarn android.animation.*
+-keep class android.animation.*
 -dontwarn rx.**
 -dontwarn com.squareup.okhttp.**
 -dontwarn com.google.appengine.api.urlfetch.*
 -dontwarn android.content.ServiceConnection
--dontwarn io.codetail.**
+-keep class io.codetail.** { *; }
+-keep class io.codetail.animation.SupportAnimator.* 
 -dontwarn com.google.**
--dontwarn android.content.**
+-keep class android.content.**
 -dontwarn com.roughike.**
 -dontwarn retrofit.**
 -keep class retrofit.** { *; }

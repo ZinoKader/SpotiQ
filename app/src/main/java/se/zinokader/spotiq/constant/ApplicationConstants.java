@@ -10,6 +10,7 @@ public class ApplicationConstants {
 
     /* Time and timing-related */
     public static final int DEFER_SNACKBAR_DELAY = 1000;
+    public static final int NETWORK_RETRY_DELAY_SEC = 3;
     public static final int SHORT_VIBRATION_DURATION_MS = 30;
     public static final int SHORT_ACTION_DELAY_SEC = 1;
     public static final int MEDIUM_ACTION_DELAY_SEC = 2;
@@ -36,11 +37,11 @@ public class ApplicationConstants {
     public static final int DEFAULT_DELAY_MS = 500;
     public static final int TAB_TRACKLIST_INDEX = 0;
     public static final int TAB_PARTY_MEMBERS_INDEX = 1;
-    public static final int DEFAULT_LIST_ANIMATION_DURATION_MS = 200;
-    public static final int DEFAULT_LIST_ANIMATION_ITEM_POSITION_START = 4;
-    public static final int DEFAULT_ITEM_ADD_DURATION_MS = 800;
-    public static final int DEFAULT_ITEM_REMOVE_DURATION_MS = 200;
-    public static final int DEFAULT_ITEM_MOVE_DURATION_MS = 300;
+    public static final int DEFAULT_LIST_ANIMATION_DURATION_MS = 400;
+    public static final int DEFAULT_LIST_ANIMATION_ITEM_POSITION_START = 6;
+    public static final int DEFAULT_ITEM_ADD_DURATION_MS = 1200;
+    public static final int DEFAULT_ITEM_REMOVE_DURATION_MS = 300;
+    public static final int DEFAULT_ITEM_MOVE_DURATION_MS = 800;
 
     /* Search-related */
     public static final int DEFAULT_DEBOUNCE_MS = 550;

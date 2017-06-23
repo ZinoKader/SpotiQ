@@ -49,7 +49,6 @@ public class StartupActivity extends BaseActivity<StartupPresenter> implements S
     public void goToSpotifyAuthentication() {
         startActivityForResult(new Intent(this, SpotifyAuthenticationActivity.class),
             ApplicationConstants.LOGIN_INTENT_REQUEST_CODE);
-        overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
     }
 
     public void goToLobby() {
@@ -59,7 +58,6 @@ public class StartupActivity extends BaseActivity<StartupPresenter> implements S
             public void onAnimationEnd(Animator animation) {
                 super.onAnimationEnd(animation);
                 startActivity(new Intent(getApplicationContext(), LobbyActivity.class));
-                overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
                 delayResetAnimatedChanges();
             }
         });

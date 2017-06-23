@@ -11,5 +11,6 @@ public final class LogTag {
     public static final String LOG_SEARCH = "search";
     public static final String LOG_TRACKLIST_REPOSITORY = "tracklist_repo";
     public static final String LOG_PREVIEW_PLAYER = "preview_player";
+    public static final String LOG_PLAYER_SERVICE ="player_service";
 
 }

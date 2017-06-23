@@ -21,7 +21,6 @@
 
         <ImageView
             android:id="@+id/albumArt"
-            android:src="@drawable/image_album_placeholder"
             android:layout_width="60dp"
             android:layout_height="60dp"
             android:layout_marginBottom="8dp"
@@ -29,6 +28,7 @@
             android:layout_marginTop="8dp"
             android:background="@color/colorPrimary"
             android:elevation="15dp"
+            android:src="@drawable/image_album_placeholder"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />

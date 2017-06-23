@@ -10,6 +10,7 @@ import se.zinokader.spotiq.feature.party.PartyPresenter;
 import se.zinokader.spotiq.feature.party.partymember.PartyMemberFragment;
 import se.zinokader.spotiq.feature.party.tracklist.TracklistFragment;
 import se.zinokader.spotiq.feature.search.SearchPresenter;
+import se.zinokader.spotiq.service.SpotiqPlayerService;
 
 @Singleton
 @Component(modules = { AppModule.class })
@@ -21,4 +22,5 @@ public interface AppComponent {
     void inject(TracklistFragment target);
     void inject(PartyMemberFragment target);
     void inject(SearchPresenter target);
+    void inject(SpotiqPlayerService target);
 }

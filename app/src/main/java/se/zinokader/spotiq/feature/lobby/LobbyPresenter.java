@@ -8,9 +8,7 @@ import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 
 import io.reactivex.Observable;
-import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import se.zinokader.spotiq.constant.ApplicationConstants;
 import se.zinokader.spotiq.constant.FirebaseConstants;
@@ -49,8 +47,9 @@ public class LobbyPresenter extends BasePresenter<LobbyView> {
         //load user
         restartableLatestCache(LOAD_USER_RESTARTABLE_ID,
             () -> spotifyRepository.getMe(spotifyCommunicatorService.getWebApi())
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread()),
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .retryWhen(throwable -> throwable.delay(ApplicationConstants.NETWORK_RETRY_DELAY_SEC, TimeUnit.SECONDS)),
             (lobbyView, userPrivate) -> {
                 User user = new User(userPrivate.id, userPrivate.display_name, userPrivate.images);
                 lobbyView.setUserDetails(user.getUserName(), user.getUserImageUrl());
@@ -67,7 +66,7 @@ public class LobbyPresenter extends BasePresenter<LobbyView> {
     void joinParty(String partyTitle, String partyPassword) {
         Party party = new Party(partyTitle, partyPassword);
 
-        Observable.zip(
+        add(Observable.zip(
             partiesRepository.getParty(party.getTitle()),
             spotifyRepository.getMe(spotifyCommunicatorService.getWebApi()),
             (dbPartySnapshot, spotifyUser) -> {
@@ -95,45 +94,30 @@ public class LobbyPresenter extends BasePresenter<LobbyView> {
             })
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(new Observer<Party>() {
-                @Override
-                public void onNext(Party party) {
-                    navigateToParty(party.getTitle());
-                }
-
-                @Override
-                public void onError(Throwable exception) {
-                    view().subscribe(lobbyViewOptionalView -> {
-                        if (lobbyViewOptionalView.view != null) {
-                            if (exception instanceof PartyDoesNotExistException) {
-                                lobbyViewOptionalView.view.showMessage("Party does not exist, why not create it?");
-                            }
-                            else if (exception instanceof PartyWrongPasswordException) {
-                                lobbyViewOptionalView.view.showMessage("Password invalid");
-                            }
-                            else {
-                                lobbyViewOptionalView.view.showMessage("Something went wrong when joining the party");
-                            }
-                        }
-                    }).dispose();
+            .compose(this.deliverFirst())
+            .retryWhen(throwable -> throwable.delay(ApplicationConstants.NETWORK_RETRY_DELAY_SEC, TimeUnit.SECONDS))
+            .subscribe(lobbyViewPartyDelivery -> lobbyViewPartyDelivery.split(
+                (lobbyView, confirmedParty) -> {
+                    navigateToParty(confirmedParty.getTitle());
+                },
+                (lobbyView, exception) -> {
+                    if (exception instanceof PartyDoesNotExistException) {
+                        lobbyView.showMessage("Party does not exist, why not create it?");
+                    }
+                    else if (exception instanceof PartyWrongPasswordException) {
+                        lobbyView.showMessage("Password invalid");
+                    }
+                    else {
+                        lobbyView.showMessage("Something went wrong when joining the party");
+                    }
                     Log.d(LogTag.LOG_LOBBY, "Could not join party");
-                    exception.printStackTrace();
-                }
-
-                @Override
-                public void onComplete() {
-                }
-
-                @Override
-                public void onSubscribe(Disposable d) {
-                }
-            });
+                })));
     }
 
     void createParty(String partyTitle, String partyPassword) {
         Party party = new Party(partyTitle, partyPassword);
 
-        Observable.zip(
+        add(Observable.zip(
             partiesRepository.getParty(party.getTitle()),
             spotifyRepository.getMe(spotifyCommunicatorService.getWebApi()),
             (dbParty, spotifyUser) -> {
@@ -159,55 +143,40 @@ public class LobbyPresenter extends BasePresenter<LobbyView> {
                 }))
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(new Observer<Party>() {
-                @Override
-                public void onNext(Party party) {
-                    navigateToParty(party.getTitle());
-                }
-
-                @Override
-                public void onError(Throwable exception) {
-                    view().subscribe(lobbyViewOptionalView -> {
-                        if (lobbyViewOptionalView.view != null) {
-                            if (exception instanceof PartyExistsException) {
-                                lobbyViewOptionalView.view.showMessage("Party \" + partyTitle + \" already exists");
-                            }
-                            else if (exception instanceof UserNotAddedException) {
-                                lobbyViewOptionalView.view.showMessage("Something went wrong when adding you to the party");
-                            }
-                            else {
-                               lobbyViewOptionalView.view.showMessage("Something went wrong when creating the party");
-                            }
-                        }
-                    }).dispose();
+            .compose(this.deliverFirst())
+            .retryWhen(throwable -> throwable.delay(ApplicationConstants.NETWORK_RETRY_DELAY_SEC, TimeUnit.SECONDS))
+            .subscribe(lobbyViewPartyDelivery -> lobbyViewPartyDelivery.split(
+                (lobbyView, confirmedParty) -> {
+                    navigateToParty(confirmedParty.getTitle());
+                },
+                (lobbyView, exception) -> {
+                    if (exception instanceof PartyExistsException) {
+                        lobbyView.showMessage("Party \" + partyTitle + \" already exists");
+                    }
+                    else if (exception instanceof UserNotAddedException) {
+                        lobbyView.showMessage("Something went wrong when adding you to the party");
+                    }
+                    else {
+                        lobbyView.showMessage("Something went wrong when creating the party");
+                    }
                     Log.d(LogTag.LOG_LOBBY, "Could not create party");
-                    exception.printStackTrace();
-                }
+                })));
 
-                @Override
-                public void onComplete() {
-                }
-
-                @Override
-                public void onSubscribe(Disposable d) {
-                }
-            });
     }
 
     private void navigateToParty(String partyTitle) {
         Observable.just(ApplicationConstants.SHORT_ACTION_DELAY_SEC)
             .observeOn(AndroidSchedulers.mainThread())
-            .doOnNext(next -> view().subscribe(lobbyViewOptionalView -> {
-               if (lobbyViewOptionalView.view != null) {
-                   lobbyViewOptionalView.view.showMessage("Entering party " + partyTitle + "...");
-               }
-            }).dispose())
+            .compose(this.deliverFirst())
+            .doOnNext(firstDelayDelivery -> firstDelayDelivery.split((lobbyView, integer) -> {
+                lobbyView.showMessage("Entering party " + partyTitle + "...");
+            }, (lobbyView, throwable) -> {
+            }))
             .delay(ApplicationConstants.SHORT_ACTION_DELAY_SEC, TimeUnit.SECONDS, AndroidSchedulers.mainThread())
-            .subscribe(success -> view().subscribe(lobbyViewOptionalView -> {
-                if (lobbyViewOptionalView.view != null) {
-                    lobbyViewOptionalView.view.goToParty(partyTitle);
-                }
-            }).dispose());
+            .subscribe(secondDelayDelivery -> secondDelayDelivery.split((lobbyView, integer) -> {
+                lobbyView.goToParty(partyTitle);
+            }, (lobbyView, throwable) -> {
+            }));
 
     }
 }

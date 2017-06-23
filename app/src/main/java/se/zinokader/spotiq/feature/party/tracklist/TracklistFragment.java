@@ -10,7 +10,6 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 
 import java.util.ArrayList;
@@ -20,6 +19,7 @@ import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.schedulers.Schedulers;
 import jp.wasabeef.recyclerview.adapters.SlideInBottomAnimationAdapter;
 import jp.wasabeef.recyclerview.animators.FadeInDownAnimator;
@@ -44,6 +44,8 @@ public class TracklistFragment extends Fragment {
 
     private FabListener fabListener;
 
+    private CompositeDisposable disposableActions = new CompositeDisposable();
+
     private RvJoiner recyclerViewJoiner = new RvJoiner(true);
     private JoinableLayout emptyTracklistLayout = new JoinableLayout(R.layout.recyclerview_empty_placeholder_view);
     private boolean emptyTracklistNoticeAttached = true;
@@ -66,7 +68,7 @@ public class TracklistFragment extends Fragment {
         super.onCreate(savedInstanceState);
         String partyTitle = getArguments().getString("partyTitle");
 
-        tracklistRepository.listenToTracklistChanges(partyTitle)
+        disposableActions.add(tracklistRepository.listenToTracklistChanges(partyTitle)
             .delay(ApplicationConstants.DEFAULT_DELAY_MS, TimeUnit.MILLISECONDS)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
@@ -79,7 +81,13 @@ public class TracklistFragment extends Fragment {
                     case REMOVED:
                         removeSong(song);
                         break;
-                }});
+                }}));
+    }
+
+    @Override
+    public void onDestroy() {
+        disposableActions.clear();
+        super.onDestroy();
     }
 
     @Override
@@ -132,12 +140,13 @@ public class TracklistFragment extends Fragment {
         SlideInBottomAnimationAdapter animatedAdapter =
             new SlideInBottomAnimationAdapter(recyclerViewJoiner.getAdapter());
         animatedAdapter.setInterpolator(new DecelerateInterpolator());
-        animatedAdapter.setFirstOnly(true);
         animatedAdapter.setHasStableIds(true);
+        animatedAdapter.setFirstOnly(true);
+        animatedAdapter.setStartPosition(ApplicationConstants.DEFAULT_LIST_ANIMATION_ITEM_POSITION_START);
         animatedAdapter.setDuration(ApplicationConstants.DEFAULT_LIST_ANIMATION_DURATION_MS);
 
         FadeInDownAnimator itemAnimator = new FadeInDownAnimator();
-        itemAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
+        itemAnimator.setInterpolator(new DecelerateInterpolator());
         itemAnimator.setAddDuration(ApplicationConstants.DEFAULT_ITEM_ADD_DURATION_MS);
         itemAnimator.setRemoveDuration(ApplicationConstants.DEFAULT_ITEM_REMOVE_DURATION_MS);
         itemAnimator.setMoveDuration(ApplicationConstants.DEFAULT_ITEM_MOVE_DURATION_MS);
@@ -180,7 +189,7 @@ public class TracklistFragment extends Fragment {
         int songPosition = getSongPosition(song);
         songs.remove(songPosition);
 
-        if (songs.size() <= 1 && upNextHeaderAttached) {
+        if (songs.size() == 1 && upNextHeaderAttached) {
             recyclerViewJoiner.remove(upNextHeaderLayout);
             upNextHeaderAttached = false;
             recyclerViewJoiner.getAdapter().notifyItemRangeRemoved(songPosition, 2);

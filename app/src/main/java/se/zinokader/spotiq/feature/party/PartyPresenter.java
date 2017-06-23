@@ -3,10 +3,8 @@ package se.zinokader.spotiq.feature.party;
 import android.os.Bundle;
 import android.util.Log;
 
-import com.spotify.sdk.android.player.Config;
 import com.spotify.sdk.android.player.ConnectionStateCallback;
 import com.spotify.sdk.android.player.Error;
-import com.spotify.sdk.android.player.PlaybackBitrate;
 import com.spotify.sdk.android.player.Player;
 import com.spotify.sdk.android.player.PlayerEvent;
 import com.spotify.sdk.android.player.Spotify;
@@ -19,6 +17,7 @@ import javax.inject.Inject;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
+import se.zinokader.spotiq.constant.ApplicationConstants;
 import se.zinokader.spotiq.constant.LogTag;
 import se.zinokader.spotiq.feature.base.BasePresenter;
 import se.zinokader.spotiq.model.User;
@@ -45,7 +44,6 @@ public class PartyPresenter extends BasePresenter<PartyView> implements Connecti
     private String partyTitle;
 
     private static final int LOAD_USER_RESTARTABLE_ID = 9814;
-    private static final int LOAD_HOST_RESTARTABLE_ID = 3512;
 
     @Override
     protected void onCreate(Bundle savedState) {
@@ -55,7 +53,9 @@ public class PartyPresenter extends BasePresenter<PartyView> implements Connecti
         restartableLatestCache(LOAD_USER_RESTARTABLE_ID,
             () -> spotifyRepository.getMe(spotifyCommunicatorService.getWebApi())
                 .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread()), (partyView, userPrivate) -> {
+                .observeOn(AndroidSchedulers.mainThread())
+                .retryWhen(throwable -> throwable.delay(ApplicationConstants.NETWORK_RETRY_DELAY_SEC, TimeUnit.SECONDS)),
+            (partyView, userPrivate) -> {
                 User user = new User(userPrivate.id, userPrivate.display_name, userPrivate.images);
                 partyView.setUserDetails(user.getUserName(), user.getUserImageUrl());
                 loadHost(user.getUserId());
@@ -78,56 +78,22 @@ public class PartyPresenter extends BasePresenter<PartyView> implements Connecti
     }
 
     private void loadHost(String userId) {
-        view().subscribe(partyViewOptionalView -> {
-            if (partyViewOptionalView.view != null) {
-                partiesRepository.isHostOfParty(userId, partyTitle)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(userIsHost -> {
-                        if (userIsHost) {
-                            loadPlayer();
-                            partyViewOptionalView.view.setHostPriviliges();
-                        }
-                    });
-            }
-        }).dispose();
+        add(partiesRepository.isHostOfParty(userId, partyTitle)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .compose(this.deliverFirst())
+            .retryWhen(throwable -> throwable.delay(ApplicationConstants.NETWORK_RETRY_DELAY_SEC, TimeUnit.SECONDS))
+            .subscribe(resultDelivery -> resultDelivery.split((partyView, userIsHost) -> {
+                if (userIsHost) {
+                    //loadPlayer();
+                    partyView.setHostPriviliges();
+                    partyView.showMessage("Connected as a party host");
+                }
+            }, (partyView, throwable) -> {
+                partyView.showMessage("Could not load host priviliges, retrying...");
+            })));
     }
 
-    private void loadPlayer() {
-        view().subscribe(partyViewOptionalView -> {
-            if (partyViewOptionalView.view != null) {
-                Config playerConfig = partyViewOptionalView.view.setupPlayerConfig(spotifyCommunicatorService.getAuthenticator().getAccessToken());
-                Spotify.getPlayer(playerConfig, this, new SpotifyPlayer.InitializationObserver() {
-                    @Override
-                    public void onInitialized(SpotifyPlayer player) {
-                        spotifyPlayer = player;
-                        spotifyPlayer.addConnectionStateCallback(PartyPresenter.this);
-                        spotifyPlayer.addNotificationCallback(PartyPresenter.this);
-
-                        spotifyPlayer.setPlaybackBitrate(new Player.OperationCallback() {
-                            @Override
-                            public void onSuccess() {
-                                Log.d(LogTag.LOG_PARTY, "Set custom playback bitrate successfully");
-                            }
-
-                            @Override
-                            public void onError(Error error) {
-                                Log.d(LogTag.LOG_PARTY, "Failed to set playback bitrate. Cause: " + error.toString());
-
-                            }
-                        }, PlaybackBitrate.BITRATE_HIGH);
-
-                    }
-
-                    @Override
-                    public void onError(Throwable throwable) {
-                        Log.e(LogTag.LOG_PARTY, "Could not initialize player: " + throwable.getMessage());
-                    }
-
-                });
-            }
-        }).dispose();
-    }
 
     Observable<Boolean> musicAction() {
         /*

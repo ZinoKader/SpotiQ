@@ -18,6 +18,7 @@ import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.schedulers.Schedulers;
 import jp.wasabeef.recyclerview.adapters.AlphaInAnimationAdapter;
 import se.zinokader.spotiq.R;
@@ -35,6 +36,8 @@ public class PartyMemberFragment extends Fragment {
 
     @Inject
     PartiesRepository partiesRepository;
+
+    private CompositeDisposable disposableActions = new CompositeDisposable();
 
     private PartyMemberRecyclerAdapter partyMemberRecyclerAdapter;
 
@@ -55,7 +58,7 @@ public class PartyMemberFragment extends Fragment {
         super.onCreate(savedInstanceState);
         this.partyTitle = getArguments().getString("partyTitle");
 
-        partiesRepository.listenToPartyMemberChanges(partyTitle)
+        disposableActions.add(partiesRepository.listenToPartyMemberChanges(partyTitle)
             .delay(ApplicationConstants.DEFAULT_DELAY_MS, TimeUnit.MILLISECONDS)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
@@ -69,7 +72,13 @@ public class PartyMemberFragment extends Fragment {
                         changePartyMember(partyMember);
                         break;
                 }
-            });
+            }));
+    }
+
+    @Override
+    public void onDestroy() {
+        disposableActions.clear();
+        super.onDestroy();
     }
 
     @Override

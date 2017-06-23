@@ -13,13 +13,11 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
-import com.spotify.sdk.android.player.Config;
 
 import be.rijckaert.tim.animatedvector.FloatingMusicActionButton;
 import nucleus5.factory.RequiresPresenter;
 import se.zinokader.spotiq.R;
 import se.zinokader.spotiq.constant.ApplicationConstants;
-import se.zinokader.spotiq.constant.SpotifyConstants;
 import se.zinokader.spotiq.databinding.ActivityPartyBinding;
 import se.zinokader.spotiq.feature.base.BaseActivity;
 import se.zinokader.spotiq.feature.party.partymember.PartyMemberFragment;
@@ -55,7 +53,7 @@ public class PartyActivity extends BaseActivity<PartyPresenter> implements Party
             ShortcutUtil.addSearchShortcut(this, partyTitle);
         }
 
-        postponeEnterTransition();
+        supportPostponeEnterTransition();
 
         binding.partyTitle.setText(partyTitle);
         binding.searchTransitionSheet.setFab(binding.searchFab);
@@ -134,13 +132,13 @@ public class PartyActivity extends BaseActivity<PartyPresenter> implements Party
             .listener(new RequestListener<String, GlideDrawable>() {
                 @Override
                 public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
-                    startPostponedEnterTransition();
+                    supportStartPostponedEnterTransition();
                     return false;
                 }
 
                 @Override
                 public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
-                    startPostponedEnterTransition();
+                    supportStartPostponedEnterTransition();
                     return false;
                 }
             })
@@ -165,11 +163,6 @@ public class PartyActivity extends BaseActivity<PartyPresenter> implements Party
             .setNegativeButton("No", (dialogInterface, i) -> dialogInterface.dismiss())
             .create()
             .show();
-    }
-
-    @Override
-    public Config setupPlayerConfig(String accessToken) {
-        return new Config(this, accessToken, SpotifyConstants.CLIENT_ID);
     }
 
     @Override

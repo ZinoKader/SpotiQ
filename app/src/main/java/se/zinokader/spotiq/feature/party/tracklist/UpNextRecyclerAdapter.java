@@ -115,9 +115,6 @@ public class UpNextRecyclerAdapter extends RecyclerView.Adapter<UpNextRecyclerAd
 
     @Override
     public long getItemId(int position) {
-        if (position >= 0) {
-            position += 1;
-        }
         return songs.get(position).getSongSpotifyId().hashCode();
     }
 
