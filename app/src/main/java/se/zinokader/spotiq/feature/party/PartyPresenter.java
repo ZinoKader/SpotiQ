@@ -41,7 +41,7 @@ public class PartyPresenter extends BasePresenter<PartyView> {
             () -> spotifyRepository.getMe(spotifyCommunicatorService.getWebApi())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .retryWhen(throwable -> throwable.delay(ApplicationConstants.NETWORK_RETRY_DELAY_SEC, TimeUnit.SECONDS)),
+                .retryWhen(throwable -> throwable.delay(ApplicationConstants.REQUEST_RETRY_DELAY_SEC, TimeUnit.SECONDS)),
             (partyView, userPrivate) -> {
                 User user = new User(userPrivate.id, userPrivate.display_name, userPrivate.images);
                 partyView.setUserDetails(user.getUserName(), user.getUserImageUrl());
@@ -69,7 +69,7 @@ public class PartyPresenter extends BasePresenter<PartyView> {
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .compose(this.deliverFirst())
-            .retryWhen(throwable -> throwable.delay(ApplicationConstants.NETWORK_RETRY_DELAY_SEC, TimeUnit.SECONDS))
+            .retryWhen(throwable -> throwable.delay(ApplicationConstants.REQUEST_RETRY_DELAY_SEC, TimeUnit.SECONDS))
             .subscribe(resultDelivery -> resultDelivery.split((partyView, userIsHost) -> {
                 if (userIsHost) {
                     //loadPlayer();

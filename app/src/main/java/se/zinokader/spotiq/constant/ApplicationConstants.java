@@ -10,7 +10,7 @@ public class ApplicationConstants {
 
     /* Time and timing-related */
     public static final int DEFER_SNACKBAR_DELAY = 1000;
-    public static final int NETWORK_RETRY_DELAY_SEC = 3;
+    public static final int REQUEST_RETRY_DELAY_SEC = 3;
     public static final int SHORT_VIBRATION_DURATION_MS = 30;
     public static final int SHORT_ACTION_DELAY_SEC = 1;
     public static final int MEDIUM_ACTION_DELAY_SEC = 2;

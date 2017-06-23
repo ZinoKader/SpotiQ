@@ -49,7 +49,7 @@ public class LobbyPresenter extends BasePresenter<LobbyView> {
             () -> spotifyRepository.getMe(spotifyCommunicatorService.getWebApi())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .retryWhen(throwable -> throwable.delay(ApplicationConstants.NETWORK_RETRY_DELAY_SEC, TimeUnit.SECONDS)),
+                .retryWhen(throwable -> throwable.delay(ApplicationConstants.REQUEST_RETRY_DELAY_SEC, TimeUnit.SECONDS)),
             (lobbyView, userPrivate) -> {
                 User user = new User(userPrivate.id, userPrivate.display_name, userPrivate.images);
                 lobbyView.setUserDetails(user.getUserName(), user.getUserImageUrl());
@@ -95,7 +95,7 @@ public class LobbyPresenter extends BasePresenter<LobbyView> {
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .compose(this.deliverFirst())
-            .retryWhen(throwable -> throwable.delay(ApplicationConstants.NETWORK_RETRY_DELAY_SEC, TimeUnit.SECONDS))
+            .retryWhen(throwable -> throwable.delay(ApplicationConstants.REQUEST_RETRY_DELAY_SEC, TimeUnit.SECONDS))
             .subscribe(lobbyViewPartyDelivery -> lobbyViewPartyDelivery.split(
                 (lobbyView, confirmedParty) -> {
                     navigateToParty(confirmedParty.getTitle());
@@ -144,7 +144,7 @@ public class LobbyPresenter extends BasePresenter<LobbyView> {
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .compose(this.deliverFirst())
-            .retryWhen(throwable -> throwable.delay(ApplicationConstants.NETWORK_RETRY_DELAY_SEC, TimeUnit.SECONDS))
+            .retryWhen(throwable -> throwable.delay(ApplicationConstants.REQUEST_RETRY_DELAY_SEC, TimeUnit.SECONDS))
             .subscribe(lobbyViewPartyDelivery -> lobbyViewPartyDelivery.split(
                 (lobbyView, confirmedParty) -> {
                     navigateToParty(confirmedParty.getTitle());
