@@ -1,6 +1,6 @@
 
 # SpotiQ
-An android app that brings democracy to your house-party
+A real-time collaborative tracklist for Spotify
 
 Built using:
 * Nucleus
