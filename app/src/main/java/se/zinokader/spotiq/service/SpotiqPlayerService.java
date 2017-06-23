@@ -15,8 +15,11 @@ import com.spotify.sdk.android.player.PlayerEvent;
 import com.spotify.sdk.android.player.Spotify;
 import com.spotify.sdk.android.player.SpotifyPlayer;
 
+import java.util.concurrent.TimeUnit;
+
 import javax.inject.Inject;
 
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import se.zinokader.spotiq.constant.ApplicationConstants;
 import se.zinokader.spotiq.constant.LogTag;
 import se.zinokader.spotiq.constant.SpotifyConstants;
@@ -65,7 +68,7 @@ public class SpotiqPlayerService extends Service implements ConnectionStateCallb
     }
 
     private void initPlayer() {
-        
+
         if (playerConfig == null) {
             playerConfig = new Config(this,
                 spotifyCommunicatorService.getAuthenticator().getAccessToken(),
@@ -102,14 +105,42 @@ public class SpotiqPlayerService extends Service implements ConnectionStateCallb
         });
     }
 
+    private void musicAction() {
+        /*
+        if (tracklist.isEmpty()) {
+            restartableFirst(EMPTY_TRACKLIST_MESSAGE_RESTARTABLE_ID,
+                () -> Observable.just(new Empty()),
+                (partyView, empty) -> partyView.showMessage("No songs in the tracklist, try adding some!"));
+            return Observable.just(false);
+        }
+        else if (spotifyPlayer.getPlaybackState().isPlaying) {
+            return pause();
+        }
+        else if(spotifyPlayer.getMetadata().currentTrack != null) {
+            return resume();
+        }
+        else {
+            return play();
+        }
+        */
+    }
+
     @Override
     public void onPlaybackEvent(PlayerEvent playerEvent) {
-
+        switch (playerEvent) {
+            case kSpPlaybackNotifyTrackDelivered:
+                tracklistRepository.removeFirstSong(partyTitle)
+                    .delay(2, TimeUnit.SECONDS)
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(wasRemoved -> {
+                        // musicAction();
+                    });
+        }
     }
 
     @Override
     public void onPlaybackError(Error error) {
-
+        Log.d(LogTag.LOG_PLAYER_SERVICE, "Spotify playback error: " + error.toString());
     }
 
     @Override
@@ -124,7 +155,7 @@ public class SpotiqPlayerService extends Service implements ConnectionStateCallb
 
     @Override
     public void onLoginFailed(Error error) {
-
+        Log.d(LogTag.LOG_PLAYER_SERVICE, "Spotify login failed: " + error.toString());
     }
 
     @Override
@@ -133,7 +164,7 @@ public class SpotiqPlayerService extends Service implements ConnectionStateCallb
     }
 
     @Override
-    public void onConnectionMessage(String s) {
-
+    public void onConnectionMessage(String message) {
+        Log.d(LogTag.LOG_PLAYER_SERVICE, "Spotify connection message: " + message);
     }
 }

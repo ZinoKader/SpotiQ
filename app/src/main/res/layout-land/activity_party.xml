@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:fab="http://schemas.android.com/apk/res-auto"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <android.support.design.widget.CoordinatorLayout
+        android:id="@+id/coordinatorContainer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fitsSystemWindows="true">
+
+        <com.roughike.bottombar.BottomBar
+            android:id="@+id/bottomBar"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:layout_alignParentBottom="true"
+            android:layout_gravity="bottom"
+            android:background="@color/colorPrimary"
+            app:bb_behavior="shy"
+            app:bb_activeTabAlpha="1"
+            app:bb_activeTabColor="@color/colorPrimary"
+            app:bb_inActiveTabAlpha="0.5"
+            app:bb_inActiveTabColor="@color/colorPrimary"
+            app:bb_tabXmlResource="@xml/party_bottom_bar">
+
+        </com.roughike.bottombar.BottomBar>
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/searchFab"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="?selectableItemBackground"
+            android:src="@drawable/ic_queue_song"
+            fab:elevation="24dp"
+            fab:fabSize="normal"
+            fab:layout_anchor="@id/bottomBar"
+            fab:layout_anchorGravity="top|center_horizontal"
+            fab:layout_behavior="se.zinokader.spotiq.util.view.ShrinkBehavior"
+            fab:rippleColor="@color/colorAccentDark" />
+
+        <com.github.fabtransitionactivity.SheetLayout
+            android:id="@+id/searchTransitionSheet"
+            android:clickable="false"
+            android:focusable="false"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="bottom"
+            android:layout_marginTop="0dp"
+            android:elevation="100dp"
+            app:ft_color="@color/colorAccent"
+            app:ft_container_gravity="center" />
+
+
+        <FrameLayout
+            android:id="@+id/fragmentHolder"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:animateLayoutChanges="true"
+            app:layout_anchor="@+id/toolbarHolder"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+
+
+        <android.support.design.widget.AppBarLayout
+            android:id="@+id/toolbarHolder"
+            android:layout_above="@id/fragmentHolder"
+            android:layout_width="match_parent"
+            android:layout_height="110dp"
+            android:clipChildren="false"
+            android:fitsSystemWindows="false">
+
+            <android.support.v7.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="110dp"
+                android:layout_marginEnd="0dp"
+                android:layout_marginStart="0dp"
+                android:layout_marginTop="0dp"
+                android:background="@color/colorPrimary"
+                android:clipChildren="false"
+                android:elevation="15dp"
+                app:contentInsetStart="0dp"
+                app:layout_scrollFlags="scroll|enterAlways"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <android.support.constraint.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@color/colorPrimary"
+                    android:clipChildren="false">
+
+                    <TextView
+                        android:id="@+id/partyTitle"
+                        android:text="@string/party_title_placeholder"
+                        android:layout_width="160dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="34dp"
+                        android:shadowColor="@color/colorMaterialGray"
+                        android:textAlignment="center"
+                        android:textColor="@color/colorMaterialWhite"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <com.mikhaellopez.circularimageview.CircularImageView
+                        android:id="@+id/userImage"
+                        android:src="@drawable/image_profile_placeholder"
+                        android:elevation="8dp"
+                        android:layout_width="45dp"
+                        android:layout_height="45dp"
+                        android:layout_marginStart="45dp"
+                        android:layout_marginTop="25dp"
+                        android:scaleType="centerCrop"
+                        android:transitionName="@string/profile_image_transition"
+                        app:civ_border_width="1dp"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <TextView
+                        android:id="@+id/userName"
+                        android:text="@string/username_placeholder"
+                        android:layout_width="95dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="20dp"
+                        android:layout_marginTop="8dp"
+                        android:textAlignment="center"
+                        android:textColor="@color/colorMaterialWhite"
+                        android:textSize="10sp"
+                        android:textStyle="bold"
+                        android:transitionName="@string/user_name_transition"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/userImage" />
+
+
+                </android.support.constraint.ConstraintLayout>
+
+            </android.support.v7.widget.Toolbar>
+
+
+        </android.support.design.widget.AppBarLayout>
+
+        <be.rijckaert.tim.animatedvector.FloatingMusicActionButton
+            android:id="@+id/playPauseFab"
+            android:visibility="invisible"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="240dp"
+            android:layout_marginEnd="35dp"
+            app:backgroundTint="@color/colorAccent"
+            app:mode="playToPause"
+            fab:elevation="10dp"
+            fab:fabSize="normal"
+            fab:rippleColor="@color/colorAccentDark"
+            fab:layout_anchor="@id/toolbarHolder"
+            fab:layout_anchorGravity="bottom|end"
+            fab:layout_behavior="se.zinokader.spotiq.util.view.ShrinkBehavior" />
+
+
+    </android.support.design.widget.CoordinatorLayout>
+
+</layout>

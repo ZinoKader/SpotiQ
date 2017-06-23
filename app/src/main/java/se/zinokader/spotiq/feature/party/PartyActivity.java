@@ -93,11 +93,9 @@ public class PartyActivity extends BaseActivity<PartyPresenter> implements Party
 
         binding.playPauseFab.changeMode(FloatingMusicActionButton.Mode.PLAY_TO_PAUSE);
 
-        binding.playPauseFab.setOnMusicFabClickListener(view -> getPresenter().musicAction().subscribe(didPlay -> {
-            if (!didPlay) { //resets the button to display the play button
-                binding.playPauseFab.playAnimation();
-            }
-        }));
+        binding.playPauseFab.setOnMusicFabClickListener(view -> {
+            /**/
+        });
 
     }
 

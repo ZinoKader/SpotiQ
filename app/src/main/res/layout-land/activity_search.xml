@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <android.support.constraint.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+
+        <org.cryse.widget.persistentsearch.PersistentSearchView
+            android:id="@+id/searchBar"
+            android:layout_width="500dp"
+            android:layout_height="wrap_content"
+            android:elevation="4dp"
+            app:persistentSV_customToolbarHeight="64dp"
+            app:persistentSV_displayMode="toolbar"
+            app:persistentSV_editHintText="@string/search_hint"
+            app:persistentSV_editHintTextColor="@color/colorPrimary"
+            app:persistentSV_editTextColor="@color/colorPrimaryDark"
+            app:persistentSV_homeButtonMode="arrow"
+            app:persistentSV_searchCardElevation="3dp"
+            app:persistentSV_searchTextColor="@color/colorPrimaryDark"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/songSearchRecyclerView"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/searchBar"
+            app:layout_constraintVertical_bias="0.0"
+            android:layout_marginTop="10dp">
+
+        </android.support.v7.widget.RecyclerView>
+
+
+    </android.support.constraint.ConstraintLayout>
+
+</layout>
