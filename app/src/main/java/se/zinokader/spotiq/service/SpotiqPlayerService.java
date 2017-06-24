@@ -2,6 +2,7 @@ package se.zinokader.spotiq.service;
 
 import android.app.Service;
 import android.content.Intent;
+import android.os.Binder;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -15,14 +16,16 @@ import com.spotify.sdk.android.player.PlayerEvent;
 import com.spotify.sdk.android.player.PlayerInitializationException;
 import com.spotify.sdk.android.player.Spotify;
 import com.spotify.sdk.android.player.SpotifyPlayer;
+import com.valdesekamdem.library.mdtoast.MDToast;
 
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
-import io.reactivex.Observable;
+import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
+import se.zinokader.spotiq.R;
 import se.zinokader.spotiq.constant.ApplicationConstants;
 import se.zinokader.spotiq.constant.LogTag;
 import se.zinokader.spotiq.constant.ServiceConstants;
@@ -44,68 +47,58 @@ public class SpotiqPlayerService extends Service implements ConnectionStateCallb
     private SpotifyPlayer spotifyPlayer;
     private String partyTitle;
 
+    private IBinder binder = new PlayerServiceBinder();
+
+    public class PlayerServiceBinder extends Binder {
+        public SpotiqPlayerService getService() {
+            return SpotiqPlayerService.this;
+        }
+    }
+
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
-        return null;
+        return binder;
     }
 
     @Override
     public void onCreate() {
         ((Injector) getApplicationContext()).inject(this);
-        super.onCreate();
     }
 
     @Override
     public void onDestroy() {
         disposableActions.clear();
-        if (spotifyPlayer != null) spotifyPlayer.shutdown();
-        super.onDestroy();
+        if (spotifyPlayer != null) {
+            try {
+                Spotify.awaitDestroyPlayer(this, 5, TimeUnit.SECONDS);
+            }
+            catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
-    /**
-     * Handles initialization and service actions
-     * @param intent requires a PARTY_NAME_EXTRA with the party title
-     */
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.d(LogTag.LOG_PLAYER_SERVICE, "Player service initialized");
+        Log.d(LogTag.LOG_PLAYER_SERVICE, "Player service initialization started");
+
         partyTitle = intent.getStringExtra(ApplicationConstants.PARTY_NAME_EXTRA);
         if (partyTitle.isEmpty()) {
-            Log.d(LogTag.LOG_PLAYER_SERVICE, "Player service could not be initialized. Received empty party title");
+            Log.d(LogTag.LOG_PLAYER_SERVICE, "Player service could not be initialized - Received empty party title");
             stopSelf();
         }
 
-        if (spotifyPlayer == null && !intent.getAction().matches(ServiceConstants.ACTION_INIT)) {
-            boolean didInit =
-                initPlayer()
-                    .retryWhen(throwable -> throwable.delay(ApplicationConstants.REQUEST_RETRY_DELAY_SEC, TimeUnit.SECONDS))
-                    .retry(10)
-                    .blockingSingle();
-            if (!didInit) {
-                stopSelf();
-            }
+        if (intent.getAction().equals(ServiceConstants.ACTION_INIT)) {
+            boolean didInit = initPlayer().blockingGet();
+            if (!didInit) stopSelf();
         }
 
-        switch (intent.getAction()) {
-            case ServiceConstants.ACTION_INIT:
-                disposableActions.add(initPlayer().subscribe());
-                break;
-            case ServiceConstants.ACTION_PLAY_PAUSE:
-                /**/
-                break;
-        }
-
-        return START_STICKY; //don't boil me, I'm still alive!
+        return START_NOT_STICKY;
     }
 
-    /**
-     * Initializes the player using an observable to handle initialization errors correctly
-     * @return true if player was initialized and assigned successfully
-     */
-    private Observable<Boolean> initPlayer() {
-
-        return Observable.create(subscriber -> {
+    private Single<Boolean> initPlayer() {
+        return Single.create(subscriber -> {
             if (playerConfig == null) {
                 playerConfig = new Config(this,
                     spotifyCommunicatorService.getAuthenticator().getAccessToken(),
@@ -120,8 +113,7 @@ public class SpotiqPlayerService extends Service implements ConnectionStateCallb
                     spotifyPlayer.setPlaybackBitrate(new Player.OperationCallback() {
                         @Override
                         public void onSuccess() {
-                            subscriber.onNext(true);
-                            subscriber.onComplete();
+                            subscriber.onSuccess(true);
                             Log.d(LogTag.LOG_PLAYER_SERVICE, "Set Spotify Player custom playback bitrate successfully");
                         }
 
@@ -146,7 +138,7 @@ public class SpotiqPlayerService extends Service implements ConnectionStateCallb
         });
     }
 
-    private void musicAction() {
+    private void handlePlayPause() {
         /*
         if (tracklist.isEmpty()) {
             restartableFirst(EMPTY_TRACKLIST_MESSAGE_RESTARTABLE_ID,
@@ -166,9 +158,33 @@ public class SpotiqPlayerService extends Service implements ConnectionStateCallb
         */
     }
 
+    public boolean isPlaying() {
+        return spotifyPlayer != null && spotifyPlayer.getPlaybackState().isPlaying;
+    }
+
+    public void play() {
+        Log.d(LogTag.LOG_PLAYER_SERVICE, "PLAY CLICKED!");
+    }
+
+    public void pause() {
+        Log.d(LogTag.LOG_PLAYER_SERVICE, "PAUSE CLICKED!");
+    }
+
+    private void showLostPlaybackPermissionToast() {
+        MDToast lostPlaybackPermissionToast =
+            MDToast.makeText(this,
+                getString(R.string.playback_permission_lost_notice),
+                MDToast.LENGTH_LONG,
+                MDToast.TYPE_INFO);
+        lostPlaybackPermissionToast.setIcon(R.drawable.ic_spotify_connect);
+        lostPlaybackPermissionToast.show();
+    }
+
     @Override
     public void onPlaybackEvent(PlayerEvent playerEvent) {
         switch (playerEvent) {
+            case kSpPlaybackNotifyLostPermission:
+                showLostPlaybackPermissionToast();
             case kSpPlaybackNotifyTrackDelivered:
                 tracklistRepository.removeFirstSong(partyTitle)
                     .delay(2, TimeUnit.SECONDS)
@@ -191,7 +207,7 @@ public class SpotiqPlayerService extends Service implements ConnectionStateCallb
 
     @Override
     public void onLoggedOut() {
-
+        stopSelf();
     }
 
     @Override

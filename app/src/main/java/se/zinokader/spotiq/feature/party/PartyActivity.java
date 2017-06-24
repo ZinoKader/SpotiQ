@@ -1,9 +1,13 @@
 package se.zinokader.spotiq.feature.party;
 
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.databinding.DataBindingUtil;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AlertDialog;
@@ -14,7 +18,6 @@ import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 
-import be.rijckaert.tim.animatedvector.FloatingMusicActionButton;
 import nucleus5.factory.RequiresPresenter;
 import se.zinokader.spotiq.R;
 import se.zinokader.spotiq.constant.ApplicationConstants;
@@ -23,6 +26,7 @@ import se.zinokader.spotiq.feature.base.BaseActivity;
 import se.zinokader.spotiq.feature.party.partymember.PartyMemberFragment;
 import se.zinokader.spotiq.feature.party.tracklist.TracklistFragment;
 import se.zinokader.spotiq.feature.search.SearchActivity;
+import se.zinokader.spotiq.service.SpotiqPlayerService;
 import se.zinokader.spotiq.util.ShortcutUtil;
 import se.zinokader.spotiq.util.listener.FabListener;
 
@@ -35,8 +39,37 @@ public class PartyActivity extends BaseActivity<PartyPresenter> implements Party
 
     private Fragment selectedFragment;
     private SelectedTab selectedTab = SelectedTab.TRACKLIST_TAB;
+    private enum SelectedTab {TRACKLIST_TAB, PARTY_MEMBERS_TAB}
 
-    private enum SelectedTab { TRACKLIST_TAB, PARTY_MEMBERS_TAB }
+    private SpotiqPlayerService playerService;
+    private boolean playerServiceBound = false;
+
+    private ServiceConnection playerServiceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder serviceBinder) {
+            playerServiceBound = true;
+            SpotiqPlayerService.PlayerServiceBinder playerServiceBinder =
+                (SpotiqPlayerService.PlayerServiceBinder) serviceBinder;
+            playerService = playerServiceBinder.getService();
+
+            //set the play/pause button state accordingly to the player service's playing status
+            if (playerService.isPlaying()) { //switch to play icon
+                if (!binding.playPauseFab.getCurrentMode().isShowingPlayIcon()) {
+                    binding.playPauseFab.playAnimation();
+                }
+            }
+            else { //switch to pause icon
+                if (!binding.playPauseFab.getCurrentMode().isShowingPlayIcon()) {
+                    binding.playPauseFab.playAnimation();
+                }
+            }
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+            playerServiceBound = false;
+        }
+    };
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -91,10 +124,13 @@ public class PartyActivity extends BaseActivity<PartyPresenter> implements Party
             }
         });
 
-        binding.playPauseFab.changeMode(FloatingMusicActionButton.Mode.PLAY_TO_PAUSE);
-
         binding.playPauseFab.setOnMusicFabClickListener(view -> {
-            /**/
+            if (playerService.isPlaying()) {
+                playerService.pause();
+            }
+            else {
+                playerService.play();
+            }
         });
 
     }
@@ -103,6 +139,10 @@ public class PartyActivity extends BaseActivity<PartyPresenter> implements Party
     protected void onDestroy() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
             ShortcutUtil.removeAllShortcuts(this);
+        }
+        if (playerServiceBound) {
+            unbindService(playerServiceConnection);
+            playerServiceBound = false;
         }
         super.onDestroy();
     }
@@ -117,6 +157,20 @@ public class PartyActivity extends BaseActivity<PartyPresenter> implements Party
     public void onPause() {
         super.onPause();
         super.stopForegroundTokenRenewalService();
+    }
+
+    @Override
+    public void showControls() {
+        if (!binding.searchFab.isShown() && selectedTab.equals(SelectedTab.TRACKLIST_TAB)) {
+            binding.searchFab.show();
+            if (displayHostControls) binding.playPauseFab.show();
+        }
+    }
+
+    @Override
+    public void hideControls() {
+        binding.searchFab.hide();
+        binding.playPauseFab.hide();
     }
 
     @Override
@@ -147,6 +201,8 @@ public class PartyActivity extends BaseActivity<PartyPresenter> implements Party
     public void setHostPriviliges() {
         displayHostControls = true;
         binding.playPauseFab.setVisibility(View.VISIBLE);
+        Intent playerServiceIntent = new Intent(this, SpotiqPlayerService.class);
+        bindService(playerServiceIntent, playerServiceConnection, Context.BIND_AUTO_CREATE);
     }
 
     @Override
@@ -156,30 +212,13 @@ public class PartyActivity extends BaseActivity<PartyPresenter> implements Party
             .setMessage("Are you sure you want to exit the party?")
             .setPositiveButton("Yes", (dialogInterface, i) -> {
                 dialogInterface.dismiss();
+                unbindService(playerServiceConnection);
+                stopService(new Intent(this, SpotiqPlayerService.class));
                 super.onBackPressed();
             })
             .setNegativeButton("No", (dialogInterface, i) -> dialogInterface.dismiss())
             .create()
             .show();
-    }
-
-    @Override
-    public void showControls() {
-        if (!binding.searchFab.isShown() && selectedTab.equals(SelectedTab.TRACKLIST_TAB)) {
-            binding.searchFab.show();
-            if (displayHostControls) binding.playPauseFab.show();
-        }
-    }
-
-    @Override
-    public void hideControls() {
-        binding.searchFab.hide();
-        binding.playPauseFab.hide();
-    }
-
-    @Override
-    public View getRootView() {
-        return binding.coordinatorContainer;
     }
 
     @Override
@@ -189,4 +228,10 @@ public class PartyActivity extends BaseActivity<PartyPresenter> implements Party
             binding.searchTransitionSheet.contractFab();
         }
     }
+
+    @Override
+    public View getRootView() {
+        return binding.coordinatorContainer;
+    }
+
 }

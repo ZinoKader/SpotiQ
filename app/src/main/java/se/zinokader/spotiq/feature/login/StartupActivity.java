@@ -52,16 +52,18 @@ public class StartupActivity extends BaseActivity<StartupPresenter> implements S
     }
 
     public void goToLobby() {
-        Animator activityTransition = prepareCircularRevealAnimation();
-        activityTransition.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                super.onAnimationEnd(animation);
-                startActivity(new Intent(getApplicationContext(), LobbyActivity.class));
-                delayResetAnimatedChanges();
-            }
+        getRootView().post(() -> {
+            Animator activityTransition = prepareCircularRevealAnimation();
+            activityTransition.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    super.onAnimationEnd(animation);
+                    startActivity(new Intent(getApplicationContext(), LobbyActivity.class));
+                    delayResetAnimatedChanges();
+                }
+            });
+            activityTransition.start();
         });
-        activityTransition.start();
     }
 
     private Animator prepareCircularRevealAnimation() {

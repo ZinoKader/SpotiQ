@@ -77,14 +77,11 @@ public abstract class BaseActivity<P extends Presenter> extends NucleusAppCompat
     }
 
     public void startForegroundTokenRenewalService() {
-        startService(new Intent(this, SpotifyCommunicatorService.class));
+        new Handler().post(() -> startService(new Intent(this, SpotifyCommunicatorService.class)));
     }
 
     public void stopForegroundTokenRenewalService() {
-        stopService(new Intent(this, SpotifyCommunicatorService.class));
+        new Handler().post(() -> stopService(new Intent(this, SpotifyCommunicatorService.class)));
     }
 
-    public boolean isSnackbarShowing() {
-        return snackbarShowing;
-    }
 }

@@ -63,8 +63,9 @@ public class SearchPresenter extends BasePresenter<SearchView> {
                 .observeOn(AndroidSchedulers.mainThread()),
             (lobbyView, userPrivate) -> {
                 user = new User(userPrivate.id, userPrivate.display_name, userPrivate.images);
-            }, (lobbyView, throwable) -> {
-                Log.d(LogTag.LOG_LOBBY, "Error when getting user Spotify data");
+            },
+            (lobbyView, throwable) -> {
+                Log.d(LogTag.LOG_SEARCH, "Error when getting user Spotify data");
                 throwable.printStackTrace();
             });
 
@@ -91,33 +92,27 @@ public class SearchPresenter extends BasePresenter<SearchView> {
         tracklistRepository.checkSongInDbPlaylist(song, partyTitle)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .flatMap(songExists -> {
-                if (songExists) {
-                    view().subscribe(searchViewOptionalView -> {
-                        if (searchViewOptionalView.view != null) {
-                            searchViewOptionalView.view.showMessage("This song is already in the queue");
-                        }
-                    });
-                    return Observable.just(false);
-                }
-                else {
-                    return tracklistRepository.addSong(song, partyTitle);
-                }
-            })
-            .map(didSucceed -> {
-                if (didSucceed) partiesRepository.incrementUserSongRequestCount(user, partyTitle);
-                return didSucceed;
-            })
-            .subscribe(songWasAdded -> view().subscribe(searchViewOptionalView -> {
-                if (searchViewOptionalView.view != null) {
-                    if (songWasAdded) {
-                        searchViewOptionalView.view.finishWithSuccess("Song added to the tracklist!");
+            .compose(this.deliverFirst())
+            .subscribe(songExistsDelivery -> songExistsDelivery.split(
+                (searchView, songExists) -> {
+                    if (songExists) {
+                        searchView.showMessage("This song is already queued up in the tracklist");
                     }
                     else {
-                        searchViewOptionalView.view.showMessage("Song could not be added to the tracklist");
+                        tracklistRepository.addSong(song, partyTitle).subscribe(addedWithSuccess -> {
+                            if (addedWithSuccess) {
+                                partiesRepository.incrementUserSongRequestCount(user, partyTitle);
+                                searchView.finishWithSuccess("Song added to the tracklist!");
+                            }
+                            else {
+                                searchView.showMessage("Something went wrong when adding the song, try again");
+                            }
+                        });
                     }
-                }
-            }));
+                },
+                (searchView, throwable) -> {
+                    Log.d(LogTag.LOG_SEARCH, "Something went wrong when informing the user of song addition status");
+                }));
     }
 
     void searchTracks(String query) {

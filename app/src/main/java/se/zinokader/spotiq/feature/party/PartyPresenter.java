@@ -1,6 +1,7 @@
 package se.zinokader.spotiq.feature.party;
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 
 import com.spotify.sdk.android.player.Spotify;
 
@@ -29,12 +30,18 @@ public class PartyPresenter extends BasePresenter<PartyView> {
     SpotifyRepository spotifyRepository;
 
     private String partyTitle;
+    private boolean memberTypeMessageShown = false;
 
     private static final int LOAD_USER_RESTARTABLE_ID = 9814;
 
     @Override
     protected void onCreate(Bundle savedState) {
         super.onCreate(savedState);
+
+        if (savedState != null) {
+            partyTitle = savedState.getString(ApplicationConstants.PARTY_NAME_EXTRA);
+            memberTypeMessageShown = savedState.getBoolean(ApplicationConstants.MEMBER_TYPE_MESSAGE_EXTRA);
+        }
 
         //listen to user changes
         restartableLatestCache(LOAD_USER_RESTARTABLE_ID,
@@ -55,6 +62,13 @@ public class PartyPresenter extends BasePresenter<PartyView> {
     }
 
     @Override
+    protected void onSave(@NonNull Bundle state) {
+        super.onSave(state);
+        state.putString(ApplicationConstants.PARTY_NAME_EXTRA, partyTitle);
+        state.putBoolean(ApplicationConstants.MEMBER_TYPE_MESSAGE_EXTRA, memberTypeMessageShown);
+    }
+
+    @Override
     protected void onDestroy() {
         Spotify.destroyPlayer(this);
         super.onDestroy();
@@ -65,7 +79,7 @@ public class PartyPresenter extends BasePresenter<PartyView> {
     }
 
     private void loadHost(String userId) {
-        add(partiesRepository.isHostOfParty(userId, partyTitle)
+        partiesRepository.isHostOfParty(userId, partyTitle)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .compose(this.deliverFirst())
@@ -74,11 +88,15 @@ public class PartyPresenter extends BasePresenter<PartyView> {
                 if (userIsHost) {
                     //loadPlayer();
                     partyView.setHostPriviliges();
-                    partyView.showMessage("Connected as a party host");
+                    if (!memberTypeMessageShown) partyView.showMessage("Connected as a party host");
                 }
+                else {
+                    if (!memberTypeMessageShown) partyView.showMessage("Connected as a party member");
+                }
+                memberTypeMessageShown = true;
             }, (partyView, throwable) -> {
                 partyView.showMessage("Could not load host priviliges, retrying...");
-            })));
+            }));
     }
 
 }

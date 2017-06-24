@@ -36,8 +36,9 @@
     <string name="now_playing">Now playing</string>
     <string name="up_next">Up next</string>
 
-    <!-- Notification -->
+    <!-- Notifications, snacks and toasts -->
     <string name="media_notification_channel_name">Music controls</string>
     <string name="media_notification_channel_description">View and control the currently playing track</string>
+    <string name="playback_permission_lost_notice">Your Spotify account is being used from somewhere else</string>
 
 </resources>

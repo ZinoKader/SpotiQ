@@ -8,8 +8,6 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 
-import java.util.Iterator;
-
 import io.reactivex.Observable;
 import se.zinokader.spotiq.constant.FirebaseConstants;
 import se.zinokader.spotiq.constant.LogTag;
@@ -31,9 +29,8 @@ public class TracklistRepository {
             .addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
-                    Iterator<DataSnapshot> tracklistIterator = dataSnapshot.getChildren().iterator();
-                    while (tracklistIterator.hasNext()) {
-                        Song dbSong = tracklistIterator.next().getValue(Song.class);
+                    for (DataSnapshot songSnapshot : dataSnapshot.getChildren()) {
+                        Song dbSong = songSnapshot.getValue(Song.class);
                         if (song.getSongSpotifyId().equals(dbSong.getSongSpotifyId())) {
                             subscriber.onNext(true);
                             subscriber.onComplete();

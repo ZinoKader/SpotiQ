@@ -19,8 +19,7 @@
 
         <service android:name=".service.SpotiqPlayerService"
             android:enabled="true"
-            android:exported="false"
-            android:process=":spotiq_player_service" />
+            android:exported="false" />
 
         <service android:name=".service.SpotifyCommunicatorService"/>
 
