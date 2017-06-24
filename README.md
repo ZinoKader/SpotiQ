@@ -4,8 +4,8 @@ A real-time collaborative tracklist for Spotify
 
 Built using:
 * Nucleus
-* RxJava / RxAndroid
-* Dagger2
+* RxJava 2
+* Dagger 2
 * Glide
 * Spotify Android SDK
 * Kaaes Spotify Web API
