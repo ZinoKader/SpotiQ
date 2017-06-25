@@ -4,15 +4,12 @@ import android.os.Bundle;
 import android.util.Log;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
 
 import io.reactivex.Observable;
-import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import kaaes.spotify.webapi.android.SpotifyService;
 import kaaes.spotify.webapi.android.models.TracksPager;
@@ -42,7 +39,7 @@ public class SearchPresenter extends BasePresenter<SearchView> {
     @Inject
     SpotifyRepository spotifyRepository;
 
-    private PreviewPlayer songPreviewPlayer = new PreviewPlayer();
+    private PreviewPlayer songPreviewPlayer;
     private String partyTitle;
     private User user;
 
@@ -55,6 +52,8 @@ public class SearchPresenter extends BasePresenter<SearchView> {
     @Override
     protected void onCreate(Bundle savedState) {
         super.onCreate(savedState);
+
+        songPreviewPlayer = new PreviewPlayer();
 
         //load user
         restartableLatestCache(LOAD_USER_RESTARTABLE_ID,
@@ -125,32 +124,14 @@ public class SearchPresenter extends BasePresenter<SearchView> {
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .concatMap(tracksPager -> Observable.fromArray(TrackMapper.tracksToSongs(tracksPager.tracks.items, user)))
-            .subscribe(new Observer<List<Song>>() {
-                @Override
-                public void onSubscribe(Disposable d) {
-
-                }
-
-                @Override
-                public void onNext(List<Song> songs) {
-                    view().subscribe(searchViewOptionalView -> {
-                        if (searchViewOptionalView.view != null) {
-                            searchViewOptionalView.view.updateSearch(songs, false);
-                        }
-                    });
-                }
-
-                @Override
-                public void onError(Throwable e) {
-
-                }
-
-                @Override
-                public void onComplete() {
-
-                }
-            });
-
+            .compose(this.deliverFirst())
+            .subscribe(searchDelivery -> searchDelivery.split(
+                (searchView, songs) -> {
+                    if (songs.isEmpty()) searchView.showMessage("No songs were found for the search query " + query);
+                    searchView.updateSearch(songs, false);
+                },
+                (searchView, throwable) -> {
+                }));
     }
 
     private Observable<TracksPager> searchTracksRecursively(String query, Map<String, Object> searchOptions) {

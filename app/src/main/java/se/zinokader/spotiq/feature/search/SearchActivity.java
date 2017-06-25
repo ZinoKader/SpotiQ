@@ -95,10 +95,7 @@ public class SearchActivity extends BaseActivity<SearchPresenter> implements Sea
             .message("Confirm song request")
             .actionText("Queue song")
             .actionTextColor(getResources().getColor(R.color.colorAccent))
-            .actionClickListener(confirmed -> {
-                getPresenter().requestSong(song);
-                finish();
-            })
+            .actionClickListener(confirmed -> getPresenter().requestSong(song))
             .build()
             .show();
     }

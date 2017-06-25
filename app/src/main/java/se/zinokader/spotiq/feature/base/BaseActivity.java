@@ -77,11 +77,11 @@ public abstract class BaseActivity<P extends Presenter> extends NucleusAppCompat
     }
 
     public void startForegroundTokenRenewalService() {
-        new Handler().post(() -> startService(new Intent(this, SpotifyCommunicatorService.class)));
+        startService(new Intent(this, SpotifyCommunicatorService.class));
     }
 
     public void stopForegroundTokenRenewalService() {
-        new Handler().post(() -> stopService(new Intent(this, SpotifyCommunicatorService.class)));
+        stopService(new Intent(this, SpotifyCommunicatorService.class));
     }
 
 }

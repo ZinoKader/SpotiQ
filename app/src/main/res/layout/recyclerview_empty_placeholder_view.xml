@@ -52,7 +52,7 @@
         android:foreground="?selectableItemBackground"
         android:outlineProvider="bounds"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/emptyNoticeHolder">
 
@@ -175,7 +175,7 @@
         android:foreground="?selectableItemBackground"
         android:outlineProvider="bounds"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/trackViewHolder">
 
@@ -299,7 +299,7 @@
         android:foreground="?selectableItemBackground"
         android:outlineProvider="bounds"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/trackViewHolder2">
 
@@ -422,9 +422,8 @@
         android:focusable="true"
         android:foreground="?selectableItemBackground"
         android:outlineProvider="bounds"
-        android:paddingBottom="50dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/trackViewHolder3">
 

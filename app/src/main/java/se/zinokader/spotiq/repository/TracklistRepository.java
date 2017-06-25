@@ -9,6 +9,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 
 import io.reactivex.Observable;
+import io.reactivex.Single;
 import se.zinokader.spotiq.constant.FirebaseConstants;
 import se.zinokader.spotiq.constant.LogTag;
 import se.zinokader.spotiq.model.ChildEvent;
@@ -50,15 +51,14 @@ public class TracklistRepository {
             }));
     }
 
-    public Observable<Boolean> addSong(Song song, String partyTitle) {
-        return Observable.create(subscriber -> databaseReference
+    public Single<Boolean> addSong(Song song, String partyTitle) {
+        return Single.create(subscriber -> databaseReference
             .child(partyTitle)
             .child(FirebaseConstants.CHILD_TRACKLIST)
             .push() //push is timestamp-based, items are chronologically ordered
             .setValue(song)
             .addOnCompleteListener(task -> {
-                subscriber.onNext(task.isSuccessful());
-                subscriber.onComplete();
+                subscriber.onSuccess(task.isSuccessful());
             })
             .addOnFailureListener(subscriber::onError));
     }

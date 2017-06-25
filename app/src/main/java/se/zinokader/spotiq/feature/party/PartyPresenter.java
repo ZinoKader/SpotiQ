@@ -3,8 +3,6 @@ package se.zinokader.spotiq.feature.party;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 
-import com.spotify.sdk.android.player.Spotify;
-
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -70,7 +68,6 @@ public class PartyPresenter extends BasePresenter<PartyView> {
 
     @Override
     protected void onDestroy() {
-        Spotify.destroyPlayer(this);
         super.onDestroy();
     }
 
@@ -86,7 +83,6 @@ public class PartyPresenter extends BasePresenter<PartyView> {
             .retryWhen(throwable -> throwable.delay(ApplicationConstants.REQUEST_RETRY_DELAY_SEC, TimeUnit.SECONDS))
             .subscribe(resultDelivery -> resultDelivery.split((partyView, userIsHost) -> {
                 if (userIsHost) {
-                    //loadPlayer();
                     partyView.setHostPriviliges();
                     if (!memberTypeMessageShown) partyView.showMessage("Connected as a party host");
                 }

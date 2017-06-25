@@ -35,6 +35,7 @@ public class PartyActivity extends BaseActivity<PartyPresenter> implements Party
 
     ActivityPartyBinding binding;
     private String partyTitle;
+    private boolean userDetailsLoaded = false;
     private boolean displayHostControls = false;
 
     private Fragment selectedFragment;
@@ -175,26 +176,29 @@ public class PartyActivity extends BaseActivity<PartyPresenter> implements Party
 
     @Override
     public void setUserDetails(String userName, String userImageUrl) {
-        binding.userName.setText(userName);
-        Glide.with(this)
-            .load(userImageUrl)
-            .placeholder(R.drawable.image_profile_placeholder)
-            .dontAnimate()
-            .dontTransform()
-            .listener(new RequestListener<String, GlideDrawable>() {
-                @Override
-                public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
-                    supportStartPostponedEnterTransition();
-                    return false;
-                }
+        if (!userDetailsLoaded) {
+            binding.userName.setText(userName);
+            Glide.with(this)
+                .load(userImageUrl)
+                .placeholder(R.drawable.image_profile_placeholder)
+                .dontAnimate()
+                .dontTransform()
+                .listener(new RequestListener<String, GlideDrawable>() {
+                    @Override
+                    public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
+                        supportStartPostponedEnterTransition();
+                        return false;
+                    }
 
-                @Override
-                public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
-                    supportStartPostponedEnterTransition();
-                    return false;
-                }
-            })
-            .into(binding.userImage);
+                    @Override
+                    public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
+                        supportStartPostponedEnterTransition();
+                        return false;
+                    }
+                })
+                .into(binding.userImage);
+            userDetailsLoaded = true;
+        }
     }
 
     @Override
@@ -213,6 +217,7 @@ public class PartyActivity extends BaseActivity<PartyPresenter> implements Party
             .setPositiveButton("Yes", (dialogInterface, i) -> {
                 dialogInterface.dismiss();
                 unbindService(playerServiceConnection);
+                playerServiceBound = false;
                 stopService(new Intent(this, SpotiqPlayerService.class));
                 super.onBackPressed();
             })
