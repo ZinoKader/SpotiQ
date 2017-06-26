@@ -83,7 +83,7 @@ public class PartyPresenter extends BasePresenter<PartyView> {
             .retryWhen(throwable -> throwable.delay(ApplicationConstants.REQUEST_RETRY_DELAY_SEC, TimeUnit.SECONDS))
             .subscribe(resultDelivery -> resultDelivery.split((partyView, userIsHost) -> {
                 if (userIsHost) {
-                    partyView.setHostPriviliges();
+                    partyView.setHostPrivileges();
                     if (!memberTypeMessageShown) partyView.showMessage("Connected as a party host");
                 }
                 else {

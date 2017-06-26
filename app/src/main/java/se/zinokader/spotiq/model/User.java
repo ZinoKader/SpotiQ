@@ -14,7 +14,7 @@ public class User {
     private String userImageUrl;
     private String joinedTimeStamp;
     private int songsRequested = 0;
-    private boolean hasHostPriviliges = false;
+    private boolean hasHostPrivileges = false;
 
     public User() {}
 
@@ -24,7 +24,7 @@ public class User {
             ? userId
             : userName;
         this.songsRequested = 0;
-        this.hasHostPriviliges = false;
+        this.hasHostPrivileges = false;
         if (userImages != null && !userImages.isEmpty()) {
             this.userImageUrl = userImages.get(0).url;
         }
@@ -61,12 +61,12 @@ public class User {
         return songsRequested;
     }
 
-    public boolean getHasHostPriviliges() {
-        return hasHostPriviliges;
+    public boolean getHasHostPrivileges() {
+        return hasHostPrivileges;
     }
 
-    public void setHasHostPriviliges() {
-        this.hasHostPriviliges = true;
+    public void setHasHostPrivileges() {
+        this.hasHostPrivileges = true;
     }
 
     public String getJoinedTimeStamp() {

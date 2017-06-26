@@ -13,13 +13,15 @@ public class UserRepository {
     public Observable<Boolean> logInFirebaseUser() {
         return Observable.create(subscriber -> Observable.just(FirebaseAuth.getInstance().signInAnonymously())
             .subscribe(authResultTask -> {
-                if (authResultTask.isSuccessful()) {
+                authResultTask.addOnSuccessListener(success -> {
                     subscriber.onNext(true);
-                }
-                else {
+                    subscriber.onComplete();
+                });
+                authResultTask.addOnFailureListener(failure -> {
                     subscriber.onNext(false);
-                }
-                subscriber.onComplete();
+                    subscriber.onComplete();
+                });
+
             }, throwable -> subscriber.onNext(false)));
     }
 }

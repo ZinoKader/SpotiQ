@@ -129,7 +129,7 @@ public class LobbyPresenter extends BasePresenter<LobbyView> {
                     party.setCreatedNowTimeStamp();
                     party.setHostSpotifyId(user.getUserId());
                     user.setJoinedNowTimeStamp();
-                    user.setHasHostPriviliges();
+                    user.setHasHostPrivileges();
                     return new UserPartyInformation(user, party);
                 }
             })

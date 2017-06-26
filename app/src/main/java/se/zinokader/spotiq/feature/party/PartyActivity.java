@@ -7,6 +7,7 @@ import android.content.ServiceConnection;
 import android.databinding.DataBindingUtil;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
@@ -37,7 +38,7 @@ public class PartyActivity extends BaseActivity<PartyPresenter> implements Party
     ActivityPartyBinding binding;
     private String partyTitle;
     private boolean userDetailsLoaded = false;
-    private boolean hostProviligesLoaded = false;
+    private boolean hostProvilegesLoaded = false;
     private boolean displayHostControls = false;
 
     private Fragment selectedFragment;
@@ -123,7 +124,7 @@ public class PartyActivity extends BaseActivity<PartyPresenter> implements Party
             else {
                 playerService.play();
             }
-            synchronizePlayButton();
+            new Handler().postDelayed(this::synchronizePlayButton, 1000);
         });
 
     }
@@ -172,12 +173,12 @@ public class PartyActivity extends BaseActivity<PartyPresenter> implements Party
     private void synchronizePlayButton() {
         if (playerService == null) return;
 
-        if (playerService.isPlaying()) { //switch to play icon
-            if (!binding.playPauseFab.getCurrentMode().isShowingPlayIcon()) {
+        if (playerService.isPlaying()) { //switch to show pause icon
+            if (binding.playPauseFab.getCurrentMode().isShowingPlayIcon()) {
                 binding.playPauseFab.playAnimation();
             }
         }
-        else { //switch to pause icon
+        else { //switch to show play icon
             if (!binding.playPauseFab.getCurrentMode().isShowingPlayIcon()) {
                 binding.playPauseFab.playAnimation();
             }
@@ -212,8 +213,8 @@ public class PartyActivity extends BaseActivity<PartyPresenter> implements Party
     }
 
     @Override
-    public void setHostPriviliges() {
-        if (!hostProviligesLoaded) {
+    public void setHostPrivileges() {
+        if (!hostProvilegesLoaded) {
             displayHostControls = true;
             binding.playPauseFab.setVisibility(View.VISIBLE);
             Intent playerServiceIntent = new Intent(this, SpotiqPlayerService.class);
@@ -222,7 +223,7 @@ public class PartyActivity extends BaseActivity<PartyPresenter> implements Party
             initPlayerServiceIntent.setAction(ServiceConstants.ACTION_INIT);
             initPlayerServiceIntent.putExtra(ApplicationConstants.PARTY_NAME_EXTRA, partyTitle);
             startService(initPlayerServiceIntent);
-            hostProviligesLoaded = true;
+            hostProvilegesLoaded = true;
         }
     }
 

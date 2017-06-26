@@ -42,7 +42,7 @@ public class PartyMemberRecyclerAdapter extends RecyclerView.Adapter<PartyMember
                 ? "Requested %d song"
                 : "Requested %d songs",
             partyMember.getSongsRequested()));
-        userHolder.memberType.setText(partyMember.getHasHostPriviliges() ? "Host" : "Member");
+        userHolder.memberType.setText(partyMember.getHasHostPrivileges() ? "Host" : "Member");
     }
 
     @Override
