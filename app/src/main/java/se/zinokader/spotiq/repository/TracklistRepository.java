@@ -14,6 +14,7 @@ import se.zinokader.spotiq.constant.FirebaseConstants;
 import se.zinokader.spotiq.constant.LogTag;
 import se.zinokader.spotiq.model.ChildEvent;
 import se.zinokader.spotiq.model.Song;
+import se.zinokader.spotiq.util.exception.EmptyTracklistException;
 
 public class TracklistRepository {
 
@@ -63,38 +64,59 @@ public class TracklistRepository {
             .addOnFailureListener(subscriber::onError));
     }
 
-    public Observable<Boolean> removeFirstSong(String partyTitle) {
-        return Observable.create(subscriber -> databaseReference
+    public Single<Song> getFirstSong(String partyTitle) {
+        return Single.create(subscriber -> databaseReference
             .child(partyTitle)
             .child(FirebaseConstants.CHILD_TRACKLIST)
             .orderByKey()
-            .limitToFirst(1)
-            .addChildEventListener(new ChildEventListener() {
+            .addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
-                public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                    dataSnapshot.getRef().removeValue((databaseError, databaseReference) -> {
-                        subscriber.onNext(true);
-                        subscriber.onComplete();
-                    });
-                }
-
-                @Override
-                public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-                }
-
-                @Override
-                public void onChildRemoved(DataSnapshot dataSnapshot) {
-                }
-
-                @Override
-                public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    if (dataSnapshot.getChildren().iterator().hasNext()) {
+                        subscriber.onSuccess(dataSnapshot.getChildren().iterator().next().getValue(Song.class));
+                    }
+                    else {
+                        subscriber.onError(new EmptyTracklistException());
+                    }
                 }
 
                 @Override
                 public void onCancelled(DatabaseError databaseError) {
-                    subscriber.onNext(false);
-                    subscriber.onComplete();
+                    subscriber.onError(databaseError.toException());
+                }
+            }));
+    }
+
+    public Single<Boolean> removeFirstSong(String partyTitle) {
+        return Single.create(subscriber -> getFirstSongKey(partyTitle)
+            .subscribe(songKey -> databaseReference
+                .child(partyTitle)
+                .child(FirebaseConstants.CHILD_TRACKLIST)
+                .child(songKey)
+                .removeValue()
+                .addOnSuccessListener(removeSuccess -> subscriber.onSuccess(true))
+                .addOnFailureListener(failedRemoveException -> subscriber.onSuccess(false)), subscriber::onError));
+    }
+
+    private Single<String> getFirstSongKey(String partyTitle) {
+        return Single.create(subscriber -> databaseReference
+            .child(partyTitle)
+            .child(FirebaseConstants.CHILD_TRACKLIST)
+            .orderByKey()
+            .addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    if (dataSnapshot.getChildren().iterator().hasNext()) {
+                        subscriber.onSuccess(dataSnapshot.getChildren().iterator().next().getKey());
+                    }
+                    else {
+                        subscriber.onError(new EmptyTracklistException());
+                    }
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    subscriber.onError(databaseError.toException());
                 }
             }));
     }

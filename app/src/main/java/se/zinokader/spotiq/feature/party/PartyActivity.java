@@ -21,6 +21,7 @@ import com.bumptech.glide.request.target.Target;
 import nucleus5.factory.RequiresPresenter;
 import se.zinokader.spotiq.R;
 import se.zinokader.spotiq.constant.ApplicationConstants;
+import se.zinokader.spotiq.constant.ServiceConstants;
 import se.zinokader.spotiq.databinding.ActivityPartyBinding;
 import se.zinokader.spotiq.feature.base.BaseActivity;
 import se.zinokader.spotiq.feature.party.partymember.PartyMemberFragment;
@@ -207,6 +208,10 @@ public class PartyActivity extends BaseActivity<PartyPresenter> implements Party
         binding.playPauseFab.setVisibility(View.VISIBLE);
         Intent playerServiceIntent = new Intent(this, SpotiqPlayerService.class);
         bindService(playerServiceIntent, playerServiceConnection, Context.BIND_AUTO_CREATE);
+        Intent initPlayerServiceIntent = new Intent(this, SpotiqPlayerService.class);
+        initPlayerServiceIntent.setAction(ServiceConstants.ACTION_INIT);
+        initPlayerServiceIntent.putExtra(ApplicationConstants.PARTY_NAME_EXTRA, partyTitle);
+        startService(initPlayerServiceIntent);
     }
 
     @Override

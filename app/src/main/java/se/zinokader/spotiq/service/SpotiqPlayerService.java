@@ -23,7 +23,6 @@ import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 
 import io.reactivex.Single;
-import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import se.zinokader.spotiq.R;
 import se.zinokader.spotiq.constant.ApplicationConstants;
@@ -90,8 +89,10 @@ public class SpotiqPlayerService extends Service implements ConnectionStateCallb
         }
 
         if (intent.getAction().equals(ServiceConstants.ACTION_INIT)) {
-            boolean didInit = initPlayer().blockingGet();
-            if (!didInit) stopSelf();
+            initPlayer().subscribe(didInit -> {
+                Log.d(LogTag.LOG_PLAYER_SERVICE, "Player initialization status: " + didInit);
+                if (!didInit) stopSelf();
+            });
         }
 
         return START_NOT_STICKY;
@@ -159,15 +160,77 @@ public class SpotiqPlayerService extends Service implements ConnectionStateCallb
     }
 
     public boolean isPlaying() {
-        return spotifyPlayer != null && spotifyPlayer.getPlaybackState().isPlaying;
+        return !(spotifyPlayer == null || spotifyPlayer.getPlaybackState() == null) && spotifyPlayer.getPlaybackState().isPlaying;
     }
 
     public void play() {
         Log.d(LogTag.LOG_PLAYER_SERVICE, "PLAY CLICKED!");
+
+        if (spotifyPlayer.getMetadata().currentTrack != null) {
+            resume();
+        }
+        else {
+            playNext();
+        }
     }
 
     public void pause() {
         Log.d(LogTag.LOG_PLAYER_SERVICE, "PAUSE CLICKED!");
+
+        spotifyPlayer.pause(new Player.OperationCallback() {
+            @Override
+            public void onSuccess() {
+
+            }
+
+            @Override
+            public void onError(Error error) {
+
+            }
+        });
+    }
+
+    private void playNext() {
+
+        tracklistRepository.getFirstSong(partyTitle)
+            .subscribe(song -> {
+                spotifyPlayer.playUri(new Player.OperationCallback() {
+                    @Override
+                    public void onSuccess() {
+                        Log.d(LogTag.LOG_PLAYER_SERVICE, "Playing next song in tracklist");
+                    }
+
+                    @Override
+                    public void onError(Error error) {
+                        Log.d(LogTag.LOG_PLAYER_SERVICE, "Failed to play next song in tracklist: " + error.name());
+                    }
+                }, song.getSongUri(), 0, 0);
+            }, throwable -> Log.d(LogTag.LOG_PLAYER_SERVICE, "Could not play next song, reason: " + throwable.getMessage()));
+    }
+
+    private void resume() {
+
+        spotifyPlayer.resume(new Player.OperationCallback() {
+            @Override
+            public void onSuccess() {
+                Log.d(LogTag.LOG_PLAYER_SERVICE, "Resumed music successfully");
+            }
+
+            @Override
+            public void onError(Error error) {
+                Log.d(LogTag.LOG_PLAYER_SERVICE, "Failed to resume music");
+            }
+        });
+    }
+
+    @Override
+    public void onPlaybackEvent(PlayerEvent playerEvent) {
+        switch (playerEvent) {
+            case kSpPlaybackNotifyLostPermission:
+                showLostPlaybackPermissionToast();
+            case kSpPlaybackNotifyTrackDelivered:
+                handlePlaybackEnd();
+        }
     }
 
     private void showLostPlaybackPermissionToast() {
@@ -180,19 +243,12 @@ public class SpotiqPlayerService extends Service implements ConnectionStateCallb
         lostPlaybackPermissionToast.show();
     }
 
-    @Override
-    public void onPlaybackEvent(PlayerEvent playerEvent) {
-        switch (playerEvent) {
-            case kSpPlaybackNotifyLostPermission:
-                showLostPlaybackPermissionToast();
-            case kSpPlaybackNotifyTrackDelivered:
-                tracklistRepository.removeFirstSong(partyTitle)
-                    .delay(2, TimeUnit.SECONDS)
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(wasRemoved -> {
-                        // musicAction();
-                    });
-        }
+    private void handlePlaybackEnd() {
+        tracklistRepository.removeFirstSong(partyTitle)
+            .delay(2, TimeUnit.SECONDS)
+            .subscribe(wasRemoved -> {
+                if (wasRemoved) playNext();
+            });
     }
 
     @Override
