@@ -90,12 +90,13 @@ public class TracklistRepository {
     public Single<Boolean> removeFirstSong(String partyTitle) {
         return Single.create(subscriber -> getFirstSongKey(partyTitle)
             .subscribe(songKey -> databaseReference
-                .child(partyTitle)
-                .child(FirebaseConstants.CHILD_TRACKLIST)
-                .child(songKey)
-                .removeValue()
-                .addOnSuccessListener(removeSuccess -> subscriber.onSuccess(true))
-                .addOnFailureListener(failedRemoveException -> subscriber.onSuccess(false)), subscriber::onError));
+                    .child(partyTitle)
+                    .child(FirebaseConstants.CHILD_TRACKLIST)
+                    .child(songKey)
+                    .removeValue()
+                    .addOnSuccessListener(removeSuccess -> subscriber.onSuccess(true))
+                    .addOnFailureListener(failedRemoveException -> subscriber.onSuccess(false)),
+                subscriber::onError));
     }
 
     private Single<String> getFirstSongKey(String partyTitle) {

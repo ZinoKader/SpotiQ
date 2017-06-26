@@ -31,6 +31,7 @@ import se.zinokader.spotiq.constant.ServiceConstants;
 import se.zinokader.spotiq.constant.SpotifyConstants;
 import se.zinokader.spotiq.repository.TracklistRepository;
 import se.zinokader.spotiq.util.di.Injector;
+import se.zinokader.spotiq.util.exception.EmptyTracklistException;
 
 public class SpotiqPlayerService extends Service implements ConnectionStateCallback, Player.NotificationCallback {
 
@@ -44,6 +45,7 @@ public class SpotiqPlayerService extends Service implements ConnectionStateCallb
 
     private Config playerConfig;
     private SpotifyPlayer spotifyPlayer;
+    private boolean isTracklistEmpty = false;
     private String partyTitle;
 
     private IBinder binder = new PlayerServiceBinder();
@@ -63,10 +65,12 @@ public class SpotiqPlayerService extends Service implements ConnectionStateCallb
     @Override
     public void onCreate() {
         ((Injector) getApplicationContext()).inject(this);
+        Log.d(LogTag.LOG_PLAYER_SERVICE, "SpotiQ Player service created");
     }
 
     @Override
     public void onDestroy() {
+        Log.d(LogTag.LOG_PLAYER_SERVICE, "SpotiQ Player service destroyed");
         disposableActions.clear();
         if (spotifyPlayer != null) {
             try {
@@ -139,34 +143,10 @@ public class SpotiqPlayerService extends Service implements ConnectionStateCallb
         });
     }
 
-    private void handlePlayPause() {
-        /*
-        if (tracklist.isEmpty()) {
-            restartableFirst(EMPTY_TRACKLIST_MESSAGE_RESTARTABLE_ID,
-                () -> Observable.just(new Empty()),
-                (partyView, empty) -> partyView.showMessage("No songs in the tracklist, try adding some!"));
-            return Observable.just(false);
-        }
-        else if (spotifyPlayer.getPlaybackState().isPlaying) {
-            return pause();
-        }
-        else if(spotifyPlayer.getMetadata().currentTrack != null) {
-            return resume();
-        }
-        else {
-            return play();
-        }
-        */
-    }
-
-    public boolean isPlaying() {
-        return !(spotifyPlayer == null || spotifyPlayer.getPlaybackState() == null) && spotifyPlayer.getPlaybackState().isPlaying;
-    }
-
     public void play() {
         Log.d(LogTag.LOG_PLAYER_SERVICE, "PLAY CLICKED!");
 
-        if (spotifyPlayer.getMetadata().currentTrack != null) {
+        if (!isTracklistEmpty && spotifyPlayer.getMetadata().currentTrack != null) {
             resume();
         }
         else {
@@ -191,13 +171,13 @@ public class SpotiqPlayerService extends Service implements ConnectionStateCallb
     }
 
     private void playNext() {
-
         tracklistRepository.getFirstSong(partyTitle)
             .subscribe(song -> {
                 spotifyPlayer.playUri(new Player.OperationCallback() {
                     @Override
                     public void onSuccess() {
                         Log.d(LogTag.LOG_PLAYER_SERVICE, "Playing next song in tracklist");
+                        isTracklistEmpty = false;
                     }
 
                     @Override
@@ -205,11 +185,13 @@ public class SpotiqPlayerService extends Service implements ConnectionStateCallb
                         Log.d(LogTag.LOG_PLAYER_SERVICE, "Failed to play next song in tracklist: " + error.name());
                     }
                 }, song.getSongUri(), 0, 0);
-            }, throwable -> Log.d(LogTag.LOG_PLAYER_SERVICE, "Could not play next song, reason: " + throwable.getMessage()));
+            }, throwable -> {
+                Log.d(LogTag.LOG_PLAYER_SERVICE, "Could not play next song, reason: " + throwable.getMessage());
+                isTracklistEmpty = true;
+            });
     }
 
     private void resume() {
-
         spotifyPlayer.resume(new Player.OperationCallback() {
             @Override
             public void onSuccess() {
@@ -223,11 +205,17 @@ public class SpotiqPlayerService extends Service implements ConnectionStateCallb
         });
     }
 
+    public boolean isPlaying() {
+        return !(spotifyPlayer == null || spotifyPlayer.getPlaybackState() == null) && spotifyPlayer.getPlaybackState().isPlaying;
+    }
+
     @Override
     public void onPlaybackEvent(PlayerEvent playerEvent) {
+        Log.d(LogTag.LOG_PLAYER_SERVICE, "Playback event: " + playerEvent.name());
         switch (playerEvent) {
             case kSpPlaybackNotifyLostPermission:
                 showLostPlaybackPermissionToast();
+                break;
             case kSpPlaybackNotifyTrackDelivered:
                 handlePlaybackEnd();
         }
@@ -245,9 +233,13 @@ public class SpotiqPlayerService extends Service implements ConnectionStateCallb
 
     private void handlePlaybackEnd() {
         tracklistRepository.removeFirstSong(partyTitle)
-            .delay(2, TimeUnit.SECONDS)
             .subscribe(wasRemoved -> {
                 if (wasRemoved) playNext();
+            }, throwable -> {
+                if (throwable instanceof EmptyTracklistException) {
+                    Log.d(LogTag.LOG_PLAYER_SERVICE, "Tracklist empty, next song not played");
+                    isTracklistEmpty = true;
+                }
             });
     }
 

@@ -37,6 +37,7 @@ public class PartyActivity extends BaseActivity<PartyPresenter> implements Party
     ActivityPartyBinding binding;
     private String partyTitle;
     private boolean userDetailsLoaded = false;
+    private boolean hostProviligesLoaded = false;
     private boolean displayHostControls = false;
 
     private Fragment selectedFragment;
@@ -53,18 +54,7 @@ public class PartyActivity extends BaseActivity<PartyPresenter> implements Party
             SpotiqPlayerService.PlayerServiceBinder playerServiceBinder =
                 (SpotiqPlayerService.PlayerServiceBinder) serviceBinder;
             playerService = playerServiceBinder.getService();
-
-            //set the play/pause button state accordingly to the player service's playing status
-            if (playerService.isPlaying()) { //switch to play icon
-                if (!binding.playPauseFab.getCurrentMode().isShowingPlayIcon()) {
-                    binding.playPauseFab.playAnimation();
-                }
-            }
-            else { //switch to pause icon
-                if (!binding.playPauseFab.getCurrentMode().isShowingPlayIcon()) {
-                    binding.playPauseFab.playAnimation();
-                }
-            }
+            synchronizePlayButton();
         }
 
         @Override
@@ -133,6 +123,7 @@ public class PartyActivity extends BaseActivity<PartyPresenter> implements Party
             else {
                 playerService.play();
             }
+            synchronizePlayButton();
         });
 
     }
@@ -175,6 +166,24 @@ public class PartyActivity extends BaseActivity<PartyPresenter> implements Party
         binding.playPauseFab.hide();
     }
 
+    /**
+     * Set the play/pause button state accordingly to the player service's playing status
+     */
+    private void synchronizePlayButton() {
+        if (playerService == null) return;
+
+        if (playerService.isPlaying()) { //switch to play icon
+            if (!binding.playPauseFab.getCurrentMode().isShowingPlayIcon()) {
+                binding.playPauseFab.playAnimation();
+            }
+        }
+        else { //switch to pause icon
+            if (!binding.playPauseFab.getCurrentMode().isShowingPlayIcon()) {
+                binding.playPauseFab.playAnimation();
+            }
+        }
+    }
+
     @Override
     public void setUserDetails(String userName, String userImageUrl) {
         if (!userDetailsLoaded) {
@@ -204,14 +213,17 @@ public class PartyActivity extends BaseActivity<PartyPresenter> implements Party
 
     @Override
     public void setHostPriviliges() {
-        displayHostControls = true;
-        binding.playPauseFab.setVisibility(View.VISIBLE);
-        Intent playerServiceIntent = new Intent(this, SpotiqPlayerService.class);
-        bindService(playerServiceIntent, playerServiceConnection, Context.BIND_AUTO_CREATE);
-        Intent initPlayerServiceIntent = new Intent(this, SpotiqPlayerService.class);
-        initPlayerServiceIntent.setAction(ServiceConstants.ACTION_INIT);
-        initPlayerServiceIntent.putExtra(ApplicationConstants.PARTY_NAME_EXTRA, partyTitle);
-        startService(initPlayerServiceIntent);
+        if (!hostProviligesLoaded) {
+            displayHostControls = true;
+            binding.playPauseFab.setVisibility(View.VISIBLE);
+            Intent playerServiceIntent = new Intent(this, SpotiqPlayerService.class);
+            bindService(playerServiceIntent, playerServiceConnection, Context.BIND_AUTO_CREATE);
+            Intent initPlayerServiceIntent = new Intent(this, SpotiqPlayerService.class);
+            initPlayerServiceIntent.setAction(ServiceConstants.ACTION_INIT);
+            initPlayerServiceIntent.putExtra(ApplicationConstants.PARTY_NAME_EXTRA, partyTitle);
+            startService(initPlayerServiceIntent);
+            hostProviligesLoaded = true;
+        }
     }
 
     @Override

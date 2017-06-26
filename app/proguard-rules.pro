@@ -13,6 +13,9 @@
 -keep class com.squareup.okhttp.*
 -keep class retrofit.appengine.UrlFetchClient
 -keep interface com.yalantis.ucrop** { *; }
+-dontwarn android.content.**
+-keep class android.content.**
+
 
 # RXJAVA RULES START
 -keepclassmembers class rx.internal.util.unsafe.*ArrayQueue*Field* {
@@ -64,6 +67,8 @@
 -dontwarn com.squareup.okhttp.**
 -dontwarn com.google.appengine.api.urlfetch.*
 -dontwarn android.content.ServiceConnection
+-dontwarn com.nineoldandroids.**
+-dontwarn io.codetail.**
 -keep class io.codetail.** { *; }
 -keep class io.codetail.animation.SupportAnimator.* 
 -dontwarn com.google.**
