@@ -10,7 +10,6 @@ import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.session.MediaSession;
-import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
@@ -21,6 +20,8 @@ import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.animation.GlideAnimation;
+import com.bumptech.glide.request.target.SimpleTarget;
 import com.spotify.sdk.android.player.Config;
 import com.spotify.sdk.android.player.ConnectionStateCallback;
 import com.spotify.sdk.android.player.Error;
@@ -33,7 +34,6 @@ import com.spotify.sdk.android.player.Spotify;
 import com.spotify.sdk.android.player.SpotifyPlayer;
 import com.valdesekamdem.library.mdtoast.MDToast;
 
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -135,67 +135,71 @@ public class SpotiqPlayerService extends Service implements ConnectionStateCallb
     }
 
     private void sendNotification(boolean shouldStartForeground) {
-        AsyncTask.execute(() -> {
-            String title;
-            String description;
-            Bitmap largeIcon = BitmapFactory.decodeResource(getResources(), R.drawable.image_album_placeholder);
-            boolean shouldBeOngoing = serviceIsRunningInForeground(this);
+        String title;
+        String description;
+        Bitmap largeIcon = BitmapFactory.decodeResource(getResources(), R.drawable.image_album_placeholder);
+        boolean shouldBeOngoing = serviceIsRunningInForeground(this);
 
-            if (isPlaying() && !isTracklistEmpty) {
-                Metadata.Track currentTrack = spotifyPlayer.getMetadata().currentTrack;
-                title = currentTrack.name;
-                description = currentTrack.artistName + " - " + currentTrack.albumName;
-                try {
-                    largeIcon = Glide.with(this)
-                        .load(currentTrack.albumCoverWebUrl)
-                        .asBitmap()
-                        .into(250, 250)
-                        .get();
-                } catch (InterruptedException | ExecutionException e) {
-                    e.printStackTrace();
-                }
-            }
-            else {
-                title = "Hosting party";
-                description = "You're currently the host of " + partyTitle;
-            }
-
-            Notification notification;
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                notification = new Notification.Builder(this, ApplicationConstants.MEDIA_NOTIFICATION_CHANNEL_ID)
-                    .setSmallIcon(R.drawable.ic_notification_logo)
-                    .setLargeIcon(largeIcon)
-                    .setStyle(new Notification.MediaStyle()
-                        .setMediaSession(new MediaSession(this, ApplicationConstants.MEDIA_SESSSION_TAG).getSessionToken()))
-                    .setColorized(true)
-                    .setContentTitle(title)
-                    .setContentText(description)
-                    .setOngoing(shouldBeOngoing)
-                    .build();
-            }
-            else {
-                notification = new NotificationCompat.Builder(this)
-                    .setSmallIcon(R.drawable.ic_notification_logo)
-                    .setLargeIcon(largeIcon)
-                    .setStyle(new NotificationCompat.MediaStyle()
-                        .setMediaSession(new MediaSessionCompat(this, ApplicationConstants.MEDIA_SESSSION_TAG).getSessionToken()))
-                    .setColorized(true)
-                    .setContentTitle(title)
-                    .setContentText(description)
-                    .setOngoing(shouldBeOngoing)
-                    .setChannel(ApplicationConstants.MEDIA_NOTIFICATION_CHANNEL_ID)
-                    .setDefaults(4)
-                    .build();
-            }
-
+        if (isPlaying() && !isTracklistEmpty) {
+            Metadata.Track currentTrack = spotifyPlayer.getMetadata().currentTrack;
+            title = currentTrack.name;
+            description = currentTrack.artistName + " - " + currentTrack.albumName;
+            Glide.with(this)
+                .load(currentTrack.albumCoverWebUrl)
+                .asBitmap()
+                .into(new SimpleTarget<Bitmap>() {
+                    @Override
+                    public void onResourceReady(Bitmap albumArt, GlideAnimation<? super Bitmap> glideAnimation) {
+                        Notification notification = createNotification(shouldBeOngoing, title, description, albumArt);
+                        if (shouldStartForeground) {
+                            startForeground(ONGOING_NOTIFICATION_ID, notification);
+                        }
+                        else {
+                            notificationManager.notify(ONGOING_NOTIFICATION_ID, notification);
+                        }
+                    }
+                });
+        }
+        else {
+            title = "Hosting party " + partyTitle;
+            description = "Player is idle";
+            Notification notification = createNotification(shouldBeOngoing, title, description, largeIcon);
             if (shouldStartForeground) {
                 startForeground(ONGOING_NOTIFICATION_ID, notification);
             }
             else {
                 notificationManager.notify(ONGOING_NOTIFICATION_ID, notification);
             }
-        });
+        }
+    }
+
+    private Notification createNotification(boolean ongoing, String title, String description, Bitmap largeIcon) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            return new Notification.Builder(this, ApplicationConstants.MEDIA_NOTIFICATION_CHANNEL_ID)
+                .setSmallIcon(R.drawable.ic_notification_logo)
+                .setLargeIcon(largeIcon)
+                .setStyle(new Notification.MediaStyle()
+                    .setMediaSession(new MediaSession(this, ApplicationConstants.MEDIA_SESSSION_TAG).getSessionToken()))
+                .setColorized(true)
+                .setContentTitle(title)
+                .setContentText(description)
+                .setOngoing(ongoing)
+                .build();
+        }
+        else {
+            return new NotificationCompat.Builder(this)
+                .setSmallIcon(R.drawable.ic_notification_logo)
+                .setLargeIcon(largeIcon)
+                .setStyle(new NotificationCompat.MediaStyle()
+                    .setMediaSession(new MediaSessionCompat(this, ApplicationConstants.MEDIA_SESSSION_TAG).getSessionToken()))
+                .setColorized(true)
+                .setContentTitle(title)
+                .setContentText(description)
+                .setOngoing(ongoing)
+                .setChannel(ApplicationConstants.MEDIA_NOTIFICATION_CHANNEL_ID)
+                .setDefaults(4)
+                .build();
+        }
     }
 
     @Override

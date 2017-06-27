@@ -252,9 +252,11 @@ public class PartyActivity extends BaseActivity<PartyPresenter> implements Party
             .setMessage("Are you sure you want to exit the party?")
             .setPositiveButton("Yes", (dialogInterface, i) -> {
                 dialogInterface.dismiss();
-                unbindService(playerServiceConnection);
-                isPlayerServiceBound = false;
-                stopService(new Intent(this, SpotiqPlayerService.class));
+                if (isPlayerServiceBound) {
+                    unbindService(playerServiceConnection);
+                    isPlayerServiceBound = false;
+                    stopService(new Intent(this, SpotiqPlayerService.class));   
+                }
                 super.onBackPressed();
             })
             .setNegativeButton("No", (dialogInterface, i) -> dialogInterface.dismiss())
