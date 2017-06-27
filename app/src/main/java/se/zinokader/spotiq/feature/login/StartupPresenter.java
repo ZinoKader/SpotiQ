@@ -62,7 +62,12 @@ public class StartupPresenter extends BasePresenter<StartupView> {
                 }));
     }
 
-    void logInFailed() {
+    void logInFailed(boolean noPremium) {
+
+        String errorMessage = noPremium
+            ? "You need a Spotify Premium account to log in"
+            : "Something went wrong on Spotify authentication";
+
         Observable.just(new Empty())
             .observeOn(AndroidSchedulers.mainThread())
             .delay(ApplicationConstants.SHORT_ACTION_DELAY_SEC, TimeUnit.SECONDS, AndroidSchedulers.mainThread())
@@ -70,7 +75,7 @@ public class StartupPresenter extends BasePresenter<StartupView> {
             .subscribe(delayFinishedDelivery -> delayFinishedDelivery.split(
                 (startupView, empty) -> {
                     startupView.resetProgress();
-                    startupView.showMessage("Something went wrong on Spotify authentication");
+                    startupView.showMessage(errorMessage);
                 },
                 (startupView, throwable) -> {
                 }));

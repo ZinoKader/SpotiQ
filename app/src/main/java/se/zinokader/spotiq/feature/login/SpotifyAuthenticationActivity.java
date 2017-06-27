@@ -13,6 +13,10 @@ import com.spotify.sdk.android.player.Error;
 
 import javax.inject.Inject;
 
+import kaaes.spotify.webapi.android.models.UserPrivate;
+import retrofit.Callback;
+import retrofit.RetrofitError;
+import retrofit.client.Response;
 import se.zinokader.spotiq.R;
 import se.zinokader.spotiq.constant.ApplicationConstants;
 import se.zinokader.spotiq.constant.LogTag;
@@ -63,19 +67,37 @@ public class SpotifyAuthenticationActivity extends AppCompatActivity implements 
 
                     Log.d(LogTag.LOG_LOGIN, "ACCESS TOKEN: " + spotifyCommunicatorService.getAuthenticator().getAccessToken());
 
-                    setResult(RESULT_OK);
+                    spotifyCommunicatorService.getWebApi().getMe(new Callback<UserPrivate>() {
+                        @Override
+                        public void success(UserPrivate userPrivate, Response response) {
+                            if (userPrivate.product.equals(SpotifyConstants.PRODUCT_PREMIUM)) {
+                                setResult(SpotifyConstants.RESULT_CODE_AUTHENTICATED);
+                            }
+                            else {
+                                setResult(SpotifyConstants.RESULT_CODE_NO_PREMIUM);
+                            }
+                            finish();
+                        }
+
+                        @Override
+                        public void failure(RetrofitError error) {
+                            setResult(SpotifyConstants.RESULT_CODE_ERROR);
+                            finish();
+                        }
+                    });
                     break;
                 default:
-                    setResult(RESULT_CANCELED);
+                    setResult(SpotifyConstants.RESULT_CODE_ERROR);
                     Log.d(LogTag.LOG_LOGIN, "Something went wrong on login");
+                    finish();
             }
         }
         else {
-            setResult(RESULT_CANCELED);
+            setResult(SpotifyConstants.RESULT_CODE_ERROR);
             Log.d(LogTag.LOG_LOGIN, "Wrong request code for Spotify login");
+            finish();
         }
 
-        finish();
     }
 
     @Override

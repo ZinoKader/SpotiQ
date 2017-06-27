@@ -151,7 +151,7 @@ public class LobbyPresenter extends BasePresenter<LobbyView> {
                 },
                 (lobbyView, exception) -> {
                     if (exception instanceof PartyExistsException) {
-                        lobbyView.showMessage("Party \" + partyTitle + \" already exists");
+                        lobbyView.showMessage("Party " + partyTitle + " already exists");
                     }
                     else if (exception instanceof UserNotAddedException) {
                         lobbyView.showMessage("Something went wrong when adding you to the party");

@@ -17,6 +17,7 @@ import nucleus5.factory.RequiresPresenter;
 import se.zinokader.spotiq.R;
 import se.zinokader.spotiq.constant.ApplicationConstants;
 import se.zinokader.spotiq.constant.LogTag;
+import se.zinokader.spotiq.constant.SpotifyConstants;
 import se.zinokader.spotiq.databinding.ActivityStartupBinding;
 import se.zinokader.spotiq.feature.base.BaseActivity;
 import se.zinokader.spotiq.feature.lobby.LobbyActivity;
@@ -113,11 +114,14 @@ public class StartupActivity extends BaseActivity<StartupPresenter> implements S
             return;
         }
 
-        if (resultCode == RESULT_OK) {
+        if (resultCode == SpotifyConstants.RESULT_CODE_AUTHENTICATED) {
             getPresenter().logInFinished();
         }
+        else if(resultCode == SpotifyConstants.RESULT_CODE_NO_PREMIUM) {
+            getPresenter().logInFailed(true);
+        }
         else {
-            getPresenter().logInFailed();
+            getPresenter().logInFailed(false);
         }
     }
 

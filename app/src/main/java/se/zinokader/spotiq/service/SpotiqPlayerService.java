@@ -10,9 +10,12 @@ import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.session.MediaSession;
+import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Build;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v7.app.NotificationCompat;
 import android.util.Log;
@@ -55,6 +58,7 @@ public class SpotiqPlayerService extends Service implements ConnectionStateCallb
     SpotifyCommunicatorService spotifyCommunicatorService;
 
     private CompositeDisposable disposableActions = new CompositeDisposable();
+    private Handler mainThreadHandler = new Handler(Looper.getMainLooper());
 
     private Config playerConfig;
     private SpotifyPlayer spotifyPlayer;
@@ -92,7 +96,7 @@ public class SpotiqPlayerService extends Service implements ConnectionStateCallb
     public boolean onUnbind(Intent intent) {
         if (!changingConfiguration) {
             Log.d(LogTag.LOG_PLAYER_SERVICE, "Starting foreground player service");
-            new Thread(() -> startForeground(ONGOING_NOTIFICATION_ID, getNotification())).start();
+            sendNotification(true);
         }
         return true;
     }
@@ -130,63 +134,68 @@ public class SpotiqPlayerService extends Service implements ConnectionStateCallb
         changingConfiguration = true;
     }
 
-    /**
-     * Should be run on BG thread for possible Glide .get() operation
-     */
-    private Notification getNotification() {
+    private void sendNotification(boolean shouldStartForeground) {
+        AsyncTask.execute(() -> {
+            String title;
+            String description;
+            Bitmap largeIcon = BitmapFactory.decodeResource(getResources(), R.drawable.image_album_placeholder);
+            boolean shouldBeOngoing = serviceIsRunningInForeground(this);
 
-        String title;
-        String description;
-        Bitmap largeIcon = BitmapFactory.decodeResource(getResources(), R.drawable.image_album_placeholder);
-        boolean shouldBeOngoing = serviceIsRunningInForeground(this);
-
-        if (isPlaying()) {
-            Metadata.Track currentTrack = spotifyPlayer.getMetadata().currentTrack;
-            title = currentTrack.name;
-            description = currentTrack.artistName + " - " + currentTrack.albumName;
-            try {
-                largeIcon = Glide.with(this)
-                    .load(currentTrack.albumCoverWebUrl)
-                    .asBitmap()
-                    .into(250, 250)
-                    .get();
-            } catch (InterruptedException | ExecutionException e) {
-                e.printStackTrace();
+            if (isPlaying() && !isTracklistEmpty) {
+                Metadata.Track currentTrack = spotifyPlayer.getMetadata().currentTrack;
+                title = currentTrack.name;
+                description = currentTrack.artistName + " - " + currentTrack.albumName;
+                try {
+                    largeIcon = Glide.with(this)
+                        .load(currentTrack.albumCoverWebUrl)
+                        .asBitmap()
+                        .into(250, 250)
+                        .get();
+                } catch (InterruptedException | ExecutionException e) {
+                    e.printStackTrace();
+                }
             }
-        }
-        else {
-            title = "Hosting party";
-            description = "You're currently the host of " + partyTitle;
-        }
+            else {
+                title = "Hosting party";
+                description = "You're currently the host of " + partyTitle;
+            }
 
+            Notification notification;
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            return new Notification.Builder(this, ApplicationConstants.MEDIA_NOTIFICATION_CHANNEL_ID)
-                .setSmallIcon(R.drawable.ic_notification_logo)
-                .setLargeIcon(largeIcon)
-                .setStyle(new Notification.MediaStyle()
-                    .setMediaSession(new MediaSession(this, ApplicationConstants.MEDIA_SESSSION_TAG).getSessionToken()))
-                .setColorized(true)
-                .setContentTitle(title)
-                .setContentText(description)
-                .setOngoing(shouldBeOngoing)
-                .build();
-        }
-        else {
-            return new NotificationCompat.Builder(this)
-                .setSmallIcon(R.drawable.ic_notification_logo)
-                .setLargeIcon(largeIcon)
-                .setStyle(new NotificationCompat.MediaStyle()
-                    .setMediaSession(new MediaSessionCompat(this, ApplicationConstants.MEDIA_SESSSION_TAG).getSessionToken()))
-                .setColorized(true)
-                .setContentTitle(title)
-                .setContentText(description)
-                .setOngoing(shouldBeOngoing)
-                .setChannel(ApplicationConstants.MEDIA_NOTIFICATION_CHANNEL_ID)
-                .setDefaults(4)
-                .build();
-        }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                notification = new Notification.Builder(this, ApplicationConstants.MEDIA_NOTIFICATION_CHANNEL_ID)
+                    .setSmallIcon(R.drawable.ic_notification_logo)
+                    .setLargeIcon(largeIcon)
+                    .setStyle(new Notification.MediaStyle()
+                        .setMediaSession(new MediaSession(this, ApplicationConstants.MEDIA_SESSSION_TAG).getSessionToken()))
+                    .setColorized(true)
+                    .setContentTitle(title)
+                    .setContentText(description)
+                    .setOngoing(shouldBeOngoing)
+                    .build();
+            }
+            else {
+                notification = new NotificationCompat.Builder(this)
+                    .setSmallIcon(R.drawable.ic_notification_logo)
+                    .setLargeIcon(largeIcon)
+                    .setStyle(new NotificationCompat.MediaStyle()
+                        .setMediaSession(new MediaSessionCompat(this, ApplicationConstants.MEDIA_SESSSION_TAG).getSessionToken()))
+                    .setColorized(true)
+                    .setContentTitle(title)
+                    .setContentText(description)
+                    .setOngoing(shouldBeOngoing)
+                    .setChannel(ApplicationConstants.MEDIA_NOTIFICATION_CHANNEL_ID)
+                    .setDefaults(4)
+                    .build();
+            }
 
+            if (shouldStartForeground) {
+                startForeground(ONGOING_NOTIFICATION_ID, notification);
+            }
+            else {
+                notificationManager.notify(ONGOING_NOTIFICATION_ID, notification);
+            }
+        });
     }
 
     @Override
@@ -286,7 +295,8 @@ public class SpotiqPlayerService extends Service implements ConnectionStateCallb
                     public void onSuccess() {
                         Log.d(LogTag.LOG_PLAYER_SERVICE, "Playing next song in tracklist");
                         isTracklistEmpty = false;
-                        new Thread(() -> notificationManager.notify(ONGOING_NOTIFICATION_ID, getNotification())).start();
+                        //delay sending notification until song certainly is playing (Spotify Android SDK to blame)
+                        new Handler().postDelayed(() -> sendNotification(false), 2000);
                     }
 
                     @Override
@@ -297,6 +307,7 @@ public class SpotiqPlayerService extends Service implements ConnectionStateCallb
             }, throwable -> {
                 Log.d(LogTag.LOG_PLAYER_SERVICE, "Could not play next song, reason: " + throwable.getMessage());
                 isTracklistEmpty = true;
+                sendNotification(false);
             });
     }
 
@@ -331,13 +342,15 @@ public class SpotiqPlayerService extends Service implements ConnectionStateCallb
     }
 
     private void showLostPlaybackPermissionToast() {
-        MDToast lostPlaybackPermissionToast =
-            MDToast.makeText(this,
-                getString(R.string.playback_permission_lost_notice),
-                MDToast.LENGTH_LONG,
-                MDToast.TYPE_INFO);
-        lostPlaybackPermissionToast.setIcon(R.drawable.ic_spotify_connect);
-        lostPlaybackPermissionToast.show();
+        mainThreadHandler.post(() -> {
+            MDToast lostPlaybackPermissionToast =
+                MDToast.makeText(this,
+                    getString(R.string.playback_permission_lost_notice),
+                    MDToast.LENGTH_LONG,
+                    MDToast.TYPE_INFO);
+            lostPlaybackPermissionToast.setIcon(R.drawable.ic_spotify_connect);
+            lostPlaybackPermissionToast.show();
+        });
     }
 
     private void handlePlaybackEnd() {
@@ -348,7 +361,6 @@ public class SpotiqPlayerService extends Service implements ConnectionStateCallb
                 if (throwable instanceof EmptyTracklistException) {
                     Log.d(LogTag.LOG_PLAYER_SERVICE, "Tracklist empty, next song not played");
                     isTracklistEmpty = true;
-                    new Thread(() -> notificationManager.notify(ONGOING_NOTIFICATION_ID, getNotification())).start();
                 }
             });
     }
@@ -365,12 +377,14 @@ public class SpotiqPlayerService extends Service implements ConnectionStateCallb
 
     @Override
     public void onLoggedOut() {
-        stopSelf();
     }
 
     @Override
     public void onLoginFailed(Error error) {
         Log.d(LogTag.LOG_PLAYER_SERVICE, "Spotify login failed: " + error.toString());
+        switch (error) {
+            case kSpErrorNeedsPremium:
+        }
     }
 
     @Override

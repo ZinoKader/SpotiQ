@@ -1,6 +1,9 @@
 
 -keepattributes Signature
 -keepattributes *Annotation*
+-keepattributes SourceFile,LineNumberTable
+-keep public class * extends java.lang.Exception
+
 -keep class se.zinokader.service.** {*;}
 -keep class com.spotify.sdk.android.** {*;}
 -keep class kaaes.** {*;}
@@ -106,3 +109,7 @@
   **[] $VALUES;
   public *;
 }
+
+#For Crashlytics
+-keep class com.crashlytics.** { *; }
+-dontwarn com.crashlytics.**

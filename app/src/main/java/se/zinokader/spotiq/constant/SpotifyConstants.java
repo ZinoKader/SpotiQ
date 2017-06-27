@@ -20,6 +20,12 @@ public final class SpotifyConstants {
             SCOPE_STREAMING,
             SCOPE_PLAYLIST_READ_PRIVATE};
 
+    public static final String PRODUCT_PREMIUM = "premium";
+
+    public static final int RESULT_CODE_AUTHENTICATED = 100;
+    public static final int RESULT_CODE_ERROR = 200;
+    public static final int RESULT_CODE_NO_PREMIUM = 300;
+
     /* Spotify Web API-related */
     public static final int SEARCH_QUERY_RESPONSE_LIMIT = 50;
     public static final int TOTAL_ITEMS_LIMIT = 100;
