@@ -25,6 +25,7 @@ public class ApplicationConstants {
 
     /* Notification-related */
     public static final String MEDIA_NOTIFICATION_CHANNEL_ID = "media_notification_channel";
+    public static final String MEDIA_SESSSION_TAG = "spotiq_media";
 
     /* App shortcut-related */
     public static final String SEARCH_SHORTCUT_ID = "spotiq_search_shortcut";

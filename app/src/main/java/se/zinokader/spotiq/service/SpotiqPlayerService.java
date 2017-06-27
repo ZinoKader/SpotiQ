@@ -1,15 +1,27 @@
 package se.zinokader.spotiq.service;
 
+import android.app.ActivityManager;
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.media.session.MediaSession;
 import android.os.Binder;
+import android.os.Build;
 import android.os.IBinder;
-import android.support.annotation.Nullable;
+import android.support.v4.media.session.MediaSessionCompat;
+import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 
+import com.bumptech.glide.Glide;
 import com.spotify.sdk.android.player.Config;
 import com.spotify.sdk.android.player.ConnectionStateCallback;
 import com.spotify.sdk.android.player.Error;
+import com.spotify.sdk.android.player.Metadata;
 import com.spotify.sdk.android.player.PlaybackBitrate;
 import com.spotify.sdk.android.player.Player;
 import com.spotify.sdk.android.player.PlayerEvent;
@@ -18,6 +30,7 @@ import com.spotify.sdk.android.player.Spotify;
 import com.spotify.sdk.android.player.SpotifyPlayer;
 import com.valdesekamdem.library.mdtoast.MDToast;
 
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -48,6 +61,11 @@ public class SpotiqPlayerService extends Service implements ConnectionStateCallb
     private boolean isTracklistEmpty = false;
     private String partyTitle;
 
+    private boolean changingConfiguration;
+
+    private NotificationManager notificationManager;
+    private static final int ONGOING_NOTIFICATION_ID = 821;
+
     private IBinder binder = new PlayerServiceBinder();
 
     public class PlayerServiceBinder extends Binder {
@@ -56,15 +74,33 @@ public class SpotiqPlayerService extends Service implements ConnectionStateCallb
         }
     }
 
-    @Nullable
     @Override
     public IBinder onBind(Intent intent) {
+        stopForeground(true);
+        changingConfiguration = false;
         return binder;
+    }
+
+    @Override
+    public void onRebind(Intent intent) {
+        stopForeground(true);
+        changingConfiguration = false;
+        super.onRebind(intent);
+    }
+
+    @Override
+    public boolean onUnbind(Intent intent) {
+        if (!changingConfiguration) {
+            Log.d(LogTag.LOG_PLAYER_SERVICE, "Starting foreground player service");
+            new Thread(() -> startForeground(ONGOING_NOTIFICATION_ID, getNotification())).start();
+        }
+        return true;
     }
 
     @Override
     public void onCreate() {
         ((Injector) getApplicationContext()).inject(this);
+        notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         Log.d(LogTag.LOG_PLAYER_SERVICE, "SpotiQ Player service created");
     }
 
@@ -80,6 +116,77 @@ public class SpotiqPlayerService extends Service implements ConnectionStateCallb
                 e.printStackTrace();
             }
         }
+    }
+
+    public void onTaskRemoved(Intent rootIntent) {
+        //Called when application closes by user input
+        stopForeground(true);
+        stopSelf();
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        changingConfiguration = true;
+    }
+
+    /**
+     * Should be run on BG thread for possible Glide .get() operation
+     */
+    private Notification getNotification() {
+
+        String title;
+        String description;
+        Bitmap largeIcon = BitmapFactory.decodeResource(getResources(), R.drawable.image_album_placeholder);
+        boolean shouldBeOngoing = serviceIsRunningInForeground(this);
+
+        if (isPlaying()) {
+            Metadata.Track currentTrack = spotifyPlayer.getMetadata().currentTrack;
+            title = currentTrack.name;
+            description = currentTrack.artistName + " - " + currentTrack.albumName;
+            try {
+                largeIcon = Glide.with(this)
+                    .load(currentTrack.albumCoverWebUrl)
+                    .asBitmap()
+                    .into(250, 250)
+                    .get();
+            } catch (InterruptedException | ExecutionException e) {
+                e.printStackTrace();
+            }
+        }
+        else {
+            title = "Hosting party";
+            description = "You're currently the host of " + partyTitle;
+        }
+
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            return new Notification.Builder(this, ApplicationConstants.MEDIA_NOTIFICATION_CHANNEL_ID)
+                .setSmallIcon(R.drawable.ic_notification_logo)
+                .setLargeIcon(largeIcon)
+                .setStyle(new Notification.MediaStyle()
+                    .setMediaSession(new MediaSession(this, ApplicationConstants.MEDIA_SESSSION_TAG).getSessionToken()))
+                .setColorized(true)
+                .setContentTitle(title)
+                .setContentText(description)
+                .setOngoing(shouldBeOngoing)
+                .build();
+        }
+        else {
+            return new NotificationCompat.Builder(this)
+                .setSmallIcon(R.drawable.ic_notification_logo)
+                .setLargeIcon(largeIcon)
+                .setStyle(new NotificationCompat.MediaStyle()
+                    .setMediaSession(new MediaSessionCompat(this, ApplicationConstants.MEDIA_SESSSION_TAG).getSessionToken()))
+                .setColorized(true)
+                .setContentTitle(title)
+                .setContentText(description)
+                .setOngoing(shouldBeOngoing)
+                .setChannel(ApplicationConstants.MEDIA_NOTIFICATION_CHANNEL_ID)
+                .setDefaults(4)
+                .build();
+        }
+
     }
 
     @Override
@@ -99,7 +206,7 @@ public class SpotiqPlayerService extends Service implements ConnectionStateCallb
             });
         }
 
-        return START_NOT_STICKY;
+        return START_STICKY;
     }
 
     private Single<Boolean> initPlayer() {
@@ -110,6 +217,7 @@ public class SpotiqPlayerService extends Service implements ConnectionStateCallb
                     SpotifyConstants.CLIENT_ID);
                 playerConfig.useCache(false);
             }
+
             spotifyPlayer = Spotify.getPlayer(playerConfig, this, new SpotifyPlayer.InitializationObserver() {
                 @Override
                 public void onInitialized(SpotifyPlayer player) {
@@ -178,6 +286,7 @@ public class SpotiqPlayerService extends Service implements ConnectionStateCallb
                     public void onSuccess() {
                         Log.d(LogTag.LOG_PLAYER_SERVICE, "Playing next song in tracklist");
                         isTracklistEmpty = false;
+                        new Thread(() -> notificationManager.notify(ONGOING_NOTIFICATION_ID, getNotification())).start();
                     }
 
                     @Override
@@ -239,6 +348,7 @@ public class SpotiqPlayerService extends Service implements ConnectionStateCallb
                 if (throwable instanceof EmptyTracklistException) {
                     Log.d(LogTag.LOG_PLAYER_SERVICE, "Tracklist empty, next song not played");
                     isTracklistEmpty = true;
+                    new Thread(() -> notificationManager.notify(ONGOING_NOTIFICATION_ID, getNotification())).start();
                 }
             });
     }
@@ -272,4 +382,19 @@ public class SpotiqPlayerService extends Service implements ConnectionStateCallb
     public void onConnectionMessage(String message) {
         Log.d(LogTag.LOG_PLAYER_SERVICE, "Spotify connection message: " + message);
     }
+
+    public boolean serviceIsRunningInForeground(Context context) {
+        ActivityManager manager = (ActivityManager) context.getSystemService(
+            Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(
+            Integer.MAX_VALUE)) {
+            if (getClass().getName().equals(service.service.getClassName())) {
+                if (service.foreground) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
 }

@@ -7,7 +7,7 @@ import com.google.firebase.FirebaseApp;
 import com.google.firebase.database.FirebaseDatabase;
 import com.jakewharton.threetenabp.AndroidThreeTen;
 
-import se.zinokader.spotiq.util.NotificationChannelUtil;
+import se.zinokader.spotiq.util.NotificationUtil;
 import se.zinokader.spotiq.util.ShortcutUtil;
 import se.zinokader.spotiq.util.di.ComponentInjector;
 import se.zinokader.spotiq.util.di.Injector;
@@ -29,13 +29,15 @@ public class SpotiqApplication extends Application implements Injector {
 
         //register notification channels
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannelUtil.createNotificationChannels(this);
+            NotificationUtil.createNotificationChannels(this);
         }
 
         //remove shortcuts on app restart
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
             ShortcutUtil.removeAllShortcuts(this);
         }
+
+
     }
 
     /**

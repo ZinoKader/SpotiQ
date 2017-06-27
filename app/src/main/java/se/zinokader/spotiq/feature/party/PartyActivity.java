@@ -46,12 +46,12 @@ public class PartyActivity extends BaseActivity<PartyPresenter> implements Party
     private enum SelectedTab {TRACKLIST_TAB, PARTY_MEMBERS_TAB}
 
     private SpotiqPlayerService playerService;
-    private boolean playerServiceBound = false;
+    private boolean isPlayerServiceBound = false;
 
     private ServiceConnection playerServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder serviceBinder) {
-            playerServiceBound = true;
+            isPlayerServiceBound = true;
             SpotiqPlayerService.PlayerServiceBinder playerServiceBinder =
                 (SpotiqPlayerService.PlayerServiceBinder) serviceBinder;
             playerService = playerServiceBinder.getService();
@@ -60,7 +60,7 @@ public class PartyActivity extends BaseActivity<PartyPresenter> implements Party
 
         @Override
         public void onServiceDisconnected(ComponentName componentName) {
-            playerServiceBound = false;
+            isPlayerServiceBound = false;
         }
     };
 
@@ -134,10 +134,6 @@ public class PartyActivity extends BaseActivity<PartyPresenter> implements Party
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
             ShortcutUtil.removeAllShortcuts(this);
         }
-        if (playerServiceBound) {
-            unbindService(playerServiceConnection);
-            playerServiceBound = false;
-        }
         super.onDestroy();
     }
 
@@ -145,12 +141,34 @@ public class PartyActivity extends BaseActivity<PartyPresenter> implements Party
     public void onResume() {
         super.onResume();
         super.startForegroundTokenRenewalService();
+        if (hostProvilegesLoaded) {
+            Intent playerServiceIntent = new Intent(this, SpotiqPlayerService.class);
+            bindService(playerServiceIntent, playerServiceConnection, Context.BIND_AUTO_CREATE);
+        }
     }
 
     @Override
     public void onPause() {
-        super.onPause();
         super.stopForegroundTokenRenewalService();
+        super.onPause();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if (hostProvilegesLoaded) {
+            Intent playerServiceIntent = new Intent(this, SpotiqPlayerService.class);
+            bindService(playerServiceIntent, playerServiceConnection, Context.BIND_AUTO_CREATE);
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        if (isPlayerServiceBound) {
+            unbindService(playerServiceConnection);
+            isPlayerServiceBound = false;
+        }
+        super.onStop();
     }
 
     @Override
@@ -235,7 +253,7 @@ public class PartyActivity extends BaseActivity<PartyPresenter> implements Party
             .setPositiveButton("Yes", (dialogInterface, i) -> {
                 dialogInterface.dismiss();
                 unbindService(playerServiceConnection);
-                playerServiceBound = false;
+                isPlayerServiceBound = false;
                 stopService(new Intent(this, SpotiqPlayerService.class));
                 super.onBackPressed();
             })

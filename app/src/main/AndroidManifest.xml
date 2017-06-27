@@ -19,6 +19,7 @@
 
         <service android:name=".service.SpotiqPlayerService"
             android:enabled="true"
+            android:stopWithTask="false"
             android:exported="false" />
 
         <service android:name=".service.SpotifyCommunicatorService"/>
