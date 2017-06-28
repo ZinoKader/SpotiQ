@@ -10,6 +10,7 @@ import android.databinding.DataBindingUtil;
 import android.media.AudioManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
@@ -66,6 +67,11 @@ public class PartyActivity extends BaseActivity<PartyPresenter> implements Party
         }
     };
 
+    private void bindPlayerService() {
+        Intent playerServiceIntent = new Intent(this, SpotiqPlayerService.class);
+        bindService(playerServiceIntent, playerServiceConnection, Context.BIND_AUTO_CREATE);
+    }
+
     private BroadcastReceiver playingStatusReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -83,11 +89,10 @@ public class PartyActivity extends BaseActivity<PartyPresenter> implements Party
             ShortcutUtil.addSearchShortcut(this, partyTitle);
         }
 
-        LocalBroadcastManager.getInstance(this).registerReceiver(
-            playingStatusReceiver, new IntentFilter(ServiceConstants.PLAYING_STATUS_BROADCAST_NAME));
-
         supportPostponeEnterTransition();
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
+        LocalBroadcastManager.getInstance(this).registerReceiver(
+            playingStatusReceiver, new IntentFilter(ServiceConstants.PLAYING_STATUS_BROADCAST_NAME));
 
         Bundle partyInfo = getIntent().getExtras();
         if (partyInfo != null) {
@@ -132,6 +137,7 @@ public class PartyActivity extends BaseActivity<PartyPresenter> implements Party
         });
 
         binding.playPauseFab.setOnMusicFabClickListener(view -> {
+            debouncePlayButton();
             if (playerService.isPlaying()) {
                 playerService.pause();
             }
@@ -155,8 +161,7 @@ public class PartyActivity extends BaseActivity<PartyPresenter> implements Party
         super.onResume();
         super.startForegroundTokenRenewalService();
         if (hostProvilegesLoaded) {
-            Intent playerServiceIntent = new Intent(this, SpotiqPlayerService.class);
-            bindService(playerServiceIntent, playerServiceConnection, Context.BIND_AUTO_CREATE);
+            bindPlayerService();
         }
     }
 
@@ -170,8 +175,7 @@ public class PartyActivity extends BaseActivity<PartyPresenter> implements Party
     protected void onStart() {
         super.onStart();
         if (hostProvilegesLoaded) {
-            Intent playerServiceIntent = new Intent(this, SpotiqPlayerService.class);
-            bindService(playerServiceIntent, playerServiceConnection, Context.BIND_AUTO_CREATE);
+            bindPlayerService();
         }
     }
 
@@ -200,18 +204,25 @@ public class PartyActivity extends BaseActivity<PartyPresenter> implements Party
 
     /**
      * Set the play/pause button state accordingly to the player service's playing status
+     * Delayed to allow the button to play the animation from user input before synchronizing with
+     * actual playing status result
      */
     private void synchronizePlayButton(boolean isPlaying) {
-        if (playerService == null) return;
-
-        //switch to show pause icon
-        if (isPlaying && binding.playPauseFab.getCurrentMode().isShowingPlayIcon()) {
-            binding.playPauseFab.playAnimation();
-        }
-        //switch to show play icon
-        else if (!isPlaying && !binding.playPauseFab.getCurrentMode().isShowingPlayIcon()) {
+        new Handler().postDelayed(() -> {
+            //switch to show pause icon
+            if (isPlaying && binding.playPauseFab.getCurrentMode().isShowingPlayIcon()) {
                 binding.playPauseFab.playAnimation();
-        }
+            }
+            //switch to show play icon
+            else if (!isPlaying && !binding.playPauseFab.getCurrentMode().isShowingPlayIcon()) {
+                binding.playPauseFab.playAnimation();
+            }
+        }, ApplicationConstants.PLAY_PAUSE_BUTTON_SYNCHRONIZATION_DELAY_MS);
+    }
+
+    private void debouncePlayButton() {
+        binding.playPauseFab.setClickable(false);
+        new Handler().postDelayed(() -> binding.playPauseFab.setClickable(true), 500);
     }
 
     @Override
@@ -246,12 +257,11 @@ public class PartyActivity extends BaseActivity<PartyPresenter> implements Party
         if (!hostProvilegesLoaded) {
             displayHostControls = true;
             binding.playPauseFab.setVisibility(View.VISIBLE);
+            bindPlayerService();
             Intent playerServiceIntent = new Intent(this, SpotiqPlayerService.class);
-            bindService(playerServiceIntent, playerServiceConnection, Context.BIND_AUTO_CREATE);
-            Intent initPlayerServiceIntent = new Intent(this, SpotiqPlayerService.class);
-            initPlayerServiceIntent.setAction(ServiceConstants.ACTION_INIT);
-            initPlayerServiceIntent.putExtra(ApplicationConstants.PARTY_NAME_EXTRA, partyTitle);
-            startService(initPlayerServiceIntent);
+            playerServiceIntent.setAction(ServiceConstants.ACTION_INIT);
+            playerServiceIntent.putExtra(ApplicationConstants.PARTY_NAME_EXTRA, partyTitle);
+            startService(playerServiceIntent);
             hostProvilegesLoaded = true;
         }
     }
@@ -263,7 +273,7 @@ public class PartyActivity extends BaseActivity<PartyPresenter> implements Party
             .setMessage("Are you sure you want to exit the party?")
             .setPositiveButton("Yes", (dialogInterface, i) -> {
                 dialogInterface.dismiss();
-                if (isPlayerServiceBound) {
+                if (hostProvilegesLoaded) {
                     stopService(new Intent(this, SpotiqPlayerService.class));
                 }
                 super.onBackPressed();

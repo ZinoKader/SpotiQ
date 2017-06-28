@@ -81,20 +81,15 @@ public class LobbyPresenter extends BasePresenter<LobbyView> {
                     throw new PartyDoesNotExistException();
                 }
             })
-            .map(userPartyInformation -> {
+            .flatMap(userPartyInformation -> {
                 if (userPartyInformation.getParty().getPassword().equals(partyPassword)) {
-                    if (!userPartyInformation.userAlreadyExists()) {
-                        boolean userWasAdded =
-                            partiesRepository.addUserToParty(userPartyInformation.getUser(),
-                                userPartyInformation.getParty().getTitle()).blockingSingle();
-                        if (userWasAdded) {
-                            return userPartyInformation.getParty();
-                        }
-                        else {
-                            throw new UserNotAddedException();
-                        }
+                    if (userPartyInformation.userAlreadyExists()) {
+                        return Observable.just(true);
                     }
-                    return userPartyInformation.getParty();
+                    else {
+                        return partiesRepository.addUserToParty(userPartyInformation.getUser(),
+                            userPartyInformation.getParty().getTitle());
+                    }
                 }
                 else {
                     throw new PartyWrongPasswordException();
@@ -105,8 +100,8 @@ public class LobbyPresenter extends BasePresenter<LobbyView> {
             .compose(this.deliverFirst())
             .retryWhen(throwable -> throwable.delay(ApplicationConstants.REQUEST_RETRY_DELAY_SEC, TimeUnit.SECONDS))
             .subscribe(lobbyViewPartyDelivery -> lobbyViewPartyDelivery.split(
-                (lobbyView, confirmedParty) -> {
-                    navigateToParty(confirmedParty.getTitle());
+                (lobbyView, userWasAdded) -> {
+                    navigateToParty(partyTitle);
                 },
                 (lobbyView, exception) -> {
                     if (exception instanceof PartyDoesNotExistException) {

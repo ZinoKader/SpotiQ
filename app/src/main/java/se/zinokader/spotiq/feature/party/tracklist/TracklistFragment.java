@@ -69,7 +69,7 @@ public class TracklistFragment extends Fragment {
         String partyTitle = getArguments().getString("partyTitle");
 
         disposableActions.add(tracklistRepository.listenToTracklistChanges(partyTitle)
-            .delay(ApplicationConstants.DEFAULT_DELAY_MS, TimeUnit.MILLISECONDS)
+            .delay(ApplicationConstants.DEFAULT_NEW_ITEM_DELAY_MS, TimeUnit.MILLISECONDS)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(childEvent -> {

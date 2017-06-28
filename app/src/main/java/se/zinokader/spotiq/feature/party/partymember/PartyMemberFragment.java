@@ -59,7 +59,7 @@ public class PartyMemberFragment extends Fragment {
         this.partyTitle = getArguments().getString("partyTitle");
 
         disposableActions.add(partiesRepository.listenToPartyMemberChanges(partyTitle)
-            .delay(ApplicationConstants.DEFAULT_DELAY_MS, TimeUnit.MILLISECONDS)
+            .delay(ApplicationConstants.DEFAULT_NEW_ITEM_DELAY_MS, TimeUnit.MILLISECONDS)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(childEvent -> {

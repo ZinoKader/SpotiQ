@@ -35,10 +35,8 @@ public class ApplicationConstants {
     //Party-related
     public static final String PARTY_NAME_EXTRA = "party_name_extra";
     public static final String MEMBER_TYPE_MESSAGE_EXTRA = "member_type_message_extra";
-    public static final int LOAD_UP_TIME_SEC = 10;
-    public static final int DEFAULT_DELAY_MS = 500;
-    public static final int TAB_TRACKLIST_INDEX = 0;
-    public static final int TAB_PARTY_MEMBERS_INDEX = 1;
+    public static final int PLAY_PAUSE_BUTTON_SYNCHRONIZATION_DELAY_MS = 800;
+    public static final int DEFAULT_NEW_ITEM_DELAY_MS = 500;
     public static final int DEFAULT_LIST_ANIMATION_DURATION_MS = 400;
     public static final int DEFAULT_LIST_ANIMATION_ITEM_POSITION_START = 6;
     public static final int DEFAULT_ITEM_ADD_DURATION_MS = 1200;

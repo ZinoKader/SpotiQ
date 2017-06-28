@@ -217,6 +217,8 @@ public class SpotiqPlayerService extends Service implements ConnectionStateCallb
                         public void onSuccess() {
                             subscriber.onSuccess(true);
                             Log.d(LogTag.LOG_PLAYER_SERVICE, "Set Spotify Player custom playback bitrate successfully");
+                            sendNotification(ServiceUtil.isPlayerServiceInForeground(SpotiqPlayerService.this));
+                            sendPlayingStatus(false); //make sure all listeners are up to sync with an inititally paused status
                         }
 
                         @Override
@@ -294,7 +296,9 @@ public class SpotiqPlayerService extends Service implements ConnectionStateCallb
                         Log.d(LogTag.LOG_PLAYER_SERVICE, "Playing next song in tracklist");
                         isTracklistEmpty = false;
                         //delay sending notification until song certainly is playing (Spotify Android SDK to blame)
-                        new Handler().postDelayed(() -> sendNotification(false), 2000);
+                        new Handler().postDelayed(() -> {
+                            sendNotification(ServiceUtil.isPlayerServiceInForeground(SpotiqPlayerService.this));
+                        }, ServiceConstants.NOTIFICATION_SEND_DELAY_MS);
                         sendPlayingStatus(true);
                     }
 
@@ -307,7 +311,7 @@ public class SpotiqPlayerService extends Service implements ConnectionStateCallb
             }, throwable -> {
                 Log.d(LogTag.LOG_PLAYER_SERVICE, "Could not play next song, reason: " + throwable.getMessage());
                 isTracklistEmpty = true;
-                sendNotification(false);
+                sendNotification(ServiceUtil.isPlayerServiceInForeground(SpotiqPlayerService.this));
                 sendPlayingStatus(false);
             });
     }
