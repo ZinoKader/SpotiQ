@@ -11,7 +11,8 @@ public class ServiceConstants {
 
     /* Player-service */
     public static final String ACTION_INIT = "spotiq.ACTION_INIT";
-    public static final String ACTION_PLAY_PAUSE = "spotiq.PLAY_PAUSE";
+    public static final String PLAYING_STATUS_BROADCAST_NAME = "spotiq.PLAYING_STATUS_BROADCAST";
+    public static final String PLAYING_STATUS_BROADCAST_KEY = "playing_status_key";
 
 
 }

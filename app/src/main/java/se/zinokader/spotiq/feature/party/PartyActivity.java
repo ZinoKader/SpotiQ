@@ -1,16 +1,19 @@
 package se.zinokader.spotiq.feature.party;
 
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.databinding.DataBindingUtil;
+import android.media.AudioManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.IBinder;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.view.View;
 
@@ -55,7 +58,6 @@ public class PartyActivity extends BaseActivity<PartyPresenter> implements Party
             SpotiqPlayerService.PlayerServiceBinder playerServiceBinder =
                 (SpotiqPlayerService.PlayerServiceBinder) serviceBinder;
             playerService = playerServiceBinder.getService();
-            synchronizePlayButton();
         }
 
         @Override
@@ -64,22 +66,34 @@ public class PartyActivity extends BaseActivity<PartyPresenter> implements Party
         }
     };
 
+    private BroadcastReceiver playingStatusReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            boolean isPlaying = intent.getBooleanExtra(ServiceConstants.PLAYING_STATUS_BROADCAST_KEY, false);
+            synchronizePlayButton(isPlaying);
+        }
+    };
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_party);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
+            ShortcutUtil.addSearchShortcut(this, partyTitle);
+        }
+
+        LocalBroadcastManager.getInstance(this).registerReceiver(
+            playingStatusReceiver, new IntentFilter(ServiceConstants.PLAYING_STATUS_BROADCAST_NAME));
+
+        supportPostponeEnterTransition();
+        setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
         Bundle partyInfo = getIntent().getExtras();
         if (partyInfo != null) {
             partyTitle = partyInfo.getString(ApplicationConstants.PARTY_NAME_EXTRA);
             getPresenter().setPartyTitle(partyTitle);
         }
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
-            ShortcutUtil.addSearchShortcut(this, partyTitle);
-        }
-
-        supportPostponeEnterTransition();
 
         binding.partyTitle.setText(partyTitle);
         binding.searchTransitionSheet.setFab(binding.searchFab);
@@ -124,7 +138,6 @@ public class PartyActivity extends BaseActivity<PartyPresenter> implements Party
             else {
                 playerService.play();
             }
-            new Handler().postDelayed(this::synchronizePlayButton, 1000);
         });
 
     }
@@ -188,18 +201,16 @@ public class PartyActivity extends BaseActivity<PartyPresenter> implements Party
     /**
      * Set the play/pause button state accordingly to the player service's playing status
      */
-    private void synchronizePlayButton() {
+    private void synchronizePlayButton(boolean isPlaying) {
         if (playerService == null) return;
 
-        if (playerService.isPlaying()) { //switch to show pause icon
-            if (binding.playPauseFab.getCurrentMode().isShowingPlayIcon()) {
-                binding.playPauseFab.playAnimation();
-            }
+        //switch to show pause icon
+        if (isPlaying && binding.playPauseFab.getCurrentMode().isShowingPlayIcon()) {
+            binding.playPauseFab.playAnimation();
         }
-        else { //switch to show play icon
-            if (!binding.playPauseFab.getCurrentMode().isShowingPlayIcon()) {
+        //switch to show play icon
+        else if (!isPlaying && !binding.playPauseFab.getCurrentMode().isShowingPlayIcon()) {
                 binding.playPauseFab.playAnimation();
-            }
         }
     }
 
@@ -253,9 +264,7 @@ public class PartyActivity extends BaseActivity<PartyPresenter> implements Party
             .setPositiveButton("Yes", (dialogInterface, i) -> {
                 dialogInterface.dismiss();
                 if (isPlayerServiceBound) {
-                    unbindService(playerServiceConnection);
-                    isPlayerServiceBound = false;
-                    stopService(new Intent(this, SpotiqPlayerService.class));   
+                    stopService(new Intent(this, SpotiqPlayerService.class));
                 }
                 super.onBackPressed();
             })

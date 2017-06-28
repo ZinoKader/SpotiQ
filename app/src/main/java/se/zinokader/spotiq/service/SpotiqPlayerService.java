@@ -1,22 +1,17 @@
 package se.zinokader.spotiq.service;
 
-import android.app.ActivityManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.media.session.MediaSession;
 import android.os.Binder;
-import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
-import android.support.v4.media.session.MediaSessionCompat;
-import android.support.v7.app.NotificationCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.bumptech.glide.Glide;
@@ -46,6 +41,8 @@ import se.zinokader.spotiq.constant.LogTag;
 import se.zinokader.spotiq.constant.ServiceConstants;
 import se.zinokader.spotiq.constant.SpotifyConstants;
 import se.zinokader.spotiq.repository.TracklistRepository;
+import se.zinokader.spotiq.util.NotificationUtil;
+import se.zinokader.spotiq.util.ServiceUtil;
 import se.zinokader.spotiq.util.di.Injector;
 import se.zinokader.spotiq.util.exception.EmptyTracklistException;
 
@@ -138,7 +135,7 @@ public class SpotiqPlayerService extends Service implements ConnectionStateCallb
         String title;
         String description;
         Bitmap largeIcon = BitmapFactory.decodeResource(getResources(), R.drawable.image_album_placeholder);
-        boolean shouldBeOngoing = serviceIsRunningInForeground(this);
+        boolean shouldBeOngoing = ServiceUtil.isPlayerServiceInForeground(this);
 
         if (isPlaying() && !isTracklistEmpty) {
             Metadata.Track currentTrack = spotifyPlayer.getMetadata().currentTrack;
@@ -150,12 +147,13 @@ public class SpotiqPlayerService extends Service implements ConnectionStateCallb
                 .into(new SimpleTarget<Bitmap>() {
                     @Override
                     public void onResourceReady(Bitmap albumArt, GlideAnimation<? super Bitmap> glideAnimation) {
-                        Notification notification = createNotification(shouldBeOngoing, title, description, albumArt);
+                        Notification playerNotification =
+                            NotificationUtil.createPlayerNotification(SpotiqPlayerService.this, shouldBeOngoing, title, description, albumArt);
                         if (shouldStartForeground) {
-                            startForeground(ONGOING_NOTIFICATION_ID, notification);
+                            startForeground(ONGOING_NOTIFICATION_ID, playerNotification);
                         }
                         else {
-                            notificationManager.notify(ONGOING_NOTIFICATION_ID, notification);
+                            notificationManager.notify(ONGOING_NOTIFICATION_ID, playerNotification);
                         }
                     }
                 });
@@ -163,43 +161,21 @@ public class SpotiqPlayerService extends Service implements ConnectionStateCallb
         else {
             title = "Hosting party " + partyTitle;
             description = "Player is idle";
-            Notification notification = createNotification(shouldBeOngoing, title, description, largeIcon);
+            Notification playerNotification =
+                NotificationUtil.createPlayerNotification(this, shouldBeOngoing, title, description, largeIcon);
             if (shouldStartForeground) {
-                startForeground(ONGOING_NOTIFICATION_ID, notification);
+                startForeground(ONGOING_NOTIFICATION_ID, playerNotification);
             }
             else {
-                notificationManager.notify(ONGOING_NOTIFICATION_ID, notification);
+                notificationManager.notify(ONGOING_NOTIFICATION_ID, playerNotification);
             }
         }
     }
 
-    private Notification createNotification(boolean ongoing, String title, String description, Bitmap largeIcon) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            return new Notification.Builder(this, ApplicationConstants.MEDIA_NOTIFICATION_CHANNEL_ID)
-                .setSmallIcon(R.drawable.ic_notification_logo)
-                .setLargeIcon(largeIcon)
-                .setStyle(new Notification.MediaStyle()
-                    .setMediaSession(new MediaSession(this, ApplicationConstants.MEDIA_SESSSION_TAG).getSessionToken()))
-                .setColorized(true)
-                .setContentTitle(title)
-                .setContentText(description)
-                .setOngoing(ongoing)
-                .build();
-        }
-        else {
-            return new NotificationCompat.Builder(this)
-                .setSmallIcon(R.drawable.ic_notification_logo)
-                .setLargeIcon(largeIcon)
-                .setStyle(new NotificationCompat.MediaStyle()
-                    .setMediaSession(new MediaSessionCompat(this, ApplicationConstants.MEDIA_SESSSION_TAG).getSessionToken()))
-                .setColorized(true)
-                .setContentTitle(title)
-                .setContentText(description)
-                .setOngoing(ongoing)
-                .setChannel(ApplicationConstants.MEDIA_NOTIFICATION_CHANNEL_ID)
-                .setDefaults(4)
-                .build();
-        }
+    private void sendPlayingStatus(boolean isPlaying) {
+        Intent playingStatusIntent = new Intent(ServiceConstants.PLAYING_STATUS_BROADCAST_NAME);
+        playingStatusIntent.putExtra(ServiceConstants.PLAYING_STATUS_BROADCAST_KEY, isPlaying);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(playingStatusIntent);
     }
 
     @Override
@@ -265,8 +241,6 @@ public class SpotiqPlayerService extends Service implements ConnectionStateCallb
     }
 
     public void play() {
-        Log.d(LogTag.LOG_PLAYER_SERVICE, "PLAY CLICKED!");
-
         if (!isTracklistEmpty && spotifyPlayer.getMetadata().currentTrack != null) {
             resume();
         }
@@ -276,19 +250,39 @@ public class SpotiqPlayerService extends Service implements ConnectionStateCallb
     }
 
     public void pause() {
-        Log.d(LogTag.LOG_PLAYER_SERVICE, "PAUSE CLICKED!");
-
         spotifyPlayer.pause(new Player.OperationCallback() {
             @Override
             public void onSuccess() {
-
+                Log.d(LogTag.LOG_PLAYER_SERVICE, "Paused music successfully");
+                sendPlayingStatus(false);
             }
 
             @Override
             public void onError(Error error) {
-
+                Log.d(LogTag.LOG_PLAYER_SERVICE, "Failed to pause music");
+                sendPlayingStatus(true);
             }
         });
+    }
+
+    private void resume() {
+        spotifyPlayer.resume(new Player.OperationCallback() {
+            @Override
+            public void onSuccess() {
+                Log.d(LogTag.LOG_PLAYER_SERVICE, "Resumed music successfully");
+                sendPlayingStatus(true);
+            }
+
+            @Override
+            public void onError(Error error) {
+                Log.d(LogTag.LOG_PLAYER_SERVICE, "Failed to resume music");
+                sendPlayingStatus(false);
+            }
+        });
+    }
+
+    public boolean isPlaying() {
+        return !(spotifyPlayer == null || spotifyPlayer.getPlaybackState() == null) && spotifyPlayer.getPlaybackState().isPlaying;
     }
 
     private void playNext() {
@@ -301,36 +295,21 @@ public class SpotiqPlayerService extends Service implements ConnectionStateCallb
                         isTracklistEmpty = false;
                         //delay sending notification until song certainly is playing (Spotify Android SDK to blame)
                         new Handler().postDelayed(() -> sendNotification(false), 2000);
+                        sendPlayingStatus(true);
                     }
 
                     @Override
                     public void onError(Error error) {
                         Log.d(LogTag.LOG_PLAYER_SERVICE, "Failed to play next song in tracklist: " + error.name());
+                        sendPlayingStatus(false);
                     }
                 }, song.getSongUri(), 0, 0);
             }, throwable -> {
                 Log.d(LogTag.LOG_PLAYER_SERVICE, "Could not play next song, reason: " + throwable.getMessage());
                 isTracklistEmpty = true;
                 sendNotification(false);
+                sendPlayingStatus(false);
             });
-    }
-
-    private void resume() {
-        spotifyPlayer.resume(new Player.OperationCallback() {
-            @Override
-            public void onSuccess() {
-                Log.d(LogTag.LOG_PLAYER_SERVICE, "Resumed music successfully");
-            }
-
-            @Override
-            public void onError(Error error) {
-                Log.d(LogTag.LOG_PLAYER_SERVICE, "Failed to resume music");
-            }
-        });
-    }
-
-    public boolean isPlaying() {
-        return !(spotifyPlayer == null || spotifyPlayer.getPlaybackState() == null) && spotifyPlayer.getPlaybackState().isPlaying;
     }
 
     @Override
@@ -399,20 +378,6 @@ public class SpotiqPlayerService extends Service implements ConnectionStateCallb
     @Override
     public void onConnectionMessage(String message) {
         Log.d(LogTag.LOG_PLAYER_SERVICE, "Spotify connection message: " + message);
-    }
-
-    public boolean serviceIsRunningInForeground(Context context) {
-        ActivityManager manager = (ActivityManager) context.getSystemService(
-            Context.ACTIVITY_SERVICE);
-        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(
-            Integer.MAX_VALUE)) {
-            if (getClass().getName().equals(service.service.getClassName())) {
-                if (service.foreground) {
-                    return true;
-                }
-            }
-        }
-        return false;
     }
 
 }

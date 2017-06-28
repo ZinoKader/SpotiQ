@@ -38,7 +38,7 @@ public class LobbyPresenter extends BasePresenter<LobbyView> {
     @Inject
     SpotifyRepository spotifyRepository;
 
-    public static final int LOAD_USER_RESTARTABLE_ID = 1918;
+    private static final int LOAD_USER_RESTARTABLE_ID = 1918;
 
     @Override
     protected void onCreate(Bundle savedState) {
@@ -83,8 +83,16 @@ public class LobbyPresenter extends BasePresenter<LobbyView> {
             })
             .map(userPartyInformation -> {
                 if (userPartyInformation.getParty().getPassword().equals(partyPassword)) {
-                    if (!userPartyInformation.userAlreadyExists()) { //not important that this is synchronous
-                        partiesRepository.addUserToParty(userPartyInformation.getUser(), userPartyInformation.getParty().getTitle()).subscribe();
+                    if (!userPartyInformation.userAlreadyExists()) {
+                        boolean userWasAdded =
+                            partiesRepository.addUserToParty(userPartyInformation.getUser(),
+                                userPartyInformation.getParty().getTitle()).blockingSingle();
+                        if (userWasAdded) {
+                            return userPartyInformation.getParty();
+                        }
+                        else {
+                            throw new UserNotAddedException();
+                        }
                     }
                     return userPartyInformation.getParty();
                 }
