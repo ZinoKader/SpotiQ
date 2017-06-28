@@ -1,6 +1,7 @@
 package se.zinokader.spotiq.model;
 
-import org.threeten.bp.LocalDateTime;
+import org.threeten.bp.ZoneOffset;
+import org.threeten.bp.ZonedDateTime;
 
 import java.util.List;
 
@@ -74,7 +75,7 @@ public class User {
     }
 
     public void setJoinedNowTimeStamp() {
-        this.joinedTimeStamp = LocalDateTime.now().toString();
+        this.joinedTimeStamp = ZonedDateTime.now(ZoneOffset.UTC).toString();
     }
 
 }

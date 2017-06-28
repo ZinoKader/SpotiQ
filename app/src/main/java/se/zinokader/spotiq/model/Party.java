@@ -1,6 +1,7 @@
 package se.zinokader.spotiq.model;
 
-import org.threeten.bp.LocalDateTime;
+import org.threeten.bp.ZoneOffset;
+import org.threeten.bp.ZonedDateTime;
 
 public class Party {
 
@@ -41,6 +42,6 @@ public class Party {
     }
 
     public void setCreatedNowTimeStamp() {
-        this.createdTimeStamp = LocalDateTime.now().toString();
+        this.createdTimeStamp = ZonedDateTime.now(ZoneOffset.UTC).toString();
     }
 }
