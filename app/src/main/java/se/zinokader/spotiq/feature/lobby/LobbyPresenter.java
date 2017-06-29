@@ -20,9 +20,12 @@ import se.zinokader.spotiq.model.UserPartyInformation;
 import se.zinokader.spotiq.repository.PartiesRepository;
 import se.zinokader.spotiq.repository.SpotifyRepository;
 import se.zinokader.spotiq.service.SpotifyCommunicatorService;
+import se.zinokader.spotiq.util.VersionUtil;
 import se.zinokader.spotiq.util.exception.PartyDoesNotExistException;
 import se.zinokader.spotiq.util.exception.PartyExistsException;
 import se.zinokader.spotiq.util.exception.PartyNotCreatedException;
+import se.zinokader.spotiq.util.exception.PartyVersionHigherException;
+import se.zinokader.spotiq.util.exception.PartyVersionLowerException;
 import se.zinokader.spotiq.util.exception.PartyWrongPasswordException;
 import se.zinokader.spotiq.util.exception.UserNotAddedException;
 
@@ -75,6 +78,14 @@ public class LobbyPresenter extends BasePresenter<LobbyView> {
                     user.setJoinedNowTimeStamp();
                     boolean userAlreadyExists = dbPartySnapshot.child(FirebaseConstants.CHILD_USERS).hasChild(user.getUserId());
                     Party dbParty = dbPartySnapshot.child(FirebaseConstants.CHILD_PARTYINFO).getValue(Party.class);
+
+                    if (dbParty.getPartyVersionCode() > VersionUtil.getCurrentAppVersionCode()) {
+                        throw new PartyVersionHigherException();
+                    }
+                    else if (dbParty.getPartyVersionCode() < VersionUtil.getCurrentAppVersionCode()) {
+                        throw new PartyVersionLowerException();
+                    }
+
                     return new UserPartyInformation(user, userAlreadyExists, dbParty);
                 }
                 else {
@@ -108,7 +119,13 @@ public class LobbyPresenter extends BasePresenter<LobbyView> {
                         lobbyView.showMessage("Party does not exist, why not create it?");
                     }
                     else if (exception instanceof PartyWrongPasswordException) {
-                        lobbyView.showMessage("Password invalid");
+                        lobbyView.showMessage("Invalid password");
+                    }
+                    else if (exception instanceof PartyVersionHigherException) {
+                        lobbyView.showMessage("The host has a newer version of the app - update SpotiQ to join this party");
+                    }
+                    else if(exception instanceof PartyVersionLowerException) {
+                        lobbyView.showMessage("The host has an older version of the app - get on the same version if you want to jam!");
                     }
                     else {
                         lobbyView.showMessage("Something went wrong when joining the party");
@@ -130,6 +147,7 @@ public class LobbyPresenter extends BasePresenter<LobbyView> {
                 else {
                     User user = new User(spotifyUser.id, spotifyUser.display_name, spotifyUser.images);
                     party.setCreatedNowTimeStamp();
+                    party.setPartyVersionCode(VersionUtil.getCurrentAppVersionCode());
                     party.setHostSpotifyId(user.getUserId());
                     user.setJoinedNowTimeStamp();
                     user.setHasHostPrivileges();

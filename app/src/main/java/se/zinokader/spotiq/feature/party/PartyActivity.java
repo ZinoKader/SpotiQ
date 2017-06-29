@@ -23,6 +23,11 @@ import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 
+import org.threeten.bp.LocalDateTime;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import nucleus5.factory.RequiresPresenter;
 import se.zinokader.spotiq.R;
 import se.zinokader.spotiq.constant.ApplicationConstants;
@@ -41,9 +46,12 @@ public class PartyActivity extends BaseActivity<PartyPresenter> implements Party
 
     ActivityPartyBinding binding;
     private String partyTitle;
+    private LocalDateTime initializedTimeStamp;
     private boolean userDetailsLoaded = false;
     private boolean hostProvilegesLoaded = false;
     private boolean displayHostControls = false;
+    private List<String> shownJoinedUserMessages = new ArrayList<>();
+    private List<String> shownSongAddedMessages = new ArrayList<>();
 
     private Fragment selectedFragment;
     private SelectedTab selectedTab = SelectedTab.TRACKLIST_TAB;
@@ -75,30 +83,64 @@ public class PartyActivity extends BaseActivity<PartyPresenter> implements Party
     private BroadcastReceiver playingStatusReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            boolean isPlaying = intent.getBooleanExtra(ServiceConstants.PLAYING_STATUS_BROADCAST_KEY, false);
+            boolean isPlaying = intent.getBooleanExtra(ServiceConstants.PLAYING_STATUS_ISPLAYING_EXTRA, false);
             synchronizePlayButton(isPlaying);
+        }
+    };
+
+    private BroadcastReceiver userJoinedReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String joinedUser = intent.getStringExtra(ApplicationConstants.JOINED_USER_EXTRA);
+            if (!shownJoinedUserMessages.contains(joinedUser)) {
+                shownJoinedUserMessages.add(joinedUser);
+                if (LocalDateTime.now().isAfter(initializedTimeStamp.plusSeconds(ApplicationConstants.PARTY_MESSAGE_GRACE_PERIOD_SEC))) {
+                    showMessage("User " + joinedUser + " has joined the party");
+                }
+            }
+        }
+    };
+
+    private BroadcastReceiver songAddedReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String addedSong = intent.getStringExtra(ApplicationConstants.SONG_ADDED_EXTRA);
+            if (!shownSongAddedMessages.contains(addedSong)) {
+                shownSongAddedMessages.add(addedSong);
+                if (LocalDateTime.now().isAfter(initializedTimeStamp.plusSeconds(ApplicationConstants.PARTY_MESSAGE_GRACE_PERIOD_SEC))) {
+                    showMessage(addedSong + " has been added to the tracklist");
+                }
+            }
         }
     };
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        initializedTimeStamp = LocalDateTime.now();
         binding = DataBindingUtil.setContentView(this, R.layout.activity_party);
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
-            ShortcutUtil.addSearchShortcut(this, partyTitle);
-        }
 
         supportPostponeEnterTransition();
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
-        LocalBroadcastManager.getInstance(this).registerReceiver(
-            playingStatusReceiver, new IntentFilter(ServiceConstants.PLAYING_STATUS_BROADCAST_NAME));
 
         Bundle partyInfo = getIntent().getExtras();
         if (partyInfo != null) {
             partyTitle = partyInfo.getString(ApplicationConstants.PARTY_NAME_EXTRA);
             getPresenter().setPartyTitle(partyTitle);
         }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
+            ShortcutUtil.addSearchShortcut(this, partyTitle);
+        }
+
+        LocalBroadcastManager.getInstance(this).registerReceiver(
+            playingStatusReceiver, new IntentFilter(ServiceConstants.PLAYING_STATUS_BROADCAST_NAME));
+
+        LocalBroadcastManager.getInstance(this).registerReceiver(
+            userJoinedReceiver, new IntentFilter(ApplicationConstants.JOINED_USER_BROADCAST_NAME));
+
+        LocalBroadcastManager.getInstance(this).registerReceiver(
+            songAddedReceiver, new IntentFilter(ApplicationConstants.SONG_ADDED_BROADCAST_NAME));
 
         binding.partyTitle.setText(partyTitle);
         binding.searchTransitionSheet.setFab(binding.searchFab);
@@ -145,7 +187,6 @@ public class PartyActivity extends BaseActivity<PartyPresenter> implements Party
                 playerService.play();
             }
         });
-
     }
 
     @Override

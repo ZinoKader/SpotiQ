@@ -1,9 +1,11 @@
 package se.zinokader.spotiq.feature.party.partymember;
 
+import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -116,6 +118,7 @@ public class PartyMemberFragment extends Fragment {
         partyMembers.add(partyMember);
         Collections.sort(partyMembers, PartyMemberComparator.getByJoinedTimeComparator());
         partyMemberRecyclerAdapter.notifyDataSetChanged();
+        sendUserJoinedBroadcast(partyMember.getUserName());
     }
 
     private void changePartyMember(User changedPartyMember) {
@@ -127,6 +130,12 @@ public class PartyMemberFragment extends Fragment {
         }
         partyMembers.removeAll(toRemove);
         addMember(changedPartyMember);
+    }
+
+    private void sendUserJoinedBroadcast(String joinedUser) {
+        Intent userJoinedIntent = new Intent(ApplicationConstants.JOINED_USER_BROADCAST_NAME);
+        userJoinedIntent.putExtra(ApplicationConstants.JOINED_USER_EXTRA, joinedUser);
+        LocalBroadcastManager.getInstance(getContext()).sendBroadcast(userJoinedIntent);
     }
 
 }

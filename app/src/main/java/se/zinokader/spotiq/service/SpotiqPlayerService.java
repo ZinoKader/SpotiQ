@@ -7,11 +7,16 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.session.MediaSession;
+import android.media.session.PlaybackState;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v4.media.session.MediaSessionCompat;
+import android.support.v4.media.session.PlaybackStateCompat;
 import android.util.Log;
 
 import com.bumptech.glide.Glide;
@@ -64,6 +69,12 @@ public class SpotiqPlayerService extends Service implements ConnectionStateCallb
 
     private boolean changingConfiguration;
 
+    private MediaSession mediaSession;
+    private MediaSessionCompat mediaSessionCompat;
+    private PlaybackState playbackStatePlaying;
+    private PlaybackState playbackStatePaused;
+    private PlaybackStateCompat playbackStateCompatPlaying;
+    private PlaybackStateCompat playbackStateCompatPaused;
     private NotificationManager notificationManager;
     private static final int ONGOING_NOTIFICATION_ID = 821;
 
@@ -101,6 +112,16 @@ public class SpotiqPlayerService extends Service implements ConnectionStateCallb
     @Override
     public void onCreate() {
         ((Injector) getApplicationContext()).inject(this);
+        mediaSession = new MediaSession(this, ApplicationConstants.MEDIA_SESSSION_TAG);
+        mediaSessionCompat = new MediaSessionCompat(this, ApplicationConstants.MEDIA_SESSSION_TAG);
+        playbackStatePlaying = new PlaybackState.Builder()
+            .setState(PlaybackState.STATE_PLAYING, 0, 1).build();
+        playbackStatePaused = new PlaybackState.Builder()
+            .setState(PlaybackState.STATE_PAUSED, 0, 1).build();
+        playbackStateCompatPlaying = new PlaybackStateCompat.Builder()
+            .setState(PlaybackState.STATE_PLAYING, 0, 1).build();
+        playbackStateCompatPaused = new PlaybackStateCompat.Builder()
+            .setState(PlaybackState.STATE_PAUSED, 0, 1).build();
         notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         Log.d(LogTag.LOG_PLAYER_SERVICE, "SpotiQ Player service created");
     }
@@ -108,6 +129,8 @@ public class SpotiqPlayerService extends Service implements ConnectionStateCallb
     @Override
     public void onDestroy() {
         Log.d(LogTag.LOG_PLAYER_SERVICE, "SpotiQ Player service destroyed");
+        mediaSession.release();
+        mediaSessionCompat.release();
         disposableActions.clear();
         if (spotifyPlayer != null) {
             try {
@@ -147,8 +170,21 @@ public class SpotiqPlayerService extends Service implements ConnectionStateCallb
                 .into(new SimpleTarget<Bitmap>() {
                     @Override
                     public void onResourceReady(Bitmap albumArt, GlideAnimation<? super Bitmap> glideAnimation) {
-                        Notification playerNotification =
-                            NotificationUtil.createPlayerNotification(SpotiqPlayerService.this, shouldBeOngoing, title, description, albumArt);
+
+                        Notification playerNotification;
+
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                            mediaSession.setMetadata(NotificationUtil.buildMediaMetadata(currentTrack, albumArt));
+                            playerNotification =
+                                NotificationUtil.createPlayerNotification(SpotiqPlayerService.this, mediaSession,
+                                    shouldBeOngoing, title, description, albumArt);
+                        }
+                        else {
+                            mediaSessionCompat.setMetadata(NotificationUtil.buildMediaMetadataCompat(currentTrack, albumArt));
+                            playerNotification = NotificationUtil.createPlayerNotificationCompat(SpotiqPlayerService.this, mediaSessionCompat,
+                                shouldBeOngoing, title, description, albumArt);
+                        }
+
                         if (shouldStartForeground) {
                             startForeground(ONGOING_NOTIFICATION_ID, playerNotification);
                         }
@@ -161,8 +197,18 @@ public class SpotiqPlayerService extends Service implements ConnectionStateCallb
         else {
             title = "Hosting party " + partyTitle;
             description = "Player is idle";
-            Notification playerNotification =
-                NotificationUtil.createPlayerNotification(this, shouldBeOngoing, title, description, largeIcon);
+            Notification playerNotification;
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                playerNotification =
+                    NotificationUtil.createPlayerNotification(SpotiqPlayerService.this, mediaSession,
+                        shouldBeOngoing, title, description, largeIcon);
+            }
+            else {
+                playerNotification = NotificationUtil.createPlayerNotificationCompat(SpotiqPlayerService.this, mediaSessionCompat,
+                    shouldBeOngoing, title, description, largeIcon);
+            }
+
             if (shouldStartForeground) {
                 startForeground(ONGOING_NOTIFICATION_ID, playerNotification);
             }
@@ -172,9 +218,9 @@ public class SpotiqPlayerService extends Service implements ConnectionStateCallb
         }
     }
 
-    private void sendPlayingStatus(boolean isPlaying) {
+    private void sendPlayingStatusBroadcast(boolean isPlaying) {
         Intent playingStatusIntent = new Intent(ServiceConstants.PLAYING_STATUS_BROADCAST_NAME);
-        playingStatusIntent.putExtra(ServiceConstants.PLAYING_STATUS_BROADCAST_KEY, isPlaying);
+        playingStatusIntent.putExtra(ServiceConstants.PLAYING_STATUS_ISPLAYING_EXTRA, isPlaying);
         LocalBroadcastManager.getInstance(this).sendBroadcast(playingStatusIntent);
     }
 
@@ -218,7 +264,9 @@ public class SpotiqPlayerService extends Service implements ConnectionStateCallb
                             subscriber.onSuccess(true);
                             Log.d(LogTag.LOG_PLAYER_SERVICE, "Set Spotify Player custom playback bitrate successfully");
                             sendNotification(ServiceUtil.isPlayerServiceInForeground(SpotiqPlayerService.this));
-                            sendPlayingStatus(false); //make sure all listeners are up to sync with an inititally paused status
+                            sendPlayingStatusBroadcast(false); //make sure all listeners are up to sync with an inititally paused status
+                            mediaSession.setActive(true);
+                            mediaSessionCompat.setActive(true);
                         }
 
                         @Override
@@ -256,13 +304,14 @@ public class SpotiqPlayerService extends Service implements ConnectionStateCallb
             @Override
             public void onSuccess() {
                 Log.d(LogTag.LOG_PLAYER_SERVICE, "Paused music successfully");
-                sendPlayingStatus(false);
+                sendPlayingStatusBroadcast(false);
+                mediaSession.setPlaybackState(playbackStatePaused);
+                mediaSessionCompat.setPlaybackState(playbackStateCompatPaused);
             }
 
             @Override
             public void onError(Error error) {
                 Log.d(LogTag.LOG_PLAYER_SERVICE, "Failed to pause music");
-                sendPlayingStatus(true);
             }
         });
     }
@@ -272,13 +321,14 @@ public class SpotiqPlayerService extends Service implements ConnectionStateCallb
             @Override
             public void onSuccess() {
                 Log.d(LogTag.LOG_PLAYER_SERVICE, "Resumed music successfully");
-                sendPlayingStatus(true);
+                sendPlayingStatusBroadcast(true);
+                mediaSession.setPlaybackState(playbackStatePlaying);
+                mediaSessionCompat.setPlaybackState(playbackStateCompatPlaying);
             }
 
             @Override
             public void onError(Error error) {
                 Log.d(LogTag.LOG_PLAYER_SERVICE, "Failed to resume music");
-                sendPlayingStatus(false);
             }
         });
     }
@@ -299,20 +349,26 @@ public class SpotiqPlayerService extends Service implements ConnectionStateCallb
                         new Handler().postDelayed(() -> {
                             sendNotification(ServiceUtil.isPlayerServiceInForeground(SpotiqPlayerService.this));
                         }, ServiceConstants.NOTIFICATION_SEND_DELAY_MS);
-                        sendPlayingStatus(true);
+                        sendPlayingStatusBroadcast(true);
+                        mediaSession.setPlaybackState(playbackStatePlaying);
+                        mediaSessionCompat.setPlaybackState(playbackStateCompatPlaying);
                     }
 
                     @Override
                     public void onError(Error error) {
                         Log.d(LogTag.LOG_PLAYER_SERVICE, "Failed to play next song in tracklist: " + error.name());
-                        sendPlayingStatus(false);
+                        sendPlayingStatusBroadcast(false);
+                        mediaSession.setPlaybackState(playbackStatePaused);
+                        mediaSessionCompat.setPlaybackState(playbackStateCompatPaused);
                     }
                 }, song.getSongUri(), 0, 0);
             }, throwable -> {
                 Log.d(LogTag.LOG_PLAYER_SERVICE, "Could not play next song, reason: " + throwable.getMessage());
                 isTracklistEmpty = true;
                 sendNotification(ServiceUtil.isPlayerServiceInForeground(SpotiqPlayerService.this));
-                sendPlayingStatus(false);
+                sendPlayingStatusBroadcast(false);
+                mediaSession.setPlaybackState(playbackStatePaused);
+                mediaSessionCompat.setPlaybackState(playbackStateCompatPaused);
             });
     }
 

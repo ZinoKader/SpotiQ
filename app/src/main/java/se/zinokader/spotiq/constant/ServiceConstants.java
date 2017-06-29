@@ -13,7 +13,6 @@ public class ServiceConstants {
     public static final int NOTIFICATION_SEND_DELAY_MS = 2000;
     public static final String ACTION_INIT = "spotiq.ACTION_INIT";
     public static final String PLAYING_STATUS_BROADCAST_NAME = "spotiq.PLAYING_STATUS_BROADCAST";
-    public static final String PLAYING_STATUS_BROADCAST_KEY = "playing_status_key";
-
+    public static final String PLAYING_STATUS_ISPLAYING_EXTRA = "playing_status_isplaying_extra";
 
 }

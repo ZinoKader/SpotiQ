@@ -1,10 +1,12 @@
 package se.zinokader.spotiq.feature.party.tracklist;
 
 import android.content.Context;
+import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -183,6 +185,8 @@ public class TracklistFragment extends Fragment {
         else {
             recyclerViewJoiner.getAdapter().notifyItemInserted(songPosition + 1);
         }
+
+        sendSongAddedBroadcast(song.getName());
     }
 
     private void removeSong(Song song) {
@@ -215,5 +219,10 @@ public class TracklistFragment extends Fragment {
         return -1;
     }
 
+    private void sendSongAddedBroadcast(String addedSong) {
+        Intent songAddedIntent = new Intent(ApplicationConstants.SONG_ADDED_BROADCAST_NAME);
+        songAddedIntent.putExtra(ApplicationConstants.SONG_ADDED_EXTRA, addedSong);
+        LocalBroadcastManager.getInstance(getContext()).sendBroadcast(songAddedIntent);
+    }
 
 }

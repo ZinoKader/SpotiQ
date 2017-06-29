@@ -3,18 +3,25 @@ package se.zinokader.spotiq.util;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.media.AudioAttributes;
+import android.media.MediaMetadata;
 import android.media.session.MediaSession;
 import android.net.Uri;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
+import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v7.app.NotificationCompat;
 
+import com.spotify.sdk.android.player.Metadata;
+
 import se.zinokader.spotiq.R;
 import se.zinokader.spotiq.constant.ApplicationConstants;
+import se.zinokader.spotiq.feature.party.PartyActivity;
 
 public class NotificationUtil {
 
@@ -44,33 +51,73 @@ public class NotificationUtil {
     }
 
 
-    public static Notification createPlayerNotification(Context context, boolean ongoing, String title, String description, Bitmap largeIcon) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            return new Notification.Builder(context, ApplicationConstants.MEDIA_NOTIFICATION_CHANNEL_ID)
-                .setSmallIcon(R.drawable.ic_notification_logo)
-                .setLargeIcon(largeIcon)
-                .setStyle(new Notification.MediaStyle()
-                    .setMediaSession(new MediaSession(context, ApplicationConstants.MEDIA_SESSSION_TAG).getSessionToken()))
-                .setColorized(true)
-                .setContentTitle(title)
-                .setContentText(description)
-                .setOngoing(ongoing)
-                .build();
-        }
-        else {
-            return new NotificationCompat.Builder(context)
-                .setSmallIcon(R.drawable.ic_notification_logo)
-                .setLargeIcon(largeIcon)
-                .setStyle(new NotificationCompat.MediaStyle()
-                    .setMediaSession(new MediaSessionCompat(context, ApplicationConstants.MEDIA_SESSSION_TAG).getSessionToken()))
-                .setColorized(true)
-                .setContentTitle(title)
-                .setContentText(description)
-                .setOngoing(ongoing)
-                .setChannel(ApplicationConstants.MEDIA_NOTIFICATION_CHANNEL_ID)
-                .setDefaults(4)
-                .build();
-        }
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    public static Notification createPlayerNotification(Context context, MediaSession mediaSession,
+                                                        boolean ongoing, String title, String description, Bitmap largeIcon) {
+
+        PendingIntent openPartyIntent = PendingIntent.getActivity(context, 0,
+            new Intent(context, PartyActivity.class), PendingIntent.FLAG_UPDATE_CURRENT);
+
+        return new Notification.Builder(context, ApplicationConstants.MEDIA_NOTIFICATION_CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_notification_logo)
+            .setLargeIcon(largeIcon)
+            .setStyle(new Notification.MediaStyle()
+                .setMediaSession(mediaSession.getSessionToken()))
+            .setColorized(true)
+            .setContentTitle(title)
+            .setContentText(description)
+            .setContentIntent(openPartyIntent)
+            .setOngoing(ongoing)
+            .build();
+
+    }
+
+    public static Notification createPlayerNotificationCompat(Context context, MediaSessionCompat mediaSessionCompat,
+                                                              boolean ongoing, String title, String description, Bitmap largeIcon) {
+
+        PendingIntent openPartyIntent = PendingIntent.getActivity(context, 0,
+            new Intent(context, PartyActivity.class), PendingIntent.FLAG_UPDATE_CURRENT);
+
+        return new NotificationCompat.Builder(context)
+            .setSmallIcon(R.drawable.ic_notification_logo)
+            .setLargeIcon(largeIcon)
+            .setStyle(new NotificationCompat.MediaStyle()
+                .setMediaSession(mediaSessionCompat.getSessionToken()))
+            .setColorized(true)
+            .setContentTitle(title)
+            .setContentText(description)
+            .setContentIntent(openPartyIntent)
+            .setOngoing(ongoing)
+            .setChannel(ApplicationConstants.MEDIA_NOTIFICATION_CHANNEL_ID)
+            .setDefaults(4)
+            .build();
+    }
+
+    /**
+     * Create meta data for notifications that allow the system to send track information to
+     * bluetooth systems, show artwork in lock screens among other uses
+     */
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    public static MediaMetadata buildMediaMetadata(Metadata.Track trackMetadata, Bitmap albumArt) {
+        return new MediaMetadata.Builder()
+            .putString(MediaMetadata.METADATA_KEY_DISPLAY_TITLE, trackMetadata.name) //song title for display
+            .putString(MediaMetadata.METADATA_KEY_TITLE, trackMetadata.name) //song title for info
+            .putString(MediaMetadata.METADATA_KEY_DISPLAY_SUBTITLE, trackMetadata.artistName) //artist name for display
+            .putString(MediaMetadata.METADATA_KEY_ARTIST, trackMetadata.artistName) //artist name for info
+            .putString(MediaMetadata.METADATA_KEY_DISPLAY_DESCRIPTION, trackMetadata.albumName) //album name for display
+            .putBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART, albumArt) //album art for display
+            .build();
+    }
+
+    public static MediaMetadataCompat buildMediaMetadataCompat(Metadata.Track trackMetadata, Bitmap albumArt) {
+        return new MediaMetadataCompat.Builder()
+            .putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_TITLE, trackMetadata.name) //song title for display
+            .putString(MediaMetadataCompat.METADATA_KEY_TITLE, trackMetadata.name) //song title for info
+            .putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_SUBTITLE, trackMetadata.artistName) //artist name for display
+            .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, trackMetadata.artistName) //artist name for info
+            .putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_DESCRIPTION, trackMetadata.albumName) //album name for display
+            .putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, albumArt) //album art for display
+            .build();
     }
 
 }

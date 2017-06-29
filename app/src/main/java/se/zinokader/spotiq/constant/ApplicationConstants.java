@@ -35,6 +35,11 @@ public class ApplicationConstants {
     //Party-related
     public static final String PARTY_NAME_EXTRA = "party_name_extra";
     public static final String MEMBER_TYPE_MESSAGE_EXTRA = "member_type_message_extra";
+    public static final String JOINED_USER_BROADCAST_NAME = "spotiq.JOINED_USER_BROADCAST";
+    public static final String JOINED_USER_EXTRA = "joined_user_extra";
+    public static final String SONG_ADDED_BROADCAST_NAME = "spotiq.SONG_ADDED_BROADCAST";
+    public static final String SONG_ADDED_EXTRA = "song_added_extra";
+    public static final int PARTY_MESSAGE_GRACE_PERIOD_SEC = 5;
     public static final int PLAY_PAUSE_BUTTON_SYNCHRONIZATION_DELAY_MS = 800;
     public static final int DEFAULT_NEW_ITEM_DELAY_MS = 500;
     public static final int DEFAULT_LIST_ANIMATION_DURATION_MS = 400;
