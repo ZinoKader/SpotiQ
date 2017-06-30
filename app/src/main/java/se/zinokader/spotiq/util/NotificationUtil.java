@@ -52,8 +52,8 @@ public class NotificationUtil {
 
 
     @RequiresApi(api = Build.VERSION_CODES.O)
-    public static Notification createPlayerNotification(Context context, MediaSession mediaSession,
-                                                        boolean ongoing, String title, String description, Bitmap largeIcon) {
+    public static Notification buildPlayerNotification(Context context, MediaSession mediaSession,
+                                                       boolean ongoing, String title, String description, Bitmap largeIcon) {
 
         PendingIntent openPartyIntent = PendingIntent.getActivity(context, 0,
             new Intent(context, PartyActivity.class), PendingIntent.FLAG_UPDATE_CURRENT);
@@ -72,8 +72,8 @@ public class NotificationUtil {
 
     }
 
-    public static Notification createPlayerNotificationCompat(Context context, MediaSessionCompat mediaSessionCompat,
-                                                              boolean ongoing, String title, String description, Bitmap largeIcon) {
+    public static Notification buildPlayerNotificationCompat(Context context, MediaSessionCompat mediaSessionCompat,
+                                                             boolean ongoing, String title, String description, Bitmap largeIcon) {
 
         PendingIntent openPartyIntent = PendingIntent.getActivity(context, 0,
             new Intent(context, PartyActivity.class), PendingIntent.FLAG_UPDATE_CURRENT);

@@ -100,7 +100,7 @@ public class SearchPresenter extends BasePresenter<SearchView> {
                     else {
                         tracklistRepository.addSong(song, partyTitle).subscribe(addedWithSuccess -> {
                             if (addedWithSuccess) {
-                                partiesRepository.incrementUserSongRequestCount(user, partyTitle);
+                                partiesRepository.incrementUserSongRequestCount(partyTitle, user);
                                 searchView.finishWithSuccess("Song added to the tracklist!");
                             }
                             else {

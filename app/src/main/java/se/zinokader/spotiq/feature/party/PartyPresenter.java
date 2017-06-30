@@ -76,7 +76,7 @@ public class PartyPresenter extends BasePresenter<PartyView> {
     }
 
     private void loadHost(String userId) {
-        partiesRepository.isHostOfParty(userId, partyTitle)
+        partiesRepository.isHostOfParty(partyTitle, userId)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .compose(this.deliverFirst())

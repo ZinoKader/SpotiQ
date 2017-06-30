@@ -176,12 +176,12 @@ public class SpotiqPlayerService extends Service implements ConnectionStateCallb
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                             mediaSession.setMetadata(NotificationUtil.buildMediaMetadata(currentTrack, albumArt));
                             playerNotification =
-                                NotificationUtil.createPlayerNotification(SpotiqPlayerService.this, mediaSession,
+                                NotificationUtil.buildPlayerNotification(SpotiqPlayerService.this, mediaSession,
                                     shouldBeOngoing, title, description, albumArt);
                         }
                         else {
                             mediaSessionCompat.setMetadata(NotificationUtil.buildMediaMetadataCompat(currentTrack, albumArt));
-                            playerNotification = NotificationUtil.createPlayerNotificationCompat(SpotiqPlayerService.this, mediaSessionCompat,
+                            playerNotification = NotificationUtil.buildPlayerNotificationCompat(SpotiqPlayerService.this, mediaSessionCompat,
                                 shouldBeOngoing, title, description, albumArt);
                         }
 
@@ -201,11 +201,11 @@ public class SpotiqPlayerService extends Service implements ConnectionStateCallb
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 playerNotification =
-                    NotificationUtil.createPlayerNotification(SpotiqPlayerService.this, mediaSession,
+                    NotificationUtil.buildPlayerNotification(SpotiqPlayerService.this, mediaSession,
                         shouldBeOngoing, title, description, largeIcon);
             }
             else {
-                playerNotification = NotificationUtil.createPlayerNotificationCompat(SpotiqPlayerService.this, mediaSessionCompat,
+                playerNotification = NotificationUtil.buildPlayerNotificationCompat(SpotiqPlayerService.this, mediaSessionCompat,
                     shouldBeOngoing, title, description, largeIcon);
             }
 

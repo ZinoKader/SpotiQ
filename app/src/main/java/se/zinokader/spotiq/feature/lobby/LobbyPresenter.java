@@ -79,11 +79,16 @@ public class LobbyPresenter extends BasePresenter<LobbyView> {
                     boolean userAlreadyExists = dbPartySnapshot.child(FirebaseConstants.CHILD_USERS).hasChild(user.getUserId());
                     Party dbParty = dbPartySnapshot.child(FirebaseConstants.CHILD_PARTYINFO).getValue(Party.class);
 
-                    if (dbParty.getPartyVersionCode() > VersionUtil.getCurrentAppVersionCode()) {
-                        throw new PartyVersionHigherException();
+                    //If host, update party version, otherwise handle version mismatch
+                    if (dbParty.getHostSpotifyId().equals(user.getUserId())) {
+                        partiesRepository.updatePartyVersion(partyTitle, VersionUtil.getCurrentAppVersionCode());
                     }
-                    else if (dbParty.getPartyVersionCode() < VersionUtil.getCurrentAppVersionCode()) {
-                        throw new PartyVersionLowerException();
+                    else {
+                        if (dbParty.getPartyVersionCode() > VersionUtil.getCurrentAppVersionCode()) {
+                            throw new PartyVersionHigherException();
+                        } else if (dbParty.getPartyVersionCode() < VersionUtil.getCurrentAppVersionCode()) {
+                            throw new PartyVersionLowerException();
+                        }
                     }
 
                     return new UserPartyInformation(user, userAlreadyExists, dbParty);
@@ -98,8 +103,7 @@ public class LobbyPresenter extends BasePresenter<LobbyView> {
                         return Observable.just(true);
                     }
                     else {
-                        return partiesRepository.addUserToParty(userPartyInformation.getUser(),
-                            userPartyInformation.getParty().getTitle());
+                        return partiesRepository.addUserToParty(userPartyInformation.getParty().getTitle(), userPartyInformation.getUser());
                     }
                 }
                 else {
@@ -156,7 +160,7 @@ public class LobbyPresenter extends BasePresenter<LobbyView> {
             })
             .flatMap(userPartyInformation -> Observable.zip(
                 partiesRepository.createNewParty(userPartyInformation.getParty()),
-                partiesRepository.addUserToParty(userPartyInformation.getUser(), userPartyInformation.getParty().getTitle()),
+                partiesRepository.addUserToParty(userPartyInformation.getParty().getTitle(), userPartyInformation.getUser()),
                 (partyWasCreated, userWasAdded) -> {
                     if (!partyWasCreated) throw new PartyNotCreatedException();
                     if (!userWasAdded) throw new UserNotAddedException();

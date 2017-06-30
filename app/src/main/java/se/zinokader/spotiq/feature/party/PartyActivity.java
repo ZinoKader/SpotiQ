@@ -50,7 +50,6 @@ public class PartyActivity extends BaseActivity<PartyPresenter> implements Party
     private boolean userDetailsLoaded = false;
     private boolean hostProvilegesLoaded = false;
     private boolean displayHostControls = false;
-    private List<String> shownJoinedUserMessages = new ArrayList<>();
     private List<String> shownSongAddedMessages = new ArrayList<>();
 
     private Fragment selectedFragment;
@@ -88,19 +87,6 @@ public class PartyActivity extends BaseActivity<PartyPresenter> implements Party
         }
     };
 
-    private BroadcastReceiver userJoinedReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String joinedUser = intent.getStringExtra(ApplicationConstants.JOINED_USER_EXTRA);
-            if (!shownJoinedUserMessages.contains(joinedUser)) {
-                shownJoinedUserMessages.add(joinedUser);
-                if (LocalDateTime.now().isAfter(initializedTimeStamp.plusSeconds(ApplicationConstants.PARTY_MESSAGE_GRACE_PERIOD_SEC))) {
-                    showMessage("User " + joinedUser + " has joined the party");
-                }
-            }
-        }
-    };
-
     private BroadcastReceiver songAddedReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -108,7 +94,8 @@ public class PartyActivity extends BaseActivity<PartyPresenter> implements Party
             if (!shownSongAddedMessages.contains(addedSong)) {
                 shownSongAddedMessages.add(addedSong);
                 if (LocalDateTime.now().isAfter(initializedTimeStamp.plusSeconds(ApplicationConstants.PARTY_MESSAGE_GRACE_PERIOD_SEC))) {
-                    showMessage(addedSong + " has been added to the tracklist");
+                    new Handler().postDelayed(() -> showMessage(addedSong + " has been added to the tracklist"),
+                        ApplicationConstants.DEFER_SNACKBAR_DELAY);
                 }
             }
         }
@@ -135,9 +122,6 @@ public class PartyActivity extends BaseActivity<PartyPresenter> implements Party
 
         LocalBroadcastManager.getInstance(this).registerReceiver(
             playingStatusReceiver, new IntentFilter(ServiceConstants.PLAYING_STATUS_BROADCAST_NAME));
-
-        LocalBroadcastManager.getInstance(this).registerReceiver(
-            userJoinedReceiver, new IntentFilter(ApplicationConstants.JOINED_USER_BROADCAST_NAME));
 
         LocalBroadcastManager.getInstance(this).registerReceiver(
             songAddedReceiver, new IntentFilter(ApplicationConstants.SONG_ADDED_BROADCAST_NAME));

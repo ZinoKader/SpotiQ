@@ -45,7 +45,7 @@ public abstract class BaseActivity<P extends Presenter> extends NucleusAppCompat
             snackbarShowing = true;
             new SnackbarBuilder(getRootView())
                 .message(message)
-                .timeoutDismissCallback(snackbar -> snackbarShowing = false)
+                .dismissCallback((snackbar, i) -> snackbarShowing = false)
                 .build()
                 .show();
         }
@@ -56,7 +56,7 @@ public abstract class BaseActivity<P extends Presenter> extends NucleusAppCompat
             snackbarShowing = true;
             new SnackbarBuilder(getRootView())
                 .message(message)
-                .timeoutDismissCallback(snackbar -> snackbarShowing = false)
+                .dismissCallback((snackbar, i) -> snackbarShowing = false)
                 .build()
                 .show();
         }, ApplicationConstants.DEFER_SNACKBAR_DELAY);
@@ -66,7 +66,7 @@ public abstract class BaseActivity<P extends Presenter> extends NucleusAppCompat
         new SnackbarBuilder(getRootView())
             .duration(Snackbar.LENGTH_SHORT)
             .message(message)
-            .timeoutDismissCallback(dismissed -> finish())
+            .dismissCallback((snackbar, i) -> finish())
             .build()
             .show();
     }

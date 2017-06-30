@@ -50,7 +50,7 @@ public class PartiesRepository {
             }));
     }
 
-    public Observable<Boolean> addUserToParty(User user, String partyTitle) {
+    public Observable<Boolean> addUserToParty(String partyTitle, User user) {
         return Observable.create(subscriber -> databaseReference
             .child(partyTitle)
             .child(FirebaseConstants.CHILD_USERS)
@@ -63,12 +63,12 @@ public class PartiesRepository {
             .addOnFailureListener(subscriber::onError));
     }
 
-    public void incrementUserSongRequestCount(User user, String partyTitle) {
+    public void incrementUserSongRequestCount(String partyTitle, User user) {
         databaseReference
             .child(partyTitle)
             .child(FirebaseConstants.CHILD_USERS)
             .child(user.getUserId())
-            .child(FirebaseConstants.CHILD_USER_SONGS_REQUESTED)
+            .child(FirebaseConstants.CHILD_USERS_SONGS_REQUESTED)
             .runTransaction(new Transaction.Handler() {
                 @Override
                 public Transaction.Result doTransaction(MutableData currentData) {
@@ -86,6 +86,14 @@ public class PartiesRepository {
 
                 }
             });
+    }
+
+    public void updatePartyVersion(String partyTitle, int versionCode) {
+        databaseReference
+            .child(partyTitle)
+            .child(FirebaseConstants.CHILD_PARTYINFO)
+            .child(FirebaseConstants.CHILD_PARTYINFO_VERSION_CODE)
+            .setValue(versionCode);
     }
 
     public Observable<ChildEvent> listenToPartyMemberChanges(String partyTitle) {
@@ -120,7 +128,7 @@ public class PartiesRepository {
             }));
     }
 
-    public Observable<Boolean> isHostOfParty(String spotifyUserId, String partyTitle) {
+    public Observable<Boolean> isHostOfParty(String partyTitle, String spotifyUserId) {
         return Observable.create(subscriber -> databaseReference
             .child(partyTitle)
             .child(FirebaseConstants.CHILD_PARTYINFO)
