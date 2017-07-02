@@ -79,16 +79,11 @@ public class LobbyPresenter extends BasePresenter<LobbyView> {
                     boolean userAlreadyExists = dbPartySnapshot.child(FirebaseConstants.CHILD_USERS).hasChild(user.getUserId());
                     Party dbParty = dbPartySnapshot.child(FirebaseConstants.CHILD_PARTYINFO).getValue(Party.class);
 
-                    //If host, update party version, otherwise handle version mismatch
-                    if (dbParty.getHostSpotifyId().equals(user.getUserId())) {
-                        partiesRepository.updatePartyVersion(partyTitle, VersionUtil.getCurrentAppVersionCode());
+                    if (dbParty.getPartyVersionCode() > VersionUtil.getCurrentAppVersionCode()) {
+                        throw new PartyVersionHigherException();
                     }
-                    else {
-                        if (dbParty.getPartyVersionCode() > VersionUtil.getCurrentAppVersionCode()) {
-                            throw new PartyVersionHigherException();
-                        } else if (dbParty.getPartyVersionCode() < VersionUtil.getCurrentAppVersionCode()) {
-                            throw new PartyVersionLowerException();
-                        }
+                    else if (dbParty.getPartyVersionCode() < VersionUtil.getCurrentAppVersionCode()) {
+                        throw new PartyVersionLowerException();
                     }
 
                     return new UserPartyInformation(user, userAlreadyExists, dbParty);
@@ -126,10 +121,10 @@ public class LobbyPresenter extends BasePresenter<LobbyView> {
                         lobbyView.showMessage("Invalid password");
                     }
                     else if (exception instanceof PartyVersionHigherException) {
-                        lobbyView.showMessage("The host has a newer version of the app - update SpotiQ to join this party");
+                        lobbyView.showMessage("This party was created with a newer version of the app - update SpotiQ to join this party!");
                     }
                     else if(exception instanceof PartyVersionLowerException) {
-                        lobbyView.showMessage("The host has an older version of the app - get on the same version if you want to jam!");
+                        lobbyView.showMessage("This party was created with an older version of the app - create a new one to jam!");
                     }
                     else {
                         lobbyView.showMessage("Something went wrong when joining the party");

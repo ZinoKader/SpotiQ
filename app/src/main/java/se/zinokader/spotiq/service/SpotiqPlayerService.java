@@ -18,13 +18,14 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.util.Log;
+import android.view.LayoutInflater;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
+import com.github.andrewlord1990.snackbarbuilder.toastbuilder.ToastBuilder;
 import com.spotify.sdk.android.player.Config;
 import com.spotify.sdk.android.player.ConnectionStateCallback;
-import com.spotify.sdk.android.player.Error;
 import com.spotify.sdk.android.player.Metadata;
 import com.spotify.sdk.android.player.PlaybackBitrate;
 import com.spotify.sdk.android.player.Player;
@@ -32,7 +33,6 @@ import com.spotify.sdk.android.player.PlayerEvent;
 import com.spotify.sdk.android.player.PlayerInitializationException;
 import com.spotify.sdk.android.player.Spotify;
 import com.spotify.sdk.android.player.SpotifyPlayer;
-import com.valdesekamdem.library.mdtoast.MDToast;
 
 import java.util.concurrent.TimeUnit;
 
@@ -117,11 +117,11 @@ public class SpotiqPlayerService extends Service implements ConnectionStateCallb
         playbackStatePlaying = new PlaybackState.Builder()
             .setState(PlaybackState.STATE_PLAYING, 0, 1).build();
         playbackStatePaused = new PlaybackState.Builder()
-            .setState(PlaybackState.STATE_PAUSED, 0, 1).build();
+            .setState(PlaybackState.STATE_STOPPED, 0, 1).build();
         playbackStateCompatPlaying = new PlaybackStateCompat.Builder()
             .setState(PlaybackState.STATE_PLAYING, 0, 1).build();
         playbackStateCompatPaused = new PlaybackStateCompat.Builder()
-            .setState(PlaybackState.STATE_PAUSED, 0, 1).build();
+            .setState(PlaybackState.STATE_STOPPED, 0, 1).build();
         notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         Log.d(LogTag.LOG_PLAYER_SERVICE, "SpotiQ Player service created");
     }
@@ -177,7 +177,7 @@ public class SpotiqPlayerService extends Service implements ConnectionStateCallb
                             mediaSession.setMetadata(NotificationUtil.buildMediaMetadata(currentTrack, albumArt));
                             playerNotification =
                                 NotificationUtil.buildPlayerNotification(SpotiqPlayerService.this, mediaSession,
-                                    shouldBeOngoing, title, description, albumArt);
+                                    shouldStartForeground, shouldBeOngoing, title, description, albumArt);
                         }
                         else {
                             mediaSessionCompat.setMetadata(NotificationUtil.buildMediaMetadataCompat(currentTrack, albumArt));
@@ -202,7 +202,7 @@ public class SpotiqPlayerService extends Service implements ConnectionStateCallb
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 playerNotification =
                     NotificationUtil.buildPlayerNotification(SpotiqPlayerService.this, mediaSession,
-                        shouldBeOngoing, title, description, largeIcon);
+                        shouldStartForeground, shouldBeOngoing, title, description, largeIcon);
             }
             else {
                 playerNotification = NotificationUtil.buildPlayerNotificationCompat(SpotiqPlayerService.this, mediaSessionCompat,
@@ -228,17 +228,27 @@ public class SpotiqPlayerService extends Service implements ConnectionStateCallb
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d(LogTag.LOG_PLAYER_SERVICE, "Player service initialization started");
 
-        partyTitle = intent.getStringExtra(ApplicationConstants.PARTY_NAME_EXTRA);
-        if (partyTitle.isEmpty()) {
-            Log.d(LogTag.LOG_PLAYER_SERVICE, "Player service could not be initialized - Received empty party title");
-            stopSelf();
-        }
-
-        if (intent.getAction().equals(ServiceConstants.ACTION_INIT)) {
-            initPlayer().subscribe(didInit -> {
-                Log.d(LogTag.LOG_PLAYER_SERVICE, "Player initialization status: " + didInit);
-                if (!didInit) stopSelf();
-            });
+        switch (intent.getAction()) {
+            case ServiceConstants.ACTION_INIT:
+                partyTitle = intent.getStringExtra(ApplicationConstants.PARTY_NAME_EXTRA);
+                if (partyTitle.isEmpty()) {
+                    Log.d(LogTag.LOG_PLAYER_SERVICE, "Player service could not be initialized - Received empty party title");
+                    stopSelf();
+                    break;
+                }
+                initPlayer().subscribe(didInit -> {
+                    Log.d(LogTag.LOG_PLAYER_SERVICE, "Player initialization status: " + didInit);
+                    if (!didInit) stopSelf();
+                });
+                break;
+            case ServiceConstants.ACTION_PLAY_PAUSE:
+                if (isPlaying()) {
+                    pause();
+                }
+                else {
+                    play();
+                }
+                break;
         }
 
         return START_STICKY;
@@ -304,9 +314,6 @@ public class SpotiqPlayerService extends Service implements ConnectionStateCallb
             @Override
             public void onSuccess() {
                 Log.d(LogTag.LOG_PLAYER_SERVICE, "Paused music successfully");
-                sendPlayingStatusBroadcast(false);
-                mediaSession.setPlaybackState(playbackStatePaused);
-                mediaSessionCompat.setPlaybackState(playbackStateCompatPaused);
             }
 
             @Override
@@ -321,9 +328,6 @@ public class SpotiqPlayerService extends Service implements ConnectionStateCallb
             @Override
             public void onSuccess() {
                 Log.d(LogTag.LOG_PLAYER_SERVICE, "Resumed music successfully");
-                sendPlayingStatusBroadcast(true);
-                mediaSession.setPlaybackState(playbackStatePlaying);
-                mediaSessionCompat.setPlaybackState(playbackStateCompatPlaying);
             }
 
             @Override
@@ -345,30 +349,18 @@ public class SpotiqPlayerService extends Service implements ConnectionStateCallb
                     public void onSuccess() {
                         Log.d(LogTag.LOG_PLAYER_SERVICE, "Playing next song in tracklist");
                         isTracklistEmpty = false;
-                        //delay sending notification until song certainly is playing (Spotify Android SDK to blame)
-                        new Handler().postDelayed(() -> {
-                            sendNotification(ServiceUtil.isPlayerServiceInForeground(SpotiqPlayerService.this));
-                        }, ServiceConstants.NOTIFICATION_SEND_DELAY_MS);
-                        sendPlayingStatusBroadcast(true);
-                        mediaSession.setPlaybackState(playbackStatePlaying);
-                        mediaSessionCompat.setPlaybackState(playbackStateCompatPlaying);
                     }
 
                     @Override
                     public void onError(Error error) {
                         Log.d(LogTag.LOG_PLAYER_SERVICE, "Failed to play next song in tracklist: " + error.name());
                         sendPlayingStatusBroadcast(false);
-                        mediaSession.setPlaybackState(playbackStatePaused);
-                        mediaSessionCompat.setPlaybackState(playbackStateCompatPaused);
                     }
                 }, song.getSongUri(), 0, 0);
             }, throwable -> {
-                Log.d(LogTag.LOG_PLAYER_SERVICE, "Could not play next song, reason: " + throwable.getMessage());
+                Log.d(LogTag.LOG_PLAYER_SERVICE, "Could not play next song: " + throwable.getMessage());
                 isTracklistEmpty = true;
-                sendNotification(ServiceUtil.isPlayerServiceInForeground(SpotiqPlayerService.this));
                 sendPlayingStatusBroadcast(false);
-                mediaSession.setPlaybackState(playbackStatePaused);
-                mediaSessionCompat.setPlaybackState(playbackStateCompatPaused);
             });
     }
 
@@ -381,18 +373,29 @@ public class SpotiqPlayerService extends Service implements ConnectionStateCallb
                 break;
             case kSpPlaybackNotifyTrackDelivered:
                 handlePlaybackEnd();
+                break;
+            case kSpPlaybackNotifyPlay:
+                sendNotification(ServiceUtil.isPlayerServiceInForeground(SpotiqPlayerService.this));
+                sendPlayingStatusBroadcast(true);
+                mediaSession.setPlaybackState(playbackStatePlaying);
+                mediaSessionCompat.setPlaybackState(playbackStateCompatPlaying);
+                break;
+            case kSpPlaybackNotifyPause:
+                sendNotification(ServiceUtil.isPlayerServiceInForeground(SpotiqPlayerService.this));
+                sendPlayingStatusBroadcast(false);
+                mediaSession.setPlaybackState(playbackStatePaused);
+                mediaSessionCompat.setPlaybackState(playbackStateCompatPaused);
+                break;
         }
     }
 
     private void showLostPlaybackPermissionToast() {
         mainThreadHandler.post(() -> {
-            MDToast lostPlaybackPermissionToast =
-                MDToast.makeText(this,
-                    getString(R.string.playback_permission_lost_notice),
-                    MDToast.LENGTH_LONG,
-                    MDToast.TYPE_INFO);
-            lostPlaybackPermissionToast.setIcon(R.drawable.ic_spotify_connect);
-            lostPlaybackPermissionToast.show();
+            new ToastBuilder(this)
+                .customView(LayoutInflater.from(this).inflate(getResources().getLayout(R.layout.toast_lost_permission_container), null))
+                .duration(ApplicationConstants.LONG_TOAST_DURATION_SEC)
+                .build()
+                .show();
         });
     }
 

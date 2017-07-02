@@ -21,7 +21,9 @@ import com.spotify.sdk.android.player.Metadata;
 
 import se.zinokader.spotiq.R;
 import se.zinokader.spotiq.constant.ApplicationConstants;
+import se.zinokader.spotiq.constant.ServiceConstants;
 import se.zinokader.spotiq.feature.party.PartyActivity;
+import se.zinokader.spotiq.service.SpotiqPlayerService;
 
 public class NotificationUtil {
 
@@ -53,16 +55,28 @@ public class NotificationUtil {
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     public static Notification buildPlayerNotification(Context context, MediaSession mediaSession,
-                                                       boolean ongoing, String title, String description, Bitmap largeIcon) {
+                                                       boolean serviceIsForeground, boolean ongoing,
+                                                       String title, String description, Bitmap largeIcon) {
 
         PendingIntent openPartyIntent = PendingIntent.getActivity(context, 0,
             new Intent(context, PartyActivity.class), PendingIntent.FLAG_UPDATE_CURRENT);
 
+        Intent playPauseActionIntent = new Intent(context, SpotiqPlayerService.class);
+        playPauseActionIntent.setAction(ServiceConstants.ACTION_PLAY_PAUSE);
+
+        PendingIntent playPauseButtonIntent = serviceIsForeground
+            ? PendingIntent.getForegroundService(context, 1,
+            playPauseActionIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+            : PendingIntent.getService(context, 1,
+            playPauseActionIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
         return new Notification.Builder(context, ApplicationConstants.MEDIA_NOTIFICATION_CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_notification_logo)
             .setLargeIcon(largeIcon)
+            .setActions(new Notification.Action(R.drawable.ic_notification_play_pause, "Play/Pause", playPauseButtonIntent))
             .setStyle(new Notification.MediaStyle()
-                .setMediaSession(mediaSession.getSessionToken()))
+                .setMediaSession(mediaSession.getSessionToken())
+                .setShowActionsInCompactView(0))
             .setColorized(true)
             .setContentTitle(title)
             .setContentText(description)
@@ -73,16 +87,30 @@ public class NotificationUtil {
     }
 
     public static Notification buildPlayerNotificationCompat(Context context, MediaSessionCompat mediaSessionCompat,
-                                                             boolean ongoing, String title, String description, Bitmap largeIcon) {
+                                                             boolean ongoing, String title,
+                                                             String description, Bitmap largeIcon) {
 
         PendingIntent openPartyIntent = PendingIntent.getActivity(context, 0,
             new Intent(context, PartyActivity.class), PendingIntent.FLAG_UPDATE_CURRENT);
 
+        Intent playPauseActionIntent = new Intent(context, SpotiqPlayerService.class);
+        playPauseActionIntent.setAction(ServiceConstants.ACTION_PLAY_PAUSE);
+
+        PendingIntent playPauseIntent = PendingIntent.getService(context, 1,
+            playPauseActionIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        int largeIconWidth = context.getResources().getDimensionPixelSize(android.R.dimen.notification_large_icon_width);
+        int largeIconHeight = context.getResources().getDimensionPixelSize(android.R.dimen.notification_large_icon_height);
+
+        largeIcon = Bitmap.createScaledBitmap(largeIcon, largeIconWidth, largeIconHeight, false);
+
         return new NotificationCompat.Builder(context)
             .setSmallIcon(R.drawable.ic_notification_logo)
             .setLargeIcon(largeIcon)
+            .addAction(new NotificationCompat.Action(R.drawable.ic_notification_play_pause, "Play/Pause", playPauseIntent))
             .setStyle(new NotificationCompat.MediaStyle()
-                .setMediaSession(mediaSessionCompat.getSessionToken()))
+                .setMediaSession(mediaSessionCompat.getSessionToken())
+                .setShowActionsInCompactView(0))
             .setColorized(true)
             .setContentTitle(title)
             .setContentText(description)

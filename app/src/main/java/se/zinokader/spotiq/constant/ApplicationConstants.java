@@ -15,6 +15,7 @@ public class ApplicationConstants {
     public static final int SHORT_ACTION_DELAY_SEC = 1;
     public static final int MEDIUM_ACTION_DELAY_SEC = 2;
     public static final int LONG_ACTION_DELAY_SEC = 3;
+    public static final int LONG_TOAST_DURATION_SEC = 5;
 
     /* Image-related */
     public static final String ALBUM_ART_PLACEHOLDER_URL = "https://www.zinokader.se/img/spotiq-album-placeholder.png";
