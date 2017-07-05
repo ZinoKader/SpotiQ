@@ -26,6 +26,7 @@ import com.bumptech.glide.request.target.SimpleTarget;
 import com.github.andrewlord1990.snackbarbuilder.toastbuilder.ToastBuilder;
 import com.spotify.sdk.android.player.Config;
 import com.spotify.sdk.android.player.ConnectionStateCallback;
+import com.spotify.sdk.android.player.Error;
 import com.spotify.sdk.android.player.Metadata;
 import com.spotify.sdk.android.player.PlaybackBitrate;
 import com.spotify.sdk.android.player.Player;
@@ -90,6 +91,7 @@ public class SpotiqPlayerService extends Service implements ConnectionStateCallb
     public IBinder onBind(Intent intent) {
         stopForeground(true);
         changingConfiguration = false;
+        sendPlayingStatusBroadcast(isPlaying());
         return binder;
     }
 
@@ -97,6 +99,7 @@ public class SpotiqPlayerService extends Service implements ConnectionStateCallb
     public void onRebind(Intent intent) {
         stopForeground(true);
         changingConfiguration = false;
+        sendPlayingStatusBroadcast(isPlaying());
         super.onRebind(intent);
     }
 
@@ -430,6 +433,7 @@ public class SpotiqPlayerService extends Service implements ConnectionStateCallb
         Log.d(LogTag.LOG_PLAYER_SERVICE, "Spotify login failed: " + error.toString());
         switch (error) {
             case kSpErrorNeedsPremium:
+               break;
         }
     }
 
