@@ -304,6 +304,7 @@ public class SpotiqPlayerService extends Service implements ConnectionStateCallb
     }
 
     public void play() {
+        if (spotifyPlayer == null) return;
         if (!isTracklistEmpty && spotifyPlayer.getMetadata().currentTrack != null) {
             resume();
         }
@@ -405,6 +406,7 @@ public class SpotiqPlayerService extends Service implements ConnectionStateCallb
     private void handlePlaybackEnd() {
         tracklistRepository.removeFirstSong(partyTitle)
             .subscribe(wasRemoved -> {
+                if (spotifyPlayer == null) return;
                 if (wasRemoved) playNext();
             }, throwable -> {
                 if (throwable instanceof EmptyTracklistException) {
@@ -433,7 +435,7 @@ public class SpotiqPlayerService extends Service implements ConnectionStateCallb
         Log.d(LogTag.LOG_PLAYER_SERVICE, "Spotify login failed: " + error.toString());
         switch (error) {
             case kSpErrorNeedsPremium:
-               break;
+                break;
         }
     }
 
