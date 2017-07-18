@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:background="@drawable/toast_info_background"
+    android:padding="8dp">
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:minHeight="24dp"
+        android:contentDescription="@null"
+        android:src="@drawable/ic_connection_lost"
+        android:layout_marginLeft="4dp"
+        android:layout_marginRight="4dp"
+        android:layout_gravity="center"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:textColor="@color/colorMaterialWhite"
+        android:textSize="10dp"
+        android:text="@string/lost_connection_message"
+        android:gravity="center"
+        android:layout_marginRight="8dp"
+        android:layout_marginEnd="8dp"/>
+
+</LinearLayout>

@@ -3,12 +3,16 @@ package se.zinokader.spotiq.service;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.Service;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.session.MediaSession;
 import android.media.session.PlaybackState;
+import android.net.ConnectivityManager;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
@@ -47,6 +51,7 @@ import se.zinokader.spotiq.constant.LogTag;
 import se.zinokader.spotiq.constant.ServiceConstants;
 import se.zinokader.spotiq.constant.SpotifyConstants;
 import se.zinokader.spotiq.repository.TracklistRepository;
+import se.zinokader.spotiq.util.NetworkUtil;
 import se.zinokader.spotiq.util.NotificationUtil;
 import se.zinokader.spotiq.util.ServiceUtil;
 import se.zinokader.spotiq.util.di.Injector;
@@ -242,6 +247,7 @@ public class SpotiqPlayerService extends Service implements ConnectionStateCallb
                 initPlayer().subscribe(didInit -> {
                     Log.d(LogTag.LOG_PLAYER_SERVICE, "Player initialization status: " + didInit);
                     if (!didInit) stopSelf();
+                    registerReceiver(connectionReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
                 });
                 break;
             case ServiceConstants.ACTION_PLAY_PAUSE:
@@ -308,6 +314,10 @@ public class SpotiqPlayerService extends Service implements ConnectionStateCallb
     }
 
     public void play() {
+        if (!NetworkUtil.isConnected(this)) {
+            handleLostConnection();
+            return;
+        }
         if (!isTracklistEmpty && spotifyPlayer.getMetadata().currentTrack != null) {
             resume();
         }
@@ -344,10 +354,6 @@ public class SpotiqPlayerService extends Service implements ConnectionStateCallb
         });
     }
 
-    public boolean isPlaying() {
-        return !(spotifyPlayer == null || spotifyPlayer.getPlaybackState() == null) && spotifyPlayer.getPlaybackState().isPlaying;
-    }
-
     private void playNext() {
         tracklistRepository.getFirstSong(partyTitle)
             .subscribe(song -> {
@@ -368,6 +374,19 @@ public class SpotiqPlayerService extends Service implements ConnectionStateCallb
                 Log.d(LogTag.LOG_PLAYER_SERVICE, "Could not play next song: " + throwable.getMessage());
                 isTracklistEmpty = true;
                 sendPlayingStatusBroadcast(false);
+            });
+    }
+
+    private void handlePlaybackEnd() {
+        tracklistRepository.removeFirstSong(partyTitle)
+            .subscribe(wasRemoved -> {
+                if (spotifyPlayer == null) return;
+                if (wasRemoved) playNext();
+            }, throwable -> {
+                if (throwable instanceof EmptyTracklistException) {
+                    Log.d(LogTag.LOG_PLAYER_SERVICE, "Tracklist empty, next song not played");
+                    isTracklistEmpty = true;
+                }
             });
     }
 
@@ -396,6 +415,10 @@ public class SpotiqPlayerService extends Service implements ConnectionStateCallb
         }
     }
 
+    public boolean isPlaying() {
+        return !(spotifyPlayer == null || spotifyPlayer.getPlaybackState() == null) && spotifyPlayer.getPlaybackState().isPlaying;
+    }
+
     private void showLostPlaybackPermissionToast() {
         mainThreadHandler.post(() -> {
             new ToastBuilder(this)
@@ -406,17 +429,27 @@ public class SpotiqPlayerService extends Service implements ConnectionStateCallb
         });
     }
 
-    private void handlePlaybackEnd() {
-        tracklistRepository.removeFirstSong(partyTitle)
-            .subscribe(wasRemoved -> {
-                if (spotifyPlayer == null) return;
-                if (wasRemoved) playNext();
-            }, throwable -> {
-                if (throwable instanceof EmptyTracklistException) {
-                    Log.d(LogTag.LOG_PLAYER_SERVICE, "Tracklist empty, next song not played");
-                    isTracklistEmpty = true;
-                }
-            });
+    private BroadcastReceiver connectionReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (!NetworkUtil.isConnected(context)) {
+                handleLostConnection();
+            }
+        }
+    };
+
+    private void handleLostConnection() {
+        if (isPlaying()) pause();
+        sendPlayingStatusBroadcast(false);
+        mediaSession.setPlaybackState(playbackStatePaused);
+        mediaSessionCompat.setPlaybackState(playbackStateCompatPaused);
+        mainThreadHandler.post(() -> {
+            new ToastBuilder(getApplicationContext())
+                .customView(LayoutInflater.from(getApplicationContext()).inflate(getResources().getLayout(R.layout.toast_lost_connection_container), null))
+                .duration(ApplicationConstants.LONG_TOAST_DURATION_SEC)
+                .build()
+                .show();
+        });
     }
 
     @Override
