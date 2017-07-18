@@ -51,15 +51,11 @@ public class LobbyPresenter extends BasePresenter<LobbyView> {
         restartableLatestCache(LOAD_USER_RESTARTABLE_ID,
             () -> spotifyRepository.getMe(spotifyCommunicatorService.getWebApi())
                 .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .retryWhen(throwable -> throwable.delay(ApplicationConstants.REQUEST_RETRY_DELAY_SEC, TimeUnit.SECONDS)),
+                .observeOn(AndroidSchedulers.mainThread()),
             (lobbyView, userPrivate) -> {
                 User user = new User(userPrivate.id, userPrivate.display_name, userPrivate.images);
                 lobbyView.setUserDetails(user.getUserName(), user.getUserImageUrl());
-            }, (lobbyView, throwable) -> {
-                Log.d(LogTag.LOG_LOBBY, "Error when getting user Spotify data");
-                throwable.printStackTrace();
-            });
+            }, (lobbyView, throwable) -> Log.d(LogTag.LOG_LOBBY, "Error when getting user Spotify data"));
 
         if (savedState == null) {
             start(LOAD_USER_RESTARTABLE_ID);
@@ -108,7 +104,6 @@ public class LobbyPresenter extends BasePresenter<LobbyView> {
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .compose(this.deliverFirst())
-            .retryWhen(throwable -> throwable.delay(ApplicationConstants.REQUEST_RETRY_DELAY_SEC, TimeUnit.SECONDS))
             .subscribe(lobbyViewPartyDelivery -> lobbyViewPartyDelivery.split(
                 (lobbyView, userWasAdded) -> {
                     navigateToParty(partyTitle);
@@ -164,7 +159,6 @@ public class LobbyPresenter extends BasePresenter<LobbyView> {
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .compose(this.deliverFirst())
-            .retryWhen(throwable -> throwable.delay(ApplicationConstants.REQUEST_RETRY_DELAY_SEC, TimeUnit.SECONDS))
             .subscribe(lobbyViewPartyDelivery -> lobbyViewPartyDelivery.split(
                 (lobbyView, confirmedParty) -> {
                     navigateToParty(confirmedParty.getTitle());

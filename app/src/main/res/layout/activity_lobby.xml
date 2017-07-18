@@ -38,14 +38,14 @@
 
         <TextView
             android:id="@+id/userName"
-            android:text="@string/username_placeholder"
-            android:transitionName="@string/user_name_transition"
-            android:layout_width="200dp"
+            android:layout_width="match_parent"
             android:layout_height="20dp"
             android:layout_marginTop="8dp"
+            android:text="@string/username_placeholder"
             android:textAlignment="center"
             android:textColor="@color/colorMaterialWhite"
             android:textSize="15sp"
+            android:transitionName="@string/user_name_transition"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"

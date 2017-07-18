@@ -268,7 +268,7 @@ public class PartyActivity extends BaseActivity<PartyPresenter> implements Party
 
                     @Override
                     public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
-                        supportStartPostponedEnterTransition();
+                        new Handler().postDelayed(() -> supportStartPostponedEnterTransition(), 1000);
                         return false;
                     }
                 })

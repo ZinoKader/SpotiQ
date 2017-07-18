@@ -245,13 +245,17 @@ public class SpotiqPlayerService extends Service implements ConnectionStateCallb
                 });
                 break;
             case ServiceConstants.ACTION_PLAY_PAUSE:
+                if (spotifyPlayer == null) {
+                    Log.d(LogTag.LOG_PLAYER_SERVICE, "Spotify Player was null - stopping service");
+                    stopSelf();
+                    break;
+                }
                 if (isPlaying()) {
                     pause();
                 }
                 else {
                     play();
                 }
-                break;
         }
 
         return START_STICKY;
@@ -304,7 +308,6 @@ public class SpotiqPlayerService extends Service implements ConnectionStateCallb
     }
 
     public void play() {
-        if (spotifyPlayer == null) return;
         if (!isTracklistEmpty && spotifyPlayer.getMetadata().currentTrack != null) {
             resume();
         }

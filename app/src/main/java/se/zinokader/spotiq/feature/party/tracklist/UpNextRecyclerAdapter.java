@@ -132,7 +132,6 @@ public class UpNextRecyclerAdapter extends RecyclerView.Adapter<UpNextRecyclerAd
 
         SongHolder(View view) {
             super(view);
-
             cardViewRoot = view.findViewById(R.id.trackViewHolder);
             albumArt = view.findViewById(R.id.albumArt);
             songName = view.findViewById(R.id.songName);
