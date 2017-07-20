@@ -23,7 +23,6 @@ import javax.inject.Inject;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.schedulers.Schedulers;
-import jp.wasabeef.recyclerview.adapters.SlideInBottomAnimationAdapter;
 import jp.wasabeef.recyclerview.animators.FadeInDownAnimator;
 import se.zinokader.spotiq.R;
 import se.zinokader.spotiq.constant.ApplicationConstants;
@@ -49,6 +48,7 @@ public class TracklistFragment extends Fragment {
     private CompositeDisposable disposableActions = new CompositeDisposable();
 
     private RvJoiner recyclerViewJoiner = new RvJoiner(true);
+    private FadeInDownAnimator itemAnimator = new FadeInDownAnimator();
     private JoinableLayout emptyTracklistLayout = new JoinableLayout(R.layout.recyclerview_empty_placeholder_view);
     private boolean emptyTracklistNoticeAttached = true;
     private JoinableLayout upNextHeaderLayout = new JoinableLayout(R.layout.recyclerview_row_tracklist_upnext_header);
@@ -69,6 +69,11 @@ public class TracklistFragment extends Fragment {
         ((Injector) getContext().getApplicationContext()).inject(this);
         super.onCreate(savedInstanceState);
         String partyTitle = getArguments().getString("partyTitle");
+
+        itemAnimator.setInterpolator(new DecelerateInterpolator());
+        itemAnimator.setAddDuration(ApplicationConstants.DEFAULT_ITEM_ADD_DURATION_MS);
+        itemAnimator.setRemoveDuration(ApplicationConstants.DEFAULT_ITEM_REMOVE_DURATION_MS);
+        itemAnimator.setMoveDuration(ApplicationConstants.DEFAULT_ITEM_MOVE_DURATION_MS);
 
         disposableActions.add(tracklistRepository.listenToTracklistChanges(partyTitle)
             .delay(ApplicationConstants.DEFAULT_NEW_ITEM_DELAY_MS, TimeUnit.MILLISECONDS)
@@ -138,23 +143,9 @@ public class TracklistFragment extends Fragment {
         recyclerViewJoiner.add(emptyTracklistLayout, 0);
         recyclerViewJoiner.add(nowPlayingJoinable);
         recyclerViewJoiner.add(upNextJoinable);
-
-        SlideInBottomAnimationAdapter animatedAdapter =
-            new SlideInBottomAnimationAdapter(recyclerViewJoiner.getAdapter());
-        animatedAdapter.setInterpolator(new DecelerateInterpolator());
-        animatedAdapter.setHasStableIds(true);
-        animatedAdapter.setFirstOnly(true);
-        animatedAdapter.setStartPosition(ApplicationConstants.DEFAULT_LIST_ANIMATION_ITEM_POSITION_START);
-        animatedAdapter.setDuration(ApplicationConstants.DEFAULT_LIST_ANIMATION_DURATION_MS);
-
-        FadeInDownAnimator itemAnimator = new FadeInDownAnimator();
-        itemAnimator.setInterpolator(new DecelerateInterpolator());
-        itemAnimator.setAddDuration(ApplicationConstants.DEFAULT_ITEM_ADD_DURATION_MS);
-        itemAnimator.setRemoveDuration(ApplicationConstants.DEFAULT_ITEM_REMOVE_DURATION_MS);
-        itemAnimator.setMoveDuration(ApplicationConstants.DEFAULT_ITEM_MOVE_DURATION_MS);
+        
         binding.tracklistRecyclerView.setItemAnimator(itemAnimator);
-
-        binding.tracklistRecyclerView.setAdapter(animatedAdapter);
+        binding.tracklistRecyclerView.setAdapter(recyclerViewJoiner.getAdapter());
 
         return binding.getRoot();
     }
@@ -197,6 +188,9 @@ public class TracklistFragment extends Fragment {
             recyclerViewJoiner.remove(upNextHeaderLayout);
             upNextHeaderAttached = false;
             recyclerViewJoiner.getAdapter().notifyItemRangeRemoved(songPosition, 2);
+        }
+        else if (songPosition == 0) {
+            recyclerViewJoiner.getAdapter().notifyItemRemoved(songPosition);
         }
         else {
             recyclerViewJoiner.getAdapter().notifyItemRemoved(songPosition + 1);

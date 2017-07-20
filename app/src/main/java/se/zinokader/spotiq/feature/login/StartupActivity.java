@@ -30,6 +30,12 @@ public class StartupActivity extends BaseActivity<StartupPresenter> implements S
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //handle when the app is open and the app is resumed by opening it from the launcher
+        //in that case we want to go to the latest activity and immidiately finish this one
+        if (!isTaskRoot() && getIntent().hasCategory(Intent.CATEGORY_LAUNCHER) && getIntent().getAction() != null && getIntent().getAction().equals(Intent.ACTION_MAIN)) {
+            finish();
+            return;
+        }
         binding = DataBindingUtil.setContentView(this, R.layout.activity_startup);
         binding.logInButton.setOnClickListener(c -> getPresenter().logIn());
     }

@@ -44,10 +44,10 @@ public class ApplicationConstants {
     public static final int DEFAULT_LIST_ANIMATION_DURATION_MS = 400;
     public static final int DEFAULT_LIST_ANIMATION_ITEM_POSITION_START = 6;
     public static final int DEFAULT_ITEM_ADD_DURATION_MS = 1200;
-    public static final int DEFAULT_ITEM_REMOVE_DURATION_MS = 300;
-    public static final int DEFAULT_ITEM_MOVE_DURATION_MS = 800;
+    public static final int DEFAULT_ITEM_REMOVE_DURATION_MS = 350;
+    public static final int DEFAULT_ITEM_MOVE_DURATION_MS = 900;
 
     /* Search-related */
-    public static final int DEFAULT_DEBOUNCE_MS = 550;
+    public static final int DEFAULT_DEBOUNCE_MS = 600;
 
 }

@@ -146,7 +146,8 @@ public class SearchPresenter extends BasePresenter<SearchView> {
                 searchOptions.put(SpotifyService.OFFSET, lastOffset + tracksPager.tracks.limit);
                 return Observable.just(tracksPager)
                     .concatWith(searchTracksRecursively(query, searchOptions));
-            });
+            })
+            .doOnError(throwable -> Log.d(LogTag.LOG_SEARCH, "Something went wrong on search: " + throwable.getMessage()));
     }
 
 }
