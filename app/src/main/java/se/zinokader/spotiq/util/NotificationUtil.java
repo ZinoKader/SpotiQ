@@ -13,9 +13,10 @@ import android.media.session.MediaSession;
 import android.net.Uri;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
+import android.support.v4.app.NotificationCompat;
 import android.support.v4.media.MediaMetadataCompat;
+import android.support.v4.media.app.NotificationCompat.MediaStyle;
 import android.support.v4.media.session.MediaSessionCompat;
-import android.support.v7.app.NotificationCompat;
 
 import com.spotify.sdk.android.player.Metadata;
 
@@ -104,11 +105,11 @@ public class NotificationUtil {
 
         largeIcon = Bitmap.createScaledBitmap(largeIcon, largeIconWidth, largeIconHeight, false);
 
-        return new NotificationCompat.Builder(context)
+        return new NotificationCompat.Builder(context, ApplicationConstants.MEDIA_NOTIFICATION_CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_notification_logo)
             .setLargeIcon(largeIcon)
             .addAction(new NotificationCompat.Action(R.drawable.ic_notification_play_pause, "Play/Pause", playPauseIntent))
-            .setStyle(new NotificationCompat.MediaStyle()
+            .setStyle(new MediaStyle()
                 .setMediaSession(mediaSessionCompat.getSessionToken())
                 .setShowActionsInCompactView(0))
             .setColorized(true)
@@ -116,7 +117,6 @@ public class NotificationUtil {
             .setContentText(description)
             .setContentIntent(openPartyIntent)
             .setOngoing(ongoing)
-            .setChannel(ApplicationConstants.MEDIA_NOTIFICATION_CHANNEL_ID)
             .setDefaults(4)
             .build();
     }
