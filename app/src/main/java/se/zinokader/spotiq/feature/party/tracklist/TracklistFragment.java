@@ -59,7 +59,7 @@ public class TracklistFragment extends Fragment {
     public static TracklistFragment newInstance(String partyTitle) {
         TracklistFragment tracklistFragment = new TracklistFragment();
         Bundle newInstanceArguments = new Bundle();
-        newInstanceArguments.putString("partyTitle", partyTitle);
+        newInstanceArguments.putString(ApplicationConstants.PARTY_NAME_EXTRA, partyTitle);
         tracklistFragment.setArguments(newInstanceArguments);
         return tracklistFragment;
     }
@@ -68,7 +68,7 @@ public class TracklistFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         ((Injector) getContext().getApplicationContext()).inject(this);
         super.onCreate(savedInstanceState);
-        String partyTitle = getArguments().getString("partyTitle");
+        String partyTitle = getArguments().getString(ApplicationConstants.PARTY_NAME_EXTRA);
 
         itemAnimator.setInterpolator(new DecelerateInterpolator());
         itemAnimator.setAddDuration(ApplicationConstants.DEFAULT_ITEM_ADD_DURATION_MS);
@@ -100,7 +100,7 @@ public class TracklistFragment extends Fragment {
     @Override
     public void onSaveInstanceState(Bundle bundle) {
         super.onSaveInstanceState(bundle);
-        bundle.putString("partyTitle", getArguments().getString("partyTitle"));
+        bundle.putString(ApplicationConstants.PARTY_NAME_EXTRA, getArguments().getString(ApplicationConstants.PARTY_NAME_EXTRA));
     }
 
     @Override

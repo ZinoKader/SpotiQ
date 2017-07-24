@@ -41,13 +41,12 @@ public class PartyMemberFragment extends Fragment {
 
     private PartyMemberRecyclerAdapter partyMemberRecyclerAdapter;
 
-    private String partyTitle;
     private List<User> partyMembers = new ArrayList<>();
 
     public static PartyMemberFragment newInstance(String partyTitle) {
         PartyMemberFragment partyMemberFragment = new PartyMemberFragment();
         Bundle newInstanceArguments = new Bundle();
-        newInstanceArguments.putString("partyTitle", partyTitle);
+        newInstanceArguments.putString(ApplicationConstants.PARTY_NAME_EXTRA, partyTitle);
         partyMemberFragment.setArguments(newInstanceArguments);
         return partyMemberFragment;
     }
@@ -56,7 +55,7 @@ public class PartyMemberFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         ((Injector) getContext().getApplicationContext()).inject(this);
         super.onCreate(savedInstanceState);
-        this.partyTitle = getArguments().getString("partyTitle");
+        String partyTitle = getArguments().getString(ApplicationConstants.PARTY_NAME_EXTRA);
 
         disposableActions.add(partiesRepository.listenToPartyMemberChanges(partyTitle)
             .delay(ApplicationConstants.DEFAULT_NEW_ITEM_DELAY_MS, TimeUnit.MILLISECONDS)
@@ -84,7 +83,7 @@ public class PartyMemberFragment extends Fragment {
     @Override
     public void onSaveInstanceState(Bundle bundle) {
         super.onSaveInstanceState(bundle);
-        bundle.putString("partyTitle", getArguments().getString("partyTitle"));
+        bundle.putString(ApplicationConstants.PARTY_NAME_EXTRA, getArguments().getString(ApplicationConstants.PARTY_NAME_EXTRA));
     }
 
     @Nullable

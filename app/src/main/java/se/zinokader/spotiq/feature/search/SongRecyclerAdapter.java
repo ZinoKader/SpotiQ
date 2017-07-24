@@ -1,4 +1,4 @@
-package se.zinokader.spotiq.feature.search.searchlist;
+package se.zinokader.spotiq.feature.search;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
@@ -22,7 +22,7 @@ import se.zinokader.spotiq.R;
 import se.zinokader.spotiq.model.Song;
 import se.zinokader.spotiq.util.type.Empty;
 
-public class SearchRecyclerAdapter extends RecyclerView.Adapter<SearchRecyclerAdapter.SongHolder> {
+public class SongRecyclerAdapter extends RecyclerView.Adapter<SongRecyclerAdapter.SongHolder> {
 
     private final PublishSubject<Song> onClickSubject = PublishSubject.create();
     private final PublishSubject<Song> onLongClickSubject = PublishSubject.create();
@@ -84,11 +84,11 @@ public class SearchRecyclerAdapter extends RecyclerView.Adapter<SearchRecyclerAd
         super.onViewRecycled(songHolder);
     }
 
-    public void addSongs(List<Song> songs) {
-        this.songs.addAll(songs);
+    public void updateSongs(List<Song> songs) {
+        this.songs = songs;
     }
 
-    public void clearSongs() {
+    public void clearResults() {
         songs.clear();
     }
 
@@ -111,6 +111,11 @@ public class SearchRecyclerAdapter extends RecyclerView.Adapter<SearchRecyclerAd
     @Override
     public int getItemCount() {
         return songs.size();
+    }
+
+    @Override
+    public long getItemId(int position) {
+        return position;
     }
 
     class SongHolder extends RecyclerView.ViewHolder {

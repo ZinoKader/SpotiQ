@@ -1,4 +1,4 @@
-package se.zinokader.spotiq.feature.search;
+package se.zinokader.spotiq.feature.search.songsearch;
 
 import android.os.Bundle;
 import android.util.Log;
@@ -25,7 +25,7 @@ import se.zinokader.spotiq.repository.TracklistRepository;
 import se.zinokader.spotiq.service.SpotifyCommunicatorService;
 import se.zinokader.spotiq.util.mapper.TrackMapper;
 
-public class SearchPresenter extends BasePresenter<SearchView> {
+public class SongSearchPresenter extends BasePresenter<SongSearchView> {
 
     @Inject
     SpotifyCommunicatorService spotifyCommunicatorService;
@@ -43,7 +43,7 @@ public class SearchPresenter extends BasePresenter<SearchView> {
     private String partyTitle;
     private User user;
 
-    private static final int LOAD_USER_RESTARTABLE_ID = 764;
+    static final int LOAD_USER_RESTARTABLE_ID = 764;
 
     void setPartyTitle(String partyTitle) {
         this.partyTitle = partyTitle;
@@ -93,31 +93,30 @@ public class SearchPresenter extends BasePresenter<SearchView> {
             .observeOn(AndroidSchedulers.mainThread())
             .compose(this.deliverFirst())
             .subscribe(songExistsDelivery -> songExistsDelivery.split(
-                (searchView, songExists) -> {
+                (songSearchView, songExists) -> {
                     if (songExists) {
-                        searchView.showMessage("This song is already queued up in the tracklist");
+                        songSearchView.showMessage("This song is already queued up in the tracklist");
                     }
                     else {
                         tracklistRepository.addSong(song, partyTitle).subscribe(addedWithSuccess -> {
                             if (addedWithSuccess) {
                                 partiesRepository.incrementUserSongRequestCount(partyTitle, user);
-                                searchView.finishWithSuccess("Song added to the tracklist!");
+                                songSearchView.finishWithSuccess("Song added to the tracklist!");
                             }
                             else {
-                                searchView.showMessage("Something went wrong when adding the song, try again");
+                                songSearchView.showMessage("Something went wrong when adding the song, try again");
                             }
                         });
                     }
                 },
-                (searchView, throwable) -> {
+                (songSearchView, throwable) -> {
                     Log.d(LogTag.LOG_SEARCH, "Something went wrong when informing the user of song addition status");
                 }));
     }
 
     void searchTracks(String query) {
-
         Map<String, Object> searchOptions = new HashMap<>();
-        searchOptions.put(SpotifyService.LIMIT, SpotifyConstants.SEARCH_QUERY_RESPONSE_LIMIT);
+        searchOptions.put(SpotifyService.LIMIT, SpotifyConstants.TRACK_SEARCH_QUERY_RESPONSE_LIMIT);
         searchOptions.put(SpotifyService.OFFSET, 0);
 
         searchTracksRecursively(query, searchOptions)
@@ -126,21 +125,19 @@ public class SearchPresenter extends BasePresenter<SearchView> {
             .concatMap(tracksPager -> Observable.fromArray(TrackMapper.tracksToSongs(tracksPager.tracks.items, user)))
             .compose(this.deliverFirst())
             .subscribe(searchDelivery -> searchDelivery.split(
-                (searchView, songs) -> {
-                    if (songs.isEmpty()) searchView.showMessage("No songs were found for the search query " + query);
-                    searchView.updateSearch(songs, false);
+                (songSearchView, songs) -> {
+                    if (songs.isEmpty()) songSearchView.showMessage("No songs were found for the search query " + query);
+                    songSearchView.updateSearch(songs);
                 },
-                (searchView, throwable) -> {
+                (songSearchView, throwable) -> {
                 }));
     }
 
     private Observable<TracksPager> searchTracksRecursively(String query, Map<String, Object> searchOptions) {
-
         int lastOffset = (int) searchOptions.get(SpotifyService.OFFSET);
-
         return spotifyRepository.searchTracks(query, searchOptions, spotifyCommunicatorService.getWebApi())
             .concatMap(tracksPager -> {
-                if (lastOffset + tracksPager.tracks.limit >= SpotifyConstants.TOTAL_ITEMS_LIMIT) {
+                if (lastOffset + tracksPager.tracks.limit >= SpotifyConstants.DEFAULT_TOTAL_ITEMS_LIMIT) {
                     return Observable.just(tracksPager);
                 }
                 searchOptions.put(SpotifyService.OFFSET, lastOffset + tracksPager.tracks.limit);

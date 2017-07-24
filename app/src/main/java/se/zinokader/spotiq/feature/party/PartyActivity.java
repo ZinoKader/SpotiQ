@@ -54,7 +54,7 @@ public class PartyActivity extends BaseActivity<PartyPresenter> implements Party
 
     private Fragment selectedFragment;
     private SelectedTab selectedTab = SelectedTab.TRACKLIST_TAB;
-    private enum SelectedTab {TRACKLIST_TAB, PARTY_MEMBERS_TAB}
+    private enum SelectedTab { TRACKLIST_TAB, PARTY_MEMBERS_TAB }
 
     private SpotiqPlayerService playerService;
     private boolean isPlayerServiceBound = false;

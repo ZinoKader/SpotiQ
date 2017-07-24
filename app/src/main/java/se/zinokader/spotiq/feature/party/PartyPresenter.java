@@ -30,7 +30,7 @@ public class PartyPresenter extends BasePresenter<PartyView> {
     private String partyTitle;
     private boolean memberTypeMessageShown = false;
 
-    private static final int LOAD_USER_RESTARTABLE_ID = 9814;
+    static final int LOAD_USER_RESTARTABLE_ID = 9814;
 
     @Override
     protected void onCreate(Bundle savedState) {

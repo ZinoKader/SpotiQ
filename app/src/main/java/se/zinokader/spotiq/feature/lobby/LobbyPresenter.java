@@ -41,7 +41,7 @@ public class LobbyPresenter extends BasePresenter<LobbyView> {
     @Inject
     SpotifyRepository spotifyRepository;
 
-    private static final int LOAD_USER_RESTARTABLE_ID = 1918;
+    static final int LOAD_USER_RESTARTABLE_ID = 1918;
 
     @Override
     protected void onCreate(Bundle savedState) {
