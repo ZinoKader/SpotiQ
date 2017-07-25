@@ -8,6 +8,7 @@ import kaaes.spotify.webapi.android.SpotifyService;
 import kaaes.spotify.webapi.android.models.Pager;
 import kaaes.spotify.webapi.android.models.PlaylistSimple;
 import kaaes.spotify.webapi.android.models.PlaylistTrack;
+import kaaes.spotify.webapi.android.models.Track;
 import kaaes.spotify.webapi.android.models.TracksPager;
 import kaaes.spotify.webapi.android.models.UserPrivate;
 import retrofit.Callback;
@@ -21,6 +22,21 @@ public class SpotifyRepository {
             @Override
             public void success(UserPrivate userPrivate, Response response) {
                 subscriber.onNext(userPrivate);
+                subscriber.onComplete();
+            }
+
+            @Override
+            public void failure(RetrofitError error) {
+                subscriber.onError(error);
+            }
+        }));
+    }
+
+    public Observable<List<Track>> getMyTopTracks(SpotifyService spotifyService) {
+        return Observable.create(subscriber -> spotifyService.getTopTracks(new Callback<Pager<Track>>() {
+            @Override
+            public void success(Pager<Track> trackPager, Response response) {
+                subscriber.onNext(trackPager.items);
                 subscriber.onComplete();
             }
 

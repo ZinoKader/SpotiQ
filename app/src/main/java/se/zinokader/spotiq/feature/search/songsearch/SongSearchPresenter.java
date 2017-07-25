@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.util.Log;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -13,6 +14,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import kaaes.spotify.webapi.android.SpotifyService;
 import kaaes.spotify.webapi.android.models.TracksPager;
+import se.zinokader.spotiq.constant.ApplicationConstants;
 import se.zinokader.spotiq.constant.LogTag;
 import se.zinokader.spotiq.constant.SpotifyConstants;
 import se.zinokader.spotiq.feature.base.BasePresenter;
@@ -23,6 +25,7 @@ import se.zinokader.spotiq.repository.PartiesRepository;
 import se.zinokader.spotiq.repository.SpotifyRepository;
 import se.zinokader.spotiq.repository.TracklistRepository;
 import se.zinokader.spotiq.service.SpotifyCommunicatorService;
+import se.zinokader.spotiq.util.comparator.SongSearchSuggestionsBuilder;
 import se.zinokader.spotiq.util.mapper.TrackMapper;
 
 public class SongSearchPresenter extends BasePresenter<SongSearchView> {
@@ -55,17 +58,26 @@ public class SongSearchPresenter extends BasePresenter<SongSearchView> {
 
         songPreviewPlayer = new PreviewPlayer();
 
-        //load user
+        //load user data and user search suggestions
         restartableLatestCache(LOAD_USER_RESTARTABLE_ID,
             () -> spotifyRepository.getMe(spotifyCommunicatorService.getWebApi())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread()),
-            (lobbyView, userPrivate) -> {
+            (songSearchView, userPrivate) -> {
                 user = new User(userPrivate.id, userPrivate.display_name, userPrivate.images);
+                //load personalized search suggestions
+                spotifyRepository.getMyTopTracks(spotifyCommunicatorService.getWebApi())
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(tracks -> {
+                        List<Song> songSuggestions = TrackMapper.tracksToSongs(tracks, user);
+                        SongSearchSuggestionsBuilder suggestionsBuilder =
+                            new SongSearchSuggestionsBuilder(songSuggestions, ApplicationConstants.MAX_SONG_SUGGESTIONS);
+                        songSearchView.updateSearchSuggestions(suggestionsBuilder);
+                    });
             },
-            (lobbyView, throwable) -> {
+            (songSearchView, throwable) -> {
                 Log.d(LogTag.LOG_SEARCH, "Error when getting user Spotify data");
-                throwable.printStackTrace();
             });
 
         if (savedState == null) {

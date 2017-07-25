@@ -151,14 +151,17 @@ public class PlaylistSearchPresenter extends BasePresenter<PlaylistSearchView> {
 
     private Observable<List<PlaylistTrack>> findPlaylistTracksRecursively(PlaylistSimple playlist, Map<String, Object> searchOptions) {
         int lastOffset = (int) searchOptions.get(SpotifyService.OFFSET);
-        return spotifyRepository.getPlaylistTracks(user.getUserId(), playlist.id, searchOptions, spotifyCommunicatorService.getWebApi())
+        return spotifyRepository.getPlaylistTracks(playlist.owner.id, playlist.id, searchOptions, spotifyCommunicatorService.getWebApi())
             .concatMap(playlistPager -> {
-                if (lastOffset + playlistPager.limit >= SpotifyConstants.DEFAULT_TOTAL_ITEMS_LIMIT) {
+                if (lastOffset + playlistPager.limit >= SpotifyConstants.PLAYLIST_TRACKS_TOTAL_ITEMS_LIMIT) {
+                    Log.d(LogTag.LOG_SEARCH, "values " + lastOffset + " " + playlistPager.limit);
                     return Observable.just(playlistPager.items);
                 }
-                searchOptions.put(SpotifyService.OFFSET, lastOffset + playlistPager.limit);
-                return Observable.just(playlistPager.items)
-                    .concatWith(findPlaylistTracksRecursively(playlist, searchOptions));
+                else {
+                    searchOptions.put(SpotifyService.OFFSET, lastOffset + playlistPager.limit);
+                    return Observable.just(playlistPager.items)
+                        .concatWith(findPlaylistTracksRecursively(playlist, searchOptions));
+                }
             })
             .doOnError(throwable -> Log.d(LogTag.LOG_SEARCH, "Something went wrong on search: " + throwable.getMessage()));
     }

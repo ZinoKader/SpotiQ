@@ -15,10 +15,13 @@ public final class SpotifyConstants {
 
     private static final String SCOPE_STREAMING = "streaming";
 
+    private static final String SCOPE_USER_TOP_READ = "user-top-read";
+
     public static final String[] DEFAULT_USER_SCOPES = new String[] {
-            SCOPE_USER_READ_PRIVATE,
-            SCOPE_STREAMING,
-            SCOPE_PLAYLIST_READ_PRIVATE};
+        SCOPE_USER_READ_PRIVATE,
+        SCOPE_STREAMING,
+        SCOPE_PLAYLIST_READ_PRIVATE,
+        SCOPE_USER_TOP_READ };
 
     public static final String PRODUCT_PREMIUM = "premium";
 

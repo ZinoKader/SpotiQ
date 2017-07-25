@@ -262,13 +262,13 @@ public class PartyActivity extends BaseActivity<PartyPresenter> implements Party
                 .listener(new RequestListener<String, GlideDrawable>() {
                     @Override
                     public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
-                        supportStartPostponedEnterTransition();
+                        new Handler().postDelayed(() -> supportStartPostponedEnterTransition(), ApplicationConstants.ACTIVITY_TRANSITION_POSTPONE_DELAY_MS);
                         return false;
                     }
 
                     @Override
                     public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
-                        new Handler().postDelayed(() -> supportStartPostponedEnterTransition(), 1000);
+                        new Handler().postDelayed(() -> supportStartPostponedEnterTransition(), ApplicationConstants.ACTIVITY_TRANSITION_POSTPONE_DELAY_MS);
                         return false;
                     }
                 })

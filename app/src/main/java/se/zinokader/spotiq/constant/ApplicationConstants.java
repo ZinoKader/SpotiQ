@@ -39,6 +39,7 @@ public class ApplicationConstants {
     public static final String SONG_ADDED_BROADCAST_NAME = "spotiq.SONG_ADDED_BROADCAST";
     public static final String SONG_ADDED_EXTRA = "song_added_extra";
     public static final int PARTY_MESSAGE_GRACE_PERIOD_SEC = 5;
+    public static final int ACTIVITY_TRANSITION_POSTPONE_DELAY_MS = 600;
     public static final int PLAY_PAUSE_BUTTON_SYNCHRONIZATION_DELAY_MS = 800;
     public static final int DEFAULT_NEW_ITEM_DELAY_MS = 500;
     public static final int DEFAULT_LIST_ANIMATION_DURATION_MS = 400;
@@ -49,5 +50,6 @@ public class ApplicationConstants {
 
     /* Search-related */
     public static final int DEFAULT_DEBOUNCE_MS = 600;
+    public static final int MAX_SONG_SUGGESTIONS = 50;
 
 }

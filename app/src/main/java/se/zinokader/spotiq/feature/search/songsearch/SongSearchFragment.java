@@ -15,6 +15,7 @@ import android.view.animation.AccelerateDecelerateInterpolator;
 
 import com.github.andrewlord1990.snackbarbuilder.SnackbarBuilder;
 
+import org.cryse.widget.persistentsearch.SearchSuggestionsBuilder;
 import org.cryse.widget.persistentsearch.SimpleSearchListener;
 
 import java.util.List;
@@ -104,14 +105,15 @@ public class SongSearchFragment extends BaseFragment<SongSearchPresenter> implem
         binding.songSearchRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
         binding.searchBar.openSearch();
-        binding.searchBar.setHomeButtonListener(() -> getActivity().finish());
+        binding.searchBar.setHomeButtonListener(() -> {
+            binding.searchBar.hideSuggestions();
+        });
         binding.searchBar.setSearchListener(new SimpleSearchListener() {
             @Override
             public void onSearchTermChanged(String query) {
                 songRecyclerAdapter.clearResults();
                 songRecyclerAdapter.notifyDataSetChanged();
                 if (!query.isEmpty()) {
-                    binding.searchBar.setHomeButtonVisibility(View.VISIBLE);
                     debouncer.debounce(() -> getPresenter().searchTracks(query), ApplicationConstants.DEFAULT_DEBOUNCE_MS);
                 }
             }
@@ -143,6 +145,11 @@ public class SongSearchFragment extends BaseFragment<SongSearchPresenter> implem
     public void updateSearch(List<Song> songs) {
         songRecyclerAdapter.updateSongs(songs);
         songRecyclerAdapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void updateSearchSuggestions(SearchSuggestionsBuilder searchSuggestionsBuilder) {
+        binding.searchBar.setSuggestionBuilder(searchSuggestionsBuilder);
     }
 
 }

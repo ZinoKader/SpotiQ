@@ -63,10 +63,6 @@ public class PlaylistSearchRecyclerAdapter extends RecyclerView.Adapter<Playlist
         this.playlists = playlists;
     }
 
-    public PlaylistSimple getPlaylist(int itemId) {
-        return playlists.get(itemId);
-    }
-
     Observable<PlaylistSimple> observeClicks() {
         return onClickSubject;
     }

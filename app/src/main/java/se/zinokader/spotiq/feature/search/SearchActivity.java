@@ -1,6 +1,7 @@
 package se.zinokader.spotiq.feature.search;
 
 import android.databinding.DataBindingUtil;
+import android.media.AudioManager;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.view.View;
@@ -20,6 +21,8 @@ public class SearchActivity extends BaseActivity<BasePresenter> implements BaseV
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_search);
         Bundle partyInfo = getIntent().getExtras();
+
+        setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
         binding.tabHolder.addTab(binding.tabHolder.newTab().setText("Playlists"));
         binding.tabHolder.addTab(binding.tabHolder.newTab().setText("Search"));
