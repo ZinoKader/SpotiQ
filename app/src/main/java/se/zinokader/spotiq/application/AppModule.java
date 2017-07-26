@@ -1,4 +1,4 @@
-package se.zinokader.spotiq.app;
+package se.zinokader.spotiq.application;
 
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -9,12 +9,12 @@ import dagger.Module;
 import dagger.Provides;
 import kaaes.spotify.webapi.android.SpotifyApi;
 import se.zinokader.spotiq.constant.FirebaseConstants;
-import se.zinokader.spotiq.model.SpotifyAuthenticator;
 import se.zinokader.spotiq.repository.PartiesRepository;
 import se.zinokader.spotiq.repository.SpotifyRepository;
 import se.zinokader.spotiq.repository.TracklistRepository;
 import se.zinokader.spotiq.repository.UserRepository;
-import se.zinokader.spotiq.service.SpotifyCommunicatorService;
+import se.zinokader.spotiq.service.authentication.SpotifyAuthenticationService;
+import se.zinokader.spotiq.service.authentication.SpotifyAuthenticator;
 
 @Module
 class AppModule {
@@ -33,8 +33,8 @@ class AppModule {
 
     @Provides
     @Singleton
-    SpotifyCommunicatorService provideSpotifyCommunicatorService() {
-        return new SpotifyCommunicatorService();
+    SpotifyAuthenticationService provideSpotifyAuthenticationService() {
+        return new SpotifyAuthenticationService();
     }
 
     @Provides

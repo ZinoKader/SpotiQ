@@ -14,12 +14,12 @@ import se.zinokader.spotiq.feature.base.BasePresenter;
 import se.zinokader.spotiq.model.User;
 import se.zinokader.spotiq.repository.PartiesRepository;
 import se.zinokader.spotiq.repository.SpotifyRepository;
-import se.zinokader.spotiq.service.SpotifyCommunicatorService;
+import se.zinokader.spotiq.service.authentication.SpotifyAuthenticationService;
 
 public class PartyPresenter extends BasePresenter<PartyView> {
 
     @Inject
-    SpotifyCommunicatorService spotifyCommunicatorService;
+    SpotifyAuthenticationService spotifyCommunicatorService;
 
     @Inject
     PartiesRepository partiesRepository;

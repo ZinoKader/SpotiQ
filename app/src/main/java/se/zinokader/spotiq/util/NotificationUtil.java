@@ -24,7 +24,7 @@ import se.zinokader.spotiq.R;
 import se.zinokader.spotiq.constant.ApplicationConstants;
 import se.zinokader.spotiq.constant.ServiceConstants;
 import se.zinokader.spotiq.feature.party.PartyActivity;
-import se.zinokader.spotiq.service.SpotiqPlayerService;
+import se.zinokader.spotiq.service.player.SpotiqPlayerService;
 
 public class NotificationUtil {
 

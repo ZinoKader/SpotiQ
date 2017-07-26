@@ -1,4 +1,4 @@
-package se.zinokader.spotiq.app;
+package se.zinokader.spotiq.application;
 
 import javax.inject.Singleton;
 
@@ -11,7 +11,7 @@ import se.zinokader.spotiq.feature.party.partymember.PartyMemberFragment;
 import se.zinokader.spotiq.feature.party.tracklist.TracklistFragment;
 import se.zinokader.spotiq.feature.search.playlistsearch.PlaylistSearchPresenter;
 import se.zinokader.spotiq.feature.search.songsearch.SongSearchPresenter;
-import se.zinokader.spotiq.service.SpotiqPlayerService;
+import se.zinokader.spotiq.service.player.SpotiqPlayerService;
 
 @Singleton
 @Component(modules = { AppModule.class })

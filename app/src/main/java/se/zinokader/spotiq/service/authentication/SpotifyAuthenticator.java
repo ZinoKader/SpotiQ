@@ -1,4 +1,4 @@
-package se.zinokader.spotiq.model;
+package se.zinokader.spotiq.service.authentication;
 
 import org.threeten.bp.LocalDateTime;
 import org.threeten.bp.temporal.ChronoUnit;

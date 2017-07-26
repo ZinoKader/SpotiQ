@@ -13,7 +13,7 @@ import nucleus5.factory.PresenterFactory;
 import nucleus5.presenter.Presenter;
 import nucleus5.view.NucleusAppCompatActivity;
 import se.zinokader.spotiq.constant.ApplicationConstants;
-import se.zinokader.spotiq.service.SpotifyCommunicatorService;
+import se.zinokader.spotiq.service.authentication.SpotifyAuthenticationService;
 import se.zinokader.spotiq.util.di.Injector;
 
 public abstract class BaseActivity<P extends Presenter> extends NucleusAppCompatActivity<P> implements BaseView {
@@ -77,11 +77,11 @@ public abstract class BaseActivity<P extends Presenter> extends NucleusAppCompat
     }
 
     public void startForegroundTokenRenewalService() {
-        startService(new Intent(this, SpotifyCommunicatorService.class));
+        startService(new Intent(this, SpotifyAuthenticationService.class));
     }
 
     public void stopForegroundTokenRenewalService() {
-        stopService(new Intent(this, SpotifyCommunicatorService.class));
+        stopService(new Intent(this, SpotifyAuthenticationService.class));
     }
 
 }

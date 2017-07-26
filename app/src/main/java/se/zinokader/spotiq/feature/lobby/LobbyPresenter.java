@@ -19,7 +19,7 @@ import se.zinokader.spotiq.model.User;
 import se.zinokader.spotiq.model.UserPartyInformation;
 import se.zinokader.spotiq.repository.PartiesRepository;
 import se.zinokader.spotiq.repository.SpotifyRepository;
-import se.zinokader.spotiq.service.SpotifyCommunicatorService;
+import se.zinokader.spotiq.service.authentication.SpotifyAuthenticationService;
 import se.zinokader.spotiq.util.VersionUtil;
 import se.zinokader.spotiq.util.exception.PartyDoesNotExistException;
 import se.zinokader.spotiq.util.exception.PartyExistsException;
@@ -33,7 +33,7 @@ import se.zinokader.spotiq.util.exception.UserNotAddedException;
 public class LobbyPresenter extends BasePresenter<LobbyView> {
 
     @Inject
-    SpotifyCommunicatorService spotifyCommunicatorService;
+    SpotifyAuthenticationService spotifyCommunicatorService;
 
     @Inject
     PartiesRepository partiesRepository;

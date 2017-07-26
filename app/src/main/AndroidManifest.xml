@@ -11,7 +11,7 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
-        android:name=".app.SpotiqApplication"
+        android:name=".application.SpotiqApplication"
         android:allowBackup="true"
         android:fullBackupContent="@xml/backup_config"
         android:icon="@mipmap/ic_launcher"
@@ -19,12 +19,12 @@
         android:roundIcon="@mipmap/ic_launcher"
         android:theme="@style/AppTheme">
 
-        <service android:name=".service.SpotiqPlayerService"
+        <service android:name=".service.player.SpotiqPlayerService"
             android:enabled="true"
             android:stopWithTask="false"
             android:exported="false" />
 
-        <service android:name=".service.SpotifyCommunicatorService"/>
+        <service android:name=".service.authentication.SpotifyAuthenticationService"/>
 
         <activity android:name=".feature.login.StartupActivity"
             android:theme="@style/AppThemeNoActionBar">

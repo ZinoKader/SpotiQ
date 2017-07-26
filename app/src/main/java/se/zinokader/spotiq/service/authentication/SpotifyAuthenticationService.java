@@ -1,4 +1,4 @@
-package se.zinokader.spotiq.service;
+package se.zinokader.spotiq.service.authentication;
 
 import android.app.Service;
 import android.content.Intent;
@@ -19,10 +19,9 @@ import kaaes.spotify.webapi.android.SpotifyService;
 import se.zinokader.spotiq.constant.LogTag;
 import se.zinokader.spotiq.constant.ServiceConstants;
 import se.zinokader.spotiq.feature.login.SpotifyAuthenticationActivity;
-import se.zinokader.spotiq.model.SpotifyAuthenticator;
 
 @Singleton
-public class SpotifyCommunicatorService extends Service {
+public class SpotifyAuthenticationService extends Service {
 
     private static final SpotifyAuthenticator spotifyAuthenticator = new SpotifyAuthenticator();
     private static final SpotifyApi spotifyWebApi = new SpotifyApi();
@@ -50,7 +49,7 @@ public class SpotifyCommunicatorService extends Service {
      * a new activity, which is annoying when the user is navigating other apps while using SpotiQ.
      * To resolve this, we are registering an observable interval that will mimic a foreground service.
      * This job should be run on resume from all presenters which care about token renewal, and paused
-     * on pause. The job will be run on immidiately on call, and then every 5 minutes thereafter.
+     * on pause. The job will be run immidiately on call, and then every 5 minutes thereafter.
      */
 
     private void startJob() {

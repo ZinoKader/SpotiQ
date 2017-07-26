@@ -37,7 +37,7 @@ import se.zinokader.spotiq.feature.base.BaseActivity;
 import se.zinokader.spotiq.feature.party.partymember.PartyMemberFragment;
 import se.zinokader.spotiq.feature.party.tracklist.TracklistFragment;
 import se.zinokader.spotiq.feature.search.SearchActivity;
-import se.zinokader.spotiq.service.SpotiqPlayerService;
+import se.zinokader.spotiq.service.player.SpotiqPlayerService;
 import se.zinokader.spotiq.util.ShortcutUtil;
 import se.zinokader.spotiq.util.listener.FabListener;
 

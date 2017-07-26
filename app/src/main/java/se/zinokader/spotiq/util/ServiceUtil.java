@@ -3,7 +3,7 @@ package se.zinokader.spotiq.util;
 import android.app.ActivityManager;
 import android.content.Context;
 
-import se.zinokader.spotiq.service.SpotiqPlayerService;
+import se.zinokader.spotiq.service.player.SpotiqPlayerService;
 
 public class ServiceUtil {
 

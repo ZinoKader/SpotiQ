@@ -24,13 +24,13 @@ import se.zinokader.spotiq.model.User;
 import se.zinokader.spotiq.repository.PartiesRepository;
 import se.zinokader.spotiq.repository.SpotifyRepository;
 import se.zinokader.spotiq.repository.TracklistRepository;
-import se.zinokader.spotiq.service.SpotifyCommunicatorService;
+import se.zinokader.spotiq.service.authentication.SpotifyAuthenticationService;
 import se.zinokader.spotiq.util.mapper.TrackMapper;
 
 public class PlaylistSearchPresenter extends BasePresenter<PlaylistSearchView> {
 
     @Inject
-    SpotifyCommunicatorService spotifyCommunicatorService;
+    SpotifyAuthenticationService spotifyCommunicatorService;
 
     @Inject
     PartiesRepository partiesRepository;

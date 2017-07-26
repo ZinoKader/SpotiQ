@@ -113,3 +113,6 @@
 #For Crashlytics
 -keep class com.crashlytics.** { *; }
 -dontwarn com.crashlytics.**
+
+#For Nucleus
+-dontwarn nucleus5.view.NucleusActionBarActivity

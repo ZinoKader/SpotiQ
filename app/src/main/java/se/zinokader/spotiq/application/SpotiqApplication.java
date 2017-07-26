@@ -1,4 +1,4 @@
-package se.zinokader.spotiq.app;
+package se.zinokader.spotiq.application;
 
 import android.app.Application;
 import android.os.Build;

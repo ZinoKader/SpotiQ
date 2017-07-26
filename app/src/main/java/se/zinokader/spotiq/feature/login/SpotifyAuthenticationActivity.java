@@ -21,7 +21,7 @@ import se.zinokader.spotiq.R;
 import se.zinokader.spotiq.constant.ApplicationConstants;
 import se.zinokader.spotiq.constant.LogTag;
 import se.zinokader.spotiq.constant.SpotifyConstants;
-import se.zinokader.spotiq.service.SpotifyCommunicatorService;
+import se.zinokader.spotiq.service.authentication.SpotifyAuthenticationService;
 import se.zinokader.spotiq.util.di.Injector;
 
 /**
@@ -31,7 +31,7 @@ import se.zinokader.spotiq.util.di.Injector;
 public class SpotifyAuthenticationActivity extends AppCompatActivity implements ConnectionStateCallback {
 
     @Inject
-    SpotifyCommunicatorService spotifyCommunicatorService;
+    SpotifyAuthenticationService spotifyCommunicatorService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
