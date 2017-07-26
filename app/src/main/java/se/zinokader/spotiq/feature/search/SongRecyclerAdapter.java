@@ -85,15 +85,11 @@ public class SongRecyclerAdapter extends RecyclerView.Adapter<SongRecyclerAdapte
     }
 
     public void updateSongs(List<Song> songs) {
-        this.songs = songs;
+        this.songs.addAll(songs);
     }
 
     public void clearResults() {
         songs.clear();
-    }
-
-    public Song getSong(int itemId) {
-        return songs.get(itemId);
     }
 
     public Observable<Song> observeClicks() {

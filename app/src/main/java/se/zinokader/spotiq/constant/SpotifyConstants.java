@@ -32,7 +32,7 @@ public final class SpotifyConstants {
     /* Spotify Web API-related */
     public static final int TRACK_SEARCH_QUERY_RESPONSE_LIMIT = 50;
     public static final int PLAYLIST_TRACK_SEARCH_QUERY_RESPONSE_LIMIT = 100;
-    public static final int DEFAULT_TOTAL_ITEMS_LIMIT = 100;
-    public static final int PLAYLIST_TRACKS_TOTAL_ITEMS_LIMIT = 10000;
+    public static final int TRACK_SEARCH_TOTAL_ITEMS_LIMIT = 100;
+    public static final int PLAYLIST_TRACK_SEARCH_TOTAL_ITEMS_LIMIT = 10000;
 
 }

@@ -4,7 +4,6 @@ import android.os.Bundle;
 import android.util.Log;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -13,6 +12,7 @@ import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import kaaes.spotify.webapi.android.SpotifyService;
+import kaaes.spotify.webapi.android.models.Pager;
 import kaaes.spotify.webapi.android.models.PlaylistSimple;
 import kaaes.spotify.webapi.android.models.PlaylistTrack;
 import se.zinokader.spotiq.constant.LogTag;
@@ -138,8 +138,8 @@ public class PlaylistSearchPresenter extends BasePresenter<PlaylistSearchView> {
         findPlaylistTracksRecursively(playlist, searchOptions)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .concatMap(tracksPager -> Observable.fromArray(TrackMapper.playlistTracksToSongs(tracksPager, user)))
-            .compose(this.deliverFirst())
+            .concatMap(playlistPager -> Observable.fromArray(TrackMapper.playlistTracksToSongs(playlistPager.items, user)))
+            .compose(this.deliverReplay())
             .subscribe(searchDelivery -> searchDelivery.split(
                 (playlistSearchView, songs) -> {
                     if (songs.isEmpty()) playlistSearchView.showMessage("Playlist is empty");
@@ -149,18 +149,17 @@ public class PlaylistSearchPresenter extends BasePresenter<PlaylistSearchView> {
                 }));
     }
 
-    private Observable<List<PlaylistTrack>> findPlaylistTracksRecursively(PlaylistSimple playlist, Map<String, Object> searchOptions) {
+    private Observable<Pager<PlaylistTrack>> findPlaylistTracksRecursively(PlaylistSimple playlist, Map<String, Object> searchOptions) {
         int lastOffset = (int) searchOptions.get(SpotifyService.OFFSET);
         return spotifyRepository.getPlaylistTracks(playlist.owner.id, playlist.id, searchOptions, spotifyCommunicatorService.getWebApi())
             .concatMap(playlistPager -> {
-                if (lastOffset + playlistPager.limit >= SpotifyConstants.PLAYLIST_TRACKS_TOTAL_ITEMS_LIMIT) {
-                    Log.d(LogTag.LOG_SEARCH, "values " + lastOffset + " " + playlistPager.limit);
-                    return Observable.just(playlistPager.items);
+                if (lastOffset + playlistPager.limit >= SpotifyConstants.PLAYLIST_TRACK_SEARCH_TOTAL_ITEMS_LIMIT
+                    || lastOffset + playlistPager.limit >= playlistPager.total) {
+                    return Observable.just(playlistPager);
                 }
                 else {
                     searchOptions.put(SpotifyService.OFFSET, lastOffset + playlistPager.limit);
-                    return Observable.just(playlistPager.items)
-                        .concatWith(findPlaylistTracksRecursively(playlist, searchOptions));
+                    return Observable.just(playlistPager).concatWith(findPlaylistTracksRecursively(playlist, searchOptions));
                 }
             })
             .doOnError(throwable -> Log.d(LogTag.LOG_SEARCH, "Something went wrong on search: " + throwable.getMessage()));

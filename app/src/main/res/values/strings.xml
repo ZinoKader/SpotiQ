@@ -42,5 +42,7 @@
     <string name="playback_permission_lost_notice">Your Spotify account is being used from somewhere else</string>
     <string name="lost_permission_message">Your Spotify account is being used from another device</string>
     <string name="lost_connection_message">No connection, SpotiQ playback paused</string>
+    <string name="song_search_spotify_library_label">Search for music in the Spotify library</string>
+    <string name="song_search_personal_playlists_label">Search for music in your personal playlists</string>
 
 </resources>

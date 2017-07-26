@@ -15,7 +15,6 @@ import android.view.animation.AccelerateDecelerateInterpolator;
 
 import com.github.andrewlord1990.snackbarbuilder.SnackbarBuilder;
 
-import org.cryse.widget.persistentsearch.SearchSuggestionsBuilder;
 import org.cryse.widget.persistentsearch.SimpleSearchListener;
 
 import java.util.List;
@@ -148,7 +147,8 @@ public class SongSearchFragment extends BaseFragment<SongSearchPresenter> implem
     }
 
     @Override
-    public void updateSearchSuggestions(SearchSuggestionsBuilder searchSuggestionsBuilder) {
+    public void updateSearchSuggestions(SongSearchSuggestionsBuilder searchSuggestionsBuilder) {
+        searchSuggestionsBuilder.buildSuggestionItems(getContext());
         binding.searchBar.setSuggestionBuilder(searchSuggestionsBuilder);
     }
 

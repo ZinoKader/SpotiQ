@@ -25,7 +25,6 @@ import se.zinokader.spotiq.repository.PartiesRepository;
 import se.zinokader.spotiq.repository.SpotifyRepository;
 import se.zinokader.spotiq.repository.TracklistRepository;
 import se.zinokader.spotiq.service.authentication.SpotifyAuthenticationService;
-import se.zinokader.spotiq.util.comparator.SongSearchSuggestionsBuilder;
 import se.zinokader.spotiq.util.mapper.TrackMapper;
 
 public class SongSearchPresenter extends BasePresenter<SongSearchView> {
@@ -135,7 +134,7 @@ public class SongSearchPresenter extends BasePresenter<SongSearchView> {
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .concatMap(tracksPager -> Observable.fromArray(TrackMapper.tracksToSongs(tracksPager.tracks.items, user)))
-            .compose(this.deliverFirst())
+            .compose(this.deliverReplay())
             .subscribe(searchDelivery -> searchDelivery.split(
                 (songSearchView, songs) -> {
                     if (songs.isEmpty()) songSearchView.showMessage("No songs were found for the search query " + query);
@@ -149,12 +148,14 @@ public class SongSearchPresenter extends BasePresenter<SongSearchView> {
         int lastOffset = (int) searchOptions.get(SpotifyService.OFFSET);
         return spotifyRepository.searchTracks(query, searchOptions, spotifyCommunicatorService.getWebApi())
             .concatMap(tracksPager -> {
-                if (lastOffset + tracksPager.tracks.limit >= SpotifyConstants.DEFAULT_TOTAL_ITEMS_LIMIT) {
+                if (lastOffset + tracksPager.tracks.limit >= SpotifyConstants.TRACK_SEARCH_TOTAL_ITEMS_LIMIT
+                    || lastOffset + tracksPager.tracks.limit >= tracksPager.tracks.total) {
                     return Observable.just(tracksPager);
                 }
-                searchOptions.put(SpotifyService.OFFSET, lastOffset + tracksPager.tracks.limit);
-                return Observable.just(tracksPager)
-                    .concatWith(searchTracksRecursively(query, searchOptions));
+                else {
+                    searchOptions.put(SpotifyService.OFFSET, lastOffset + tracksPager.tracks.limit);
+                    return Observable.just(tracksPager).concatWith(searchTracksRecursively(query, searchOptions));
+                }
             })
             .doOnError(throwable -> Log.d(LogTag.LOG_SEARCH, "Something went wrong on search: " + throwable.getMessage()));
     }

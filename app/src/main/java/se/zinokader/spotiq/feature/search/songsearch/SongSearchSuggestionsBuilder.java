@@ -1,4 +1,11 @@
-package se.zinokader.spotiq.util.comparator;
+package se.zinokader.spotiq.feature.search.songsearch;
+
+import android.content.Context;
+
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.drawable.GlideDrawable;
+import com.bumptech.glide.request.animation.GlideAnimation;
+import com.bumptech.glide.request.target.SimpleTarget;
 
 import org.cryse.widget.persistentsearch.SearchItem;
 import org.cryse.widget.persistentsearch.SearchSuggestionsBuilder;
@@ -11,17 +18,26 @@ import se.zinokader.spotiq.model.Song;
 
 public class SongSearchSuggestionsBuilder implements SearchSuggestionsBuilder {
 
-    private List<SearchItem> songSearchItems = new ArrayList<>();
+    private List<Song> songSuggestions;
+    private List<SearchItem> songSearchItems;
     private int maxSuggestionsCount;
 
-    public SongSearchSuggestionsBuilder(List<Song> songSuggestions, int maxSuggestionsCount) {
-        buildSearchItems(songSuggestions);
+    SongSearchSuggestionsBuilder(List<Song> songSuggestions, int maxSuggestionsCount) {
+        this.songSuggestions = songSuggestions;
         this.maxSuggestionsCount = maxSuggestionsCount;
+        songSearchItems = new ArrayList<>();
     }
 
-    private void buildSearchItems(List<Song> songSuggestions) {
+    void buildSuggestionItems(Context context) {
         for (Song song : songSuggestions) {
-            songSearchItems.add(new SearchItem(song.getName(), song.getName(), SearchItem.TYPE_SEARCH_ITEM_SUGGESTION));
+            Glide.with(context)
+                .load(song.getAlbumArtUrl())
+                .into(new SimpleTarget<GlideDrawable>() {
+                    @Override
+                    public void onResourceReady(GlideDrawable albumDrawable, GlideAnimation<? super GlideDrawable> glideAnimation) {
+                        songSearchItems.add(new SearchItem(song.getName(), song.getName(), SearchItem.TYPE_SEARCH_ITEM_SUGGESTION, albumDrawable));
+                    }
+                });
         }
     }
 

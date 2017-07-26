@@ -98,8 +98,10 @@ public class PlaylistSearchFragment extends BaseFragment<PlaylistSearchPresenter
         playlistSearchRecyclerAdapter.observeClicks()
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(playlist -> {
+                binding.searchTypeLabel.setVisibility(View.GONE);
                 binding.playlistBar.setVisibility(View.VISIBLE);
                 binding.playlistName.setText(playlist.name);
+
                 binding.contentRecyclerView.setAdapter(animatedSongAdapter);
                 songRecylerAdapter.clearResults();
                 getPresenter().loadPlaylistSongs(playlist);
@@ -108,6 +110,7 @@ public class PlaylistSearchFragment extends BaseFragment<PlaylistSearchPresenter
         binding.playlistBackButton.setOnClickListener(view -> {
             binding.contentRecyclerView.setAdapter(animatedPlaylistAdapter);
             binding.playlistBar.setVisibility(View.GONE);
+            binding.searchTypeLabel.setVisibility(View.VISIBLE);
             getPresenter().request(PlaylistSearchPresenter.LOAD_PLAYLISTS_RESTARTABLE_ID);
         });
 

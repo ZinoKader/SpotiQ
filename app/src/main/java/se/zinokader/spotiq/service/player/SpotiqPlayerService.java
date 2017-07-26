@@ -120,11 +120,12 @@ public class SpotiqPlayerService extends Service implements ConnectionStateCallb
     @Override
     public void onDestroy() {
         Log.d(LogTag.LOG_PLAYER_SERVICE, "SpotiQ Player service destroyed");
+        unregisterReceiver(connectionReceiver);
         mediaSessionHandler.releaseSessions();
         disposableActions.clear();
         if (spotifyPlayer != null) {
             try {
-                Spotify.awaitDestroyPlayer(this, 5, TimeUnit.SECONDS);
+                Spotify.awaitDestroyPlayer(SpotiqPlayerService.this, 5, TimeUnit.SECONDS);
             }
             catch (InterruptedException e) {
                 e.printStackTrace();
@@ -250,13 +251,13 @@ public class SpotiqPlayerService extends Service implements ConnectionStateCallb
     private Single<Boolean> initPlayer() {
         return Single.create(subscriber -> {
             if (playerConfig == null) {
-                playerConfig = new Config(this,
+                playerConfig = new Config(SpotiqPlayerService.this,
                     spotifyCommunicatorService.getAuthenticator().getAccessToken(),
                     SpotifyConstants.CLIENT_ID);
                 playerConfig.useCache(false);
             }
 
-            spotifyPlayer = Spotify.getPlayer(playerConfig, this, new SpotifyPlayer.InitializationObserver() {
+            spotifyPlayer = Spotify.getPlayer(playerConfig, SpotiqPlayerService.this, new SpotifyPlayer.InitializationObserver() {
                 @Override
                 public void onInitialized(SpotifyPlayer player) {
                     spotifyPlayer.addConnectionStateCallback(SpotiqPlayerService.this);

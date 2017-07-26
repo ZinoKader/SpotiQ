@@ -10,9 +10,10 @@ import se.zinokader.spotiq.constant.LogTag;
 
 public class PreviewPlayer extends MediaPlayer implements MediaPlayer.OnPreparedListener {
 
-    private MediaPlayer mediaPlayer = new MediaPlayer();
+    private MediaPlayer mediaPlayer;
 
     public PreviewPlayer() {
+        mediaPlayer = new MediaPlayer();
         AudioAttributes audioAttributes = new AudioAttributes.Builder()
             .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
             .build();
@@ -48,6 +49,7 @@ public class PreviewPlayer extends MediaPlayer implements MediaPlayer.OnPrepared
     }
 
     public void release() {
+        mediaPlayer.stop();
         mediaPlayer.release();
     }
 
