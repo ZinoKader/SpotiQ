@@ -1,7 +1,6 @@
 package se.zinokader.spotiq.service.player;
 
 import android.app.Notification;
-import android.app.NotificationManager;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -52,7 +51,6 @@ import se.zinokader.spotiq.service.authentication.SpotifyAuthenticationService;
 import se.zinokader.spotiq.util.NetworkUtil;
 import se.zinokader.spotiq.util.NotificationUtil;
 import se.zinokader.spotiq.util.PreferenceUtil;
-import se.zinokader.spotiq.util.ServiceUtil;
 import se.zinokader.spotiq.util.di.Injector;
 import se.zinokader.spotiq.util.exception.EmptyTracklistException;
 
@@ -72,10 +70,10 @@ public class SpotiqHostService extends Service implements ConnectionStateCallbac
     private boolean isTracklistEmpty = true;
     private String partyTitle;
 
+    private boolean inForeground;
     private boolean changingConfiguration;
 
     private MediaSessionHandler mediaSessionHandler;
-    private NotificationManager notificationManager;
     private static final int ONGOING_NOTIFICATION_ID = 821;
 
     private IBinder binder = new PlayerServiceBinder();
@@ -99,6 +97,7 @@ public class SpotiqHostService extends Service implements ConnectionStateCallbac
     public IBinder onBind(Intent intent) {
         stopForeground(true);
         changingConfiguration = false;
+        inForeground = false;
         sendPlayingStatusBroadcast(isPlaying());
         return binder;
     }
@@ -107,6 +106,7 @@ public class SpotiqHostService extends Service implements ConnectionStateCallbac
     public void onRebind(Intent intent) {
         stopForeground(true);
         changingConfiguration = false;
+        inForeground = false;
         sendPlayingStatusBroadcast(isPlaying());
         super.onRebind(intent);
     }
@@ -115,6 +115,7 @@ public class SpotiqHostService extends Service implements ConnectionStateCallbac
     public boolean onUnbind(Intent intent) {
         if (!changingConfiguration) {
             Log.d(LogTag.LOG_PLAYER_SERVICE, "Starting player service in foreground");
+            inForeground = true;
             updatePlayerNotification();
         }
         return true;
@@ -124,13 +125,13 @@ public class SpotiqHostService extends Service implements ConnectionStateCallbac
     public void onCreate() {
         ((Injector) getApplicationContext()).inject(this);
         mediaSessionHandler = new MediaSessionHandler(this);
-        notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         Log.d(LogTag.LOG_PLAYER_SERVICE, "SpotiQ Player service created");
     }
 
     @Override
     public void onDestroy() {
         Log.d(LogTag.LOG_PLAYER_SERVICE, "SpotiQ Player service destroyed");
+        stopForeground(true);
         mediaSessionHandler.releaseSessions();
         subscriptions.clear();
         if (connectionReceiver != null) {
@@ -198,7 +199,7 @@ public class SpotiqHostService extends Service implements ConnectionStateCallbac
     }
 
     private void updatePlayerNotification() {
-        if (!ServiceUtil.isPlayerServiceInForeground(this)) return;
+        if (!inForeground) return;
         String title;
         String description;
         Bitmap largeIcon = BitmapFactory.decodeResource(getResources(), R.drawable.image_album_placeholder);
@@ -218,8 +219,7 @@ public class SpotiqHostService extends Service implements ConnectionStateCallbac
                             mediaSessionHandler.setMetaData(NotificationUtil.buildMediaMetadata(currentTrack, albumArt));
                             playerNotification = NotificationUtil.buildPlayerNotification(SpotiqHostService.this,
                                 mediaSessionHandler.getMediaSession(), title, description, albumArt);
-                        }
-                        else {
+                        } else {
                             mediaSessionHandler.setMetaData(NotificationUtil.buildMediaMetadataCompat(currentTrack, albumArt));
                             playerNotification = NotificationUtil.buildPlayerNotificationCompat(SpotiqHostService.this,
                                 mediaSessionHandler.getMediaSessionCompat(), title, description, albumArt);
@@ -227,16 +227,14 @@ public class SpotiqHostService extends Service implements ConnectionStateCallbac
                         startForeground(ONGOING_NOTIFICATION_ID, playerNotification);
                     }
                 });
-        }
-        else {
+        } else {
             title = "Hosting party " + partyTitle;
             description = "Player is idle";
             Notification playerNotification;
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 playerNotification = NotificationUtil.buildPlayerNotification(SpotiqHostService.this,
                     mediaSessionHandler.getMediaSession(), title, description, largeIcon);
-            }
-            else {
+            } else {
                 playerNotification = NotificationUtil.buildPlayerNotificationCompat(SpotiqHostService.this,
                     mediaSessionHandler.getMediaSessionCompat(), title, description, largeIcon);
             }
@@ -252,12 +250,11 @@ public class SpotiqHostService extends Service implements ConnectionStateCallbac
 
     private Single<Boolean> initPlayer() {
         return Single.create(subscriber -> {
-            if (playerConfig == null) {
-                playerConfig = new Config(SpotiqHostService.this,
-                    spotifyCommunicatorService.getAuthenticator().getAccessToken(),
-                    SpotifyConstants.CLIENT_ID);
-                playerConfig.useCache(false);
-            }
+
+            playerConfig = new Config(SpotiqHostService.this,
+                spotifyCommunicatorService.getAuthenticator().getAccessToken(),
+                SpotifyConstants.CLIENT_ID);
+            playerConfig.useCache(false);
 
             spotifyPlayer = Spotify.getPlayer(playerConfig, SpotiqHostService.this, new SpotifyPlayer.InitializationObserver() {
                 @Override
@@ -399,6 +396,12 @@ public class SpotiqHostService extends Service implements ConnectionStateCallbac
             });
     }
 
+    private void handlePlaybackError() {
+        sendPlayingStatusBroadcast(false);
+        showPlaybackFailedToast();
+        handlePlaybackEnd();
+    }
+
     private void handleLostConnection() {
         if (isPlaying()) pause();
         sendPlayingStatusBroadcast(false);
@@ -445,9 +448,20 @@ public class SpotiqHostService extends Service implements ConnectionStateCallbac
         });
     }
 
+    private void showPlaybackFailedToast() {
+        mainThreadHandler.post(() -> {
+            new ToastBuilder(this)
+                .customView(LayoutInflater.from(this).inflate(getResources().getLayout(R.layout.toast_playback_failed_container), null))
+                .duration(ApplicationConstants.LONG_TOAST_DURATION_SEC)
+                .build()
+                .show();
+        });
+    }
+
     @Override
     public void onPlaybackError(Error error) {
         Log.d(LogTag.LOG_PLAYER_SERVICE, "Spotify playback error: " + error.toString());
+        handlePlaybackError();
     }
 
     @Override
@@ -462,10 +476,12 @@ public class SpotiqHostService extends Service implements ConnectionStateCallbac
     @Override
     public void onLoginFailed(Error error) {
         Log.d(LogTag.LOG_PLAYER_SERVICE, "Spotify login failed: " + error.toString());
+        /*
         switch (error) {
             case kSpErrorNeedsPremium:
                 break;
         }
+        */
     }
 
     @Override

@@ -42,9 +42,9 @@ class MediaSessionHandler {
         mediaSessionCompat.setPlaybackState(playbackStateCompatPaused);
     }
 
-    void setSessionActive(boolean isActive) {
-        mediaSession.setActive(isActive);
-        mediaSessionCompat.setActive(isActive);
+    void setSessionActive() {
+        mediaSession.setActive(true);
+        mediaSessionCompat.setActive(true);
     }
 
     void setMetaData(MediaMetadata mediaMetadata) {
