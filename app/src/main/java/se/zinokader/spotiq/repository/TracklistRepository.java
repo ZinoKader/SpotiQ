@@ -33,6 +33,7 @@ public class TracklistRepository {
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     for (DataSnapshot songSnapshot : dataSnapshot.getChildren()) {
                         Song dbSong = songSnapshot.getValue(Song.class);
+                        if (dbSong == null) continue;
                         if (song.getSongSpotifyId().equals(dbSong.getSongSpotifyId())) {
                             subscriber.onNext(true);
                             subscriber.onComplete();
@@ -58,9 +59,7 @@ public class TracklistRepository {
             .child(FirebaseConstants.CHILD_TRACKLIST)
             .push() //push is timestamp-based, items are chronologically ordered
             .setValue(song)
-            .addOnCompleteListener(task -> {
-                subscriber.onSuccess(task.isSuccessful());
-            })
+            .addOnCompleteListener(task -> subscriber.onSuccess(task.isSuccessful()))
             .addOnFailureListener(subscriber::onError));
     }
 

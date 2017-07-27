@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import se.zinokader.spotiq.constant.ApplicationConstants;
 import se.zinokader.spotiq.model.Song;
 
 public class SongSearchSuggestionsBuilder implements SearchSuggestionsBuilder {
@@ -32,6 +33,8 @@ public class SongSearchSuggestionsBuilder implements SearchSuggestionsBuilder {
         for (Song song : songSuggestions) {
             Glide.with(context)
                 .load(song.getAlbumArtUrl())
+                .fitCenter()
+                .override(ApplicationConstants.DEFAULT_ALBUM_ART_OVERRIDE_DIMENSION, ApplicationConstants.DEFAULT_ALBUM_ART_OVERRIDE_DIMENSION)
                 .into(new SimpleTarget<GlideDrawable>() {
                     @Override
                     public void onResourceReady(GlideDrawable albumDrawable, GlideAnimation<? super GlideDrawable> glideAnimation) {

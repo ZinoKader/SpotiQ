@@ -88,14 +88,6 @@ public class PartiesRepository {
             });
     }
 
-    public void updatePartyVersion(String partyTitle, int versionCode) {
-        databaseReference
-            .child(partyTitle)
-            .child(FirebaseConstants.CHILD_PARTYINFO)
-            .child(FirebaseConstants.CHILD_PARTYINFO_VERSION_CODE)
-            .setValue(versionCode);
-    }
-
     public Observable<ChildEvent> listenToPartyMemberChanges(String partyTitle) {
         return Observable.create(subscriber -> databaseReference
             .child(partyTitle)

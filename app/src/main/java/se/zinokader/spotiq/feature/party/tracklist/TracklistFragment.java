@@ -9,6 +9,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,6 +27,7 @@ import io.reactivex.schedulers.Schedulers;
 import jp.wasabeef.recyclerview.animators.FadeInDownAnimator;
 import se.zinokader.spotiq.R;
 import se.zinokader.spotiq.constant.ApplicationConstants;
+import se.zinokader.spotiq.constant.LogTag;
 import se.zinokader.spotiq.databinding.FragmentTracklistBinding;
 import se.zinokader.spotiq.model.Song;
 import se.zinokader.spotiq.repository.TracklistRepository;
@@ -45,7 +47,7 @@ public class TracklistFragment extends Fragment {
 
     private FabListener fabListener;
 
-    private CompositeDisposable disposableActions = new CompositeDisposable();
+    private CompositeDisposable subscriptions = new CompositeDisposable();
 
     private RvJoiner recyclerViewJoiner = new RvJoiner(true);
     private FadeInDownAnimator itemAnimator = new FadeInDownAnimator();
@@ -75,7 +77,7 @@ public class TracklistFragment extends Fragment {
         itemAnimator.setRemoveDuration(ApplicationConstants.DEFAULT_ITEM_REMOVE_DURATION_MS);
         itemAnimator.setMoveDuration(ApplicationConstants.DEFAULT_ITEM_MOVE_DURATION_MS);
 
-        disposableActions.add(tracklistRepository.listenToTracklistChanges(partyTitle)
+        subscriptions.add(tracklistRepository.listenToTracklistChanges(partyTitle)
             .delay(ApplicationConstants.DEFAULT_NEW_ITEM_DELAY_MS, TimeUnit.MILLISECONDS)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
@@ -93,7 +95,7 @@ public class TracklistFragment extends Fragment {
 
     @Override
     public void onDestroy() {
-        disposableActions.clear();
+        subscriptions.clear();
         super.onDestroy();
     }
 
@@ -143,7 +145,7 @@ public class TracklistFragment extends Fragment {
         recyclerViewJoiner.add(emptyTracklistLayout, 0);
         recyclerViewJoiner.add(nowPlayingJoinable);
         recyclerViewJoiner.add(upNextJoinable);
-        
+
         binding.tracklistRecyclerView.setItemAnimator(itemAnimator);
         binding.tracklistRecyclerView.setAdapter(recyclerViewJoiner.getAdapter());
 
@@ -182,6 +184,10 @@ public class TracklistFragment extends Fragment {
 
     private void removeSong(Song song) {
         int songPosition = getSongPosition(song);
+        if (songPosition == -1) {
+            Log.d(LogTag.LOG_PARTY, "Song could not be removed because it did not exist in the tracklist");
+            return;
+        }
         songs.remove(songPosition);
 
         if (songs.size() == 1 && upNextHeaderAttached) {

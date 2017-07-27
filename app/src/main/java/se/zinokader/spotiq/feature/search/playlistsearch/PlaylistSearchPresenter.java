@@ -138,6 +138,14 @@ public class PlaylistSearchPresenter extends BasePresenter<PlaylistSearchView> {
         findPlaylistTracksRecursively(playlist, searchOptions)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
+            .map(playlistPager -> {
+                for (PlaylistTrack track : playlistPager.items) {
+                    if (track.is_local) {
+                        playlistPager.items.remove(track);
+                    }
+                }
+                return playlistPager;
+            })
             .concatMap(playlistPager -> Observable.fromArray(TrackMapper.playlistTracksToSongs(playlistPager.items, user)))
             .compose(this.deliverReplay())
             .subscribe(searchDelivery -> searchDelivery.split(

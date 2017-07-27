@@ -81,5 +81,4 @@ public class Song {
             ? ApplicationConstants.ALBUM_ART_PLACEHOLDER_URL
             : album.images.get(0).url;
     }
-
 }

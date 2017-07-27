@@ -20,6 +20,8 @@
 
     <!-- Search -->
     <string name="search_hint">Search for music</string>
+    <string name="song_search_spotify_library_label">Search for music in the Spotify library</string>
+    <string name="song_search_personal_playlists_label">Search for music in your personal playlists</string>
 
     <!-- Transition names -->
     <string name="profile_image_transition">profileImageTransition</string>
@@ -41,8 +43,7 @@
     <string name="media_notification_channel_description">View and control the currently playing track</string>
     <string name="playback_permission_lost_notice">Your Spotify account is being used from somewhere else</string>
     <string name="lost_permission_message">Your Spotify account is being used from another device</string>
-    <string name="lost_connection_message">No connection, SpotiQ playback paused</string>
-    <string name="song_search_spotify_library_label">Search for music in the Spotify library</string>
-    <string name="song_search_personal_playlists_label">Search for music in your personal playlists</string>
+    <string name="lost_connection_message">No connection - SpotiQ playback paused</string>
+    <string name="playback_failed_message">Something went wrong on playback - track removed</string>
 
 </resources>

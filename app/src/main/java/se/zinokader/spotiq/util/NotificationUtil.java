@@ -24,7 +24,7 @@ import se.zinokader.spotiq.R;
 import se.zinokader.spotiq.constant.ApplicationConstants;
 import se.zinokader.spotiq.constant.ServiceConstants;
 import se.zinokader.spotiq.feature.party.PartyActivity;
-import se.zinokader.spotiq.service.player.SpotiqPlayerService;
+import se.zinokader.spotiq.service.player.SpotiqHostService;
 
 public class NotificationUtil {
 
@@ -56,19 +56,15 @@ public class NotificationUtil {
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     public static Notification buildPlayerNotification(Context context, MediaSession mediaSession,
-                                                       boolean serviceIsForeground, boolean ongoing,
                                                        String title, String description, Bitmap largeIcon) {
 
         PendingIntent openPartyIntent = PendingIntent.getActivity(context, 0,
             new Intent(context, PartyActivity.class), PendingIntent.FLAG_UPDATE_CURRENT);
 
-        Intent playPauseActionIntent = new Intent(context, SpotiqPlayerService.class);
+        Intent playPauseActionIntent = new Intent(context, SpotiqHostService.class);
         playPauseActionIntent.setAction(ServiceConstants.ACTION_PLAY_PAUSE);
 
-        PendingIntent playPauseButtonIntent = serviceIsForeground
-            ? PendingIntent.getForegroundService(context, 1,
-            playPauseActionIntent, PendingIntent.FLAG_UPDATE_CURRENT)
-            : PendingIntent.getService(context, 1,
+        PendingIntent playPauseButtonIntent = PendingIntent.getForegroundService(context, 1,
             playPauseActionIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         return new Notification.Builder(context, ApplicationConstants.MEDIA_NOTIFICATION_CHANNEL_ID)
@@ -82,19 +78,18 @@ public class NotificationUtil {
             .setContentTitle(title)
             .setContentText(description)
             .setContentIntent(openPartyIntent)
-            .setOngoing(ongoing)
+            .setOngoing(true)
             .build();
 
     }
 
     public static Notification buildPlayerNotificationCompat(Context context, MediaSessionCompat mediaSessionCompat,
-                                                             boolean ongoing, String title,
-                                                             String description, Bitmap largeIcon) {
+                                                             String title, String description, Bitmap largeIcon) {
 
         PendingIntent openPartyIntent = PendingIntent.getActivity(context, 0,
             new Intent(context, PartyActivity.class), PendingIntent.FLAG_UPDATE_CURRENT);
 
-        Intent playPauseActionIntent = new Intent(context, SpotiqPlayerService.class);
+        Intent playPauseActionIntent = new Intent(context, SpotiqHostService.class);
         playPauseActionIntent.setAction(ServiceConstants.ACTION_PLAY_PAUSE);
 
         PendingIntent playPauseIntent = PendingIntent.getService(context, 1,
@@ -116,7 +111,7 @@ public class NotificationUtil {
             .setContentTitle(title)
             .setContentText(description)
             .setContentIntent(openPartyIntent)
-            .setOngoing(ongoing)
+            .setOngoing(true)
             .setDefaults(4)
             .build();
     }

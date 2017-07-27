@@ -37,7 +37,7 @@ import se.zinokader.spotiq.feature.base.BaseActivity;
 import se.zinokader.spotiq.feature.party.partymember.PartyMemberFragment;
 import se.zinokader.spotiq.feature.party.tracklist.TracklistFragment;
 import se.zinokader.spotiq.feature.search.SearchActivity;
-import se.zinokader.spotiq.service.player.SpotiqPlayerService;
+import se.zinokader.spotiq.service.player.SpotiqHostService;
 import se.zinokader.spotiq.util.ShortcutUtil;
 import se.zinokader.spotiq.util.listener.FabListener;
 
@@ -56,15 +56,15 @@ public class PartyActivity extends BaseActivity<PartyPresenter> implements Party
     private SelectedTab selectedTab = SelectedTab.TRACKLIST_TAB;
     private enum SelectedTab { TRACKLIST_TAB, PARTY_MEMBERS_TAB }
 
-    private SpotiqPlayerService playerService;
+    private SpotiqHostService playerService;
     private boolean isPlayerServiceBound = false;
 
     private ServiceConnection playerServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder serviceBinder) {
             isPlayerServiceBound = true;
-            SpotiqPlayerService.PlayerServiceBinder playerServiceBinder =
-                (SpotiqPlayerService.PlayerServiceBinder) serviceBinder;
+            SpotiqHostService.PlayerServiceBinder playerServiceBinder =
+                (SpotiqHostService.PlayerServiceBinder) serviceBinder;
             playerService = playerServiceBinder.getService();
         }
 
@@ -75,7 +75,7 @@ public class PartyActivity extends BaseActivity<PartyPresenter> implements Party
     };
 
     private void bindPlayerService() {
-        Intent playerServiceIntent = new Intent(this, SpotiqPlayerService.class);
+        Intent playerServiceIntent = new Intent(this, SpotiqHostService.class);
         bindService(playerServiceIntent, playerServiceConnection, Context.BIND_AUTO_CREATE);
     }
 
@@ -94,8 +94,7 @@ public class PartyActivity extends BaseActivity<PartyPresenter> implements Party
             if (!shownSongAddedMessages.contains(addedSong)) {
                 shownSongAddedMessages.add(addedSong);
                 if (LocalDateTime.now().isAfter(initializedTimeStamp.plusSeconds(ApplicationConstants.PARTY_MESSAGE_GRACE_PERIOD_SEC))) {
-                    new Handler().postDelayed(() -> showMessage(addedSong + " has been added to the tracklist"),
-                        ApplicationConstants.DEFER_SNACKBAR_DELAY);
+                    new Handler().postDelayed(() -> showMessage(addedSong + " was added to the tracklist"), ApplicationConstants.DEFER_SNACKBAR_DELAY);
                 }
             }
         }
@@ -283,7 +282,7 @@ public class PartyActivity extends BaseActivity<PartyPresenter> implements Party
             displayHostControls = true;
             binding.playPauseFab.setVisibility(View.VISIBLE);
             bindPlayerService();
-            Intent playerServiceIntent = new Intent(this, SpotiqPlayerService.class);
+            Intent playerServiceIntent = new Intent(this, SpotiqHostService.class);
             playerServiceIntent.setAction(ServiceConstants.ACTION_INIT);
             playerServiceIntent.putExtra(ApplicationConstants.PARTY_NAME_EXTRA, partyTitle);
             startService(playerServiceIntent);
@@ -299,7 +298,7 @@ public class PartyActivity extends BaseActivity<PartyPresenter> implements Party
             .setPositiveButton("Yes", (dialogInterface, i) -> {
                 dialogInterface.dismiss();
                 if (hostProvilegesLoaded) {
-                    stopService(new Intent(this, SpotiqPlayerService.class));
+                    stopService(new Intent(this, SpotiqHostService.class));
                 }
                 super.onBackPressed();
             })

@@ -3,7 +3,7 @@ package se.zinokader.spotiq.util;
 import android.app.ActivityManager;
 import android.content.Context;
 
-import se.zinokader.spotiq.service.player.SpotiqPlayerService;
+import se.zinokader.spotiq.service.player.SpotiqHostService;
 
 public class ServiceUtil {
 
@@ -11,7 +11,7 @@ public class ServiceUtil {
         ActivityManager manager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
         for (ActivityManager.RunningServiceInfo runningService : manager.getRunningServices(
             Integer.MAX_VALUE)) {
-            if (SpotiqPlayerService.class.getName().equals(runningService.service.getClassName())) {
+            if (SpotiqHostService.class.getName().equals(runningService.service.getClassName())) {
                 if (runningService.foreground) {
                     return true;
                 }

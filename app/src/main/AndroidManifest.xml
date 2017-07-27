@@ -19,20 +19,24 @@
         android:roundIcon="@mipmap/ic_launcher"
         android:theme="@style/AppTheme">
 
-        <service android:name=".service.player.SpotiqPlayerService"
+        <service android:name=".service.player.SpotiqHostService"
             android:enabled="true"
             android:stopWithTask="false"
             android:exported="false" />
 
         <service android:name=".service.authentication.SpotifyAuthenticationService"/>
 
-        <activity android:name=".feature.login.StartupActivity"
+        <activity android:name=".feature.splash.SplashActivity"
             android:theme="@style/AppThemeNoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+
+        <activity android:name=".feature.login.StartupActivity"
+            android:theme="@style/AppThemeNoActionBar">
         </activity>
 
         <activity android:name=".feature.login.SpotifyAuthenticationActivity"

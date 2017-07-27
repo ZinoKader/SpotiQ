@@ -18,11 +18,14 @@ public class ApplicationConstants {
     public static final int LONG_TOAST_DURATION_SEC = 5;
 
     /* Image-related */
+    //Placeholders
     public static final String ALBUM_ART_PLACEHOLDER_URL = "https://www.zinokader.se/img/spotiq-album-placeholder.png";
     public static final String PROFILE_IMAGE_PLACEHOLDER_URL = "https://www.zinokader.se/img/spotiq-profile-placeholder.png";
+    //Dimensions
     public static final int DEFAULT_TRACKLIST_CROP_WIDTH = 600;
     public static final int DEFAULT_TRACKLIST_CROP_HEIGHT = 200;
     public static final int DEFAULT_TRACKLIST_BLUR_RADIUS = 100;
+    public static final int DEFAULT_ALBUM_ART_OVERRIDE_DIMENSION = 200;
 
     /* Notification-related */
     public static final String MEDIA_NOTIFICATION_CHANNEL_ID = "media_notification_channel";
@@ -32,6 +35,12 @@ public class ApplicationConstants {
     public static final String SEARCH_SHORTCUT_ID = "spotiq_search_shortcut";
 
     /* Activity & Lifecycle-related */
+
+    //Splash-related
+    public static final float ANIMATION_LOGO_SCALE_DOWN = 0.7f;
+    public static final float ANIMATION_LOGO_SCALE_UP = 100f;
+    public static final int ANIMATION_LOGO_SCALE_DOWN_DURATION_MS = 750;
+    public static final int ANIMATION_LOGO_SCALE_UP_DURATION_MS = 200;
 
     //Party-related
     public static final String PARTY_NAME_EXTRA = "party_name_extra";

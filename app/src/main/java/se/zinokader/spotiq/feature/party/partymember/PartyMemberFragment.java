@@ -37,7 +37,7 @@ public class PartyMemberFragment extends Fragment {
     @Inject
     PartiesRepository partiesRepository;
 
-    private CompositeDisposable disposableActions = new CompositeDisposable();
+    private CompositeDisposable subscriptions = new CompositeDisposable();
 
     private PartyMemberRecyclerAdapter partyMemberRecyclerAdapter;
 
@@ -57,7 +57,7 @@ public class PartyMemberFragment extends Fragment {
         super.onCreate(savedInstanceState);
         String partyTitle = getArguments().getString(ApplicationConstants.PARTY_NAME_EXTRA);
 
-        disposableActions.add(partiesRepository.listenToPartyMemberChanges(partyTitle)
+        subscriptions.add(partiesRepository.listenToPartyMemberChanges(partyTitle)
             .delay(ApplicationConstants.DEFAULT_NEW_ITEM_DELAY_MS, TimeUnit.MILLISECONDS)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
@@ -76,7 +76,7 @@ public class PartyMemberFragment extends Fragment {
 
     @Override
     public void onDestroy() {
-        disposableActions.clear();
+        subscriptions.clear();
         super.onDestroy();
     }
 
