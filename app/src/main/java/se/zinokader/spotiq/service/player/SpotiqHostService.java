@@ -46,15 +46,17 @@ import se.zinokader.spotiq.constant.ApplicationConstants;
 import se.zinokader.spotiq.constant.LogTag;
 import se.zinokader.spotiq.constant.ServiceConstants;
 import se.zinokader.spotiq.constant.SpotifyConstants;
+import se.zinokader.spotiq.model.ChildEvent;
 import se.zinokader.spotiq.repository.TracklistRepository;
 import se.zinokader.spotiq.service.authentication.SpotifyAuthenticationService;
 import se.zinokader.spotiq.util.NetworkUtil;
 import se.zinokader.spotiq.util.NotificationUtil;
+import se.zinokader.spotiq.util.PreferenceUtil;
 import se.zinokader.spotiq.util.ServiceUtil;
 import se.zinokader.spotiq.util.di.Injector;
 import se.zinokader.spotiq.util.exception.EmptyTracklistException;
 
-public class SpotiqPlayerService extends Service implements ConnectionStateCallback, Player.NotificationCallback {
+public class SpotiqHostService extends Service implements ConnectionStateCallback, Player.NotificationCallback {
 
     @Inject
     TracklistRepository tracklistRepository;
@@ -62,12 +64,12 @@ public class SpotiqPlayerService extends Service implements ConnectionStateCallb
     @Inject
     SpotifyAuthenticationService spotifyCommunicatorService;
 
-    private CompositeDisposable disposableActions = new CompositeDisposable();
+    private CompositeDisposable subscriptions = new CompositeDisposable();
     private Handler mainThreadHandler = new Handler(Looper.getMainLooper());
 
     private Config playerConfig;
     private SpotifyPlayer spotifyPlayer;
-    private boolean isTracklistEmpty = false;
+    private boolean isTracklistEmpty = true;
     private String partyTitle;
 
     private boolean changingConfiguration;
@@ -79,10 +81,19 @@ public class SpotiqPlayerService extends Service implements ConnectionStateCallb
     private IBinder binder = new PlayerServiceBinder();
 
     public class PlayerServiceBinder extends Binder {
-        public SpotiqPlayerService getService() {
-            return SpotiqPlayerService.this;
+        public SpotiqHostService getService() {
+            return SpotiqHostService.this;
         }
     }
+
+    private BroadcastReceiver connectionReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (!NetworkUtil.isConnected(context)) {
+                handleLostConnection();
+            }
+        }
+    };
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -103,8 +114,8 @@ public class SpotiqPlayerService extends Service implements ConnectionStateCallb
     @Override
     public boolean onUnbind(Intent intent) {
         if (!changingConfiguration) {
-            Log.d(LogTag.LOG_PLAYER_SERVICE, "Starting foreground player service");
-            sendNotification(true);
+            Log.d(LogTag.LOG_PLAYER_SERVICE, "Starting player service in foreground");
+            updatePlayerNotification();
         }
         return true;
     }
@@ -120,12 +131,14 @@ public class SpotiqPlayerService extends Service implements ConnectionStateCallb
     @Override
     public void onDestroy() {
         Log.d(LogTag.LOG_PLAYER_SERVICE, "SpotiQ Player service destroyed");
-        unregisterReceiver(connectionReceiver);
         mediaSessionHandler.releaseSessions();
-        disposableActions.clear();
+        subscriptions.clear();
+        if (connectionReceiver != null) {
+            unregisterReceiver(connectionReceiver);
+        }
         if (spotifyPlayer != null) {
             try {
-                Spotify.awaitDestroyPlayer(SpotiqPlayerService.this, 5, TimeUnit.SECONDS);
+                Spotify.awaitDestroyPlayer(SpotiqHostService.this, 5, TimeUnit.SECONDS);
             }
             catch (InterruptedException e) {
                 e.printStackTrace();
@@ -145,74 +158,6 @@ public class SpotiqPlayerService extends Service implements ConnectionStateCallb
         changingConfiguration = true;
     }
 
-    private void sendNotification(boolean shouldStartForeground) {
-        String title;
-        String description;
-        Bitmap largeIcon = BitmapFactory.decodeResource(getResources(), R.drawable.image_album_placeholder);
-        boolean shouldBeOngoing = ServiceUtil.isPlayerServiceInForeground(this);
-
-        if (isPlaying() && !isTracklistEmpty) {
-            Metadata.Track currentTrack = spotifyPlayer.getMetadata().currentTrack;
-            title = currentTrack.name;
-            description = currentTrack.artistName + " - " + currentTrack.albumName;
-            Glide.with(this)
-                .load(currentTrack.albumCoverWebUrl)
-                .asBitmap()
-                .into(new SimpleTarget<Bitmap>() {
-                    @Override
-                    public void onResourceReady(Bitmap albumArt, GlideAnimation<? super Bitmap> glideAnimation) {
-
-                        Notification playerNotification;
-
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                            mediaSessionHandler.setMetaData(NotificationUtil.buildMediaMetadata(currentTrack, albumArt));
-                            playerNotification = NotificationUtil.buildPlayerNotification(SpotiqPlayerService.this, mediaSessionHandler.getMediaSession(),
-                                shouldStartForeground, shouldBeOngoing, title, description, albumArt);
-                        }
-                        else {
-                            mediaSessionHandler.setMetaData(NotificationUtil.buildMediaMetadataCompat(currentTrack, albumArt));
-                            playerNotification = NotificationUtil.buildPlayerNotificationCompat(SpotiqPlayerService.this, mediaSessionHandler.getMediaSessionCompat(),
-                                shouldBeOngoing, title, description, albumArt);
-                        }
-
-                        if (shouldStartForeground) {
-                            startForeground(ONGOING_NOTIFICATION_ID, playerNotification);
-                        }
-                        else {
-                            notificationManager.notify(ONGOING_NOTIFICATION_ID, playerNotification);
-                        }
-                    }
-                });
-        }
-        else {
-            title = "Hosting party " + partyTitle;
-            description = "Player is idle";
-            Notification playerNotification;
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                playerNotification = NotificationUtil.buildPlayerNotification(SpotiqPlayerService.this, mediaSessionHandler.getMediaSession(),
-                    shouldStartForeground, shouldBeOngoing, title, description, largeIcon);
-            }
-            else {
-                playerNotification = NotificationUtil.buildPlayerNotificationCompat(SpotiqPlayerService.this, mediaSessionHandler.getMediaSessionCompat(),
-                    shouldBeOngoing, title, description, largeIcon);
-            }
-
-            if (shouldStartForeground) {
-                startForeground(ONGOING_NOTIFICATION_ID, playerNotification);
-            }
-            else {
-                notificationManager.notify(ONGOING_NOTIFICATION_ID, playerNotification);
-            }
-        }
-    }
-
-    private void sendPlayingStatusBroadcast(boolean isPlaying) {
-        Intent playingStatusIntent = new Intent(ServiceConstants.PLAYING_STATUS_BROADCAST_NAME);
-        playingStatusIntent.putExtra(ServiceConstants.PLAYING_STATUS_ISPLAYING_EXTRA, isPlaying);
-        LocalBroadcastManager.getInstance(this).sendBroadcast(playingStatusIntent);
-    }
-
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d(LogTag.LOG_PLAYER_SERVICE, "Player service initialization started");
@@ -227,13 +172,17 @@ public class SpotiqPlayerService extends Service implements ConnectionStateCallb
                 }
                 initPlayer().subscribe(didInit -> {
                     Log.d(LogTag.LOG_PLAYER_SERVICE, "Player initialization status: " + didInit);
-                    if (!didInit) stopSelf();
+                    if (!didInit) {
+                        stopSelf();
+                        return;
+                    }
                     registerReceiver(connectionReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
                 });
+                setupServiceSettings();
                 break;
             case ServiceConstants.ACTION_PLAY_PAUSE:
                 if (spotifyPlayer == null) {
-                    Log.d(LogTag.LOG_PLAYER_SERVICE, "Spotify Player was null - stopping service");
+                    Log.d(LogTag.LOG_PLAYER_SERVICE, "SpotifyPlayer was null - stopping service");
                     stopSelf();
                     break;
                 }
@@ -248,28 +197,80 @@ public class SpotiqPlayerService extends Service implements ConnectionStateCallb
         return START_STICKY;
     }
 
+    private void updatePlayerNotification() {
+        if (!ServiceUtil.isPlayerServiceInForeground(this)) return;
+        String title;
+        String description;
+        Bitmap largeIcon = BitmapFactory.decodeResource(getResources(), R.drawable.image_album_placeholder);
+
+        if (isPlaying() && !isTracklistEmpty) {
+            Metadata.Track currentTrack = spotifyPlayer.getMetadata().currentTrack;
+            title = currentTrack.name;
+            description = currentTrack.artistName + " - " + currentTrack.albumName;
+            Glide.with(this)
+                .load(currentTrack.albumCoverWebUrl)
+                .asBitmap()
+                .into(new SimpleTarget<Bitmap>() {
+                    @Override
+                    public void onResourceReady(Bitmap albumArt, GlideAnimation<? super Bitmap> glideAnimation) {
+                        Notification playerNotification;
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                            mediaSessionHandler.setMetaData(NotificationUtil.buildMediaMetadata(currentTrack, albumArt));
+                            playerNotification = NotificationUtil.buildPlayerNotification(SpotiqHostService.this,
+                                mediaSessionHandler.getMediaSession(), title, description, albumArt);
+                        }
+                        else {
+                            mediaSessionHandler.setMetaData(NotificationUtil.buildMediaMetadataCompat(currentTrack, albumArt));
+                            playerNotification = NotificationUtil.buildPlayerNotificationCompat(SpotiqHostService.this,
+                                mediaSessionHandler.getMediaSessionCompat(), title, description, albumArt);
+                        }
+                        startForeground(ONGOING_NOTIFICATION_ID, playerNotification);
+                    }
+                });
+        }
+        else {
+            title = "Hosting party " + partyTitle;
+            description = "Player is idle";
+            Notification playerNotification;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                playerNotification = NotificationUtil.buildPlayerNotification(SpotiqHostService.this,
+                    mediaSessionHandler.getMediaSession(), title, description, largeIcon);
+            }
+            else {
+                playerNotification = NotificationUtil.buildPlayerNotificationCompat(SpotiqHostService.this,
+                    mediaSessionHandler.getMediaSessionCompat(), title, description, largeIcon);
+            }
+            startForeground(ONGOING_NOTIFICATION_ID, playerNotification);
+        }
+    }
+
+    private void sendPlayingStatusBroadcast(boolean isPlaying) {
+        Intent playingStatusIntent = new Intent(ServiceConstants.PLAYING_STATUS_BROADCAST_NAME);
+        playingStatusIntent.putExtra(ServiceConstants.PLAYING_STATUS_ISPLAYING_EXTRA, isPlaying);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(playingStatusIntent);
+    }
+
     private Single<Boolean> initPlayer() {
         return Single.create(subscriber -> {
             if (playerConfig == null) {
-                playerConfig = new Config(SpotiqPlayerService.this,
+                playerConfig = new Config(SpotiqHostService.this,
                     spotifyCommunicatorService.getAuthenticator().getAccessToken(),
                     SpotifyConstants.CLIENT_ID);
                 playerConfig.useCache(false);
             }
 
-            spotifyPlayer = Spotify.getPlayer(playerConfig, SpotiqPlayerService.this, new SpotifyPlayer.InitializationObserver() {
+            spotifyPlayer = Spotify.getPlayer(playerConfig, SpotiqHostService.this, new SpotifyPlayer.InitializationObserver() {
                 @Override
                 public void onInitialized(SpotifyPlayer player) {
-                    spotifyPlayer.addConnectionStateCallback(SpotiqPlayerService.this);
-                    spotifyPlayer.addNotificationCallback(SpotiqPlayerService.this);
+                    spotifyPlayer.addConnectionStateCallback(SpotiqHostService.this);
+                    spotifyPlayer.addNotificationCallback(SpotiqHostService.this);
                     spotifyPlayer.setPlaybackBitrate(new Player.OperationCallback() {
                         @Override
                         public void onSuccess() {
                             subscriber.onSuccess(true);
                             Log.d(LogTag.LOG_PLAYER_SERVICE, "Set Spotify Player custom playback bitrate successfully");
-                            sendNotification(ServiceUtil.isPlayerServiceInForeground(SpotiqPlayerService.this));
                             sendPlayingStatusBroadcast(false); //make sure all listeners are up to sync with an inititally paused status
-                            mediaSessionHandler.setSessionActive(true);
+                            mediaSessionHandler.setSessionActive();
                         }
 
                         @Override
@@ -291,6 +292,10 @@ public class SpotiqPlayerService extends Service implements ConnectionStateCallb
 
             });
         });
+    }
+
+    public boolean isPlaying() {
+        return !(spotifyPlayer == null || spotifyPlayer.getPlaybackState() == null) && spotifyPlayer.getPlaybackState().isPlaying;
     }
 
     public void play() {
@@ -352,9 +357,33 @@ public class SpotiqPlayerService extends Service implements ConnectionStateCallb
                 }, song.getSongUri(), 0, 0);
             }, throwable -> {
                 Log.d(LogTag.LOG_PLAYER_SERVICE, "Could not play next song: " + throwable.getMessage());
-                isTracklistEmpty = true;
                 sendPlayingStatusBroadcast(false);
+                if (throwable instanceof EmptyTracklistException) {
+                    isTracklistEmpty = true;
+                }
             });
+    }
+
+    private void setupServiceSettings() {
+
+        //synchronize tracklist status
+        tracklistRepository.getFirstSong(partyTitle)
+            .subscribe((song, throwable) -> {
+                if (!(throwable instanceof EmptyTracklistException)) {
+                    isTracklistEmpty = false;
+                }
+            });
+
+        //setup auto playing the first track
+        if (PreferenceUtil.isAutoPlayEnabled(this)) {
+            subscriptions.add(tracklistRepository.listenToTracklistChanges(partyTitle)
+                .subscribe(childEvent -> {
+                    if (childEvent.getChangeType().equals(ChildEvent.Type.ADDED) && isTracklistEmpty) {
+                        play();
+                    }
+                }));
+        }
+
     }
 
     private void handlePlaybackEnd() {
@@ -370,6 +399,19 @@ public class SpotiqPlayerService extends Service implements ConnectionStateCallb
             });
     }
 
+    private void handleLostConnection() {
+        if (isPlaying()) pause();
+        sendPlayingStatusBroadcast(false);
+        mediaSessionHandler.setPlaybackStatePaused();
+        mainThreadHandler.post(() -> {
+            new ToastBuilder(getApplicationContext())
+                .customView(LayoutInflater.from(getApplicationContext()).inflate(getResources().getLayout(R.layout.toast_lost_connection_container), null))
+                .duration(ApplicationConstants.LONG_TOAST_DURATION_SEC)
+                .build()
+                .show();
+        });
+    }
+
     @Override
     public void onPlaybackEvent(PlayerEvent playerEvent) {
         Log.d(LogTag.LOG_PLAYER_SERVICE, "Playback event: " + playerEvent.name());
@@ -381,48 +423,22 @@ public class SpotiqPlayerService extends Service implements ConnectionStateCallb
                 handlePlaybackEnd();
                 break;
             case kSpPlaybackNotifyPlay:
-                sendNotification(ServiceUtil.isPlayerServiceInForeground(SpotiqPlayerService.this));
+                updatePlayerNotification();
                 sendPlayingStatusBroadcast(true);
                 mediaSessionHandler.setPlaybackStatePlaying();
                 break;
             case kSpPlaybackNotifyPause:
-                sendNotification(ServiceUtil.isPlayerServiceInForeground(SpotiqPlayerService.this));
+                updatePlayerNotification();
                 sendPlayingStatusBroadcast(false);
                 mediaSessionHandler.setPlaybackStatePaused();
                 break;
         }
     }
 
-    public boolean isPlaying() {
-        return !(spotifyPlayer == null || spotifyPlayer.getPlaybackState() == null) && spotifyPlayer.getPlaybackState().isPlaying;
-    }
-
     private void showLostPlaybackPermissionToast() {
         mainThreadHandler.post(() -> {
             new ToastBuilder(this)
                 .customView(LayoutInflater.from(this).inflate(getResources().getLayout(R.layout.toast_lost_permission_container), null))
-                .duration(ApplicationConstants.LONG_TOAST_DURATION_SEC)
-                .build()
-                .show();
-        });
-    }
-
-    private BroadcastReceiver connectionReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (!NetworkUtil.isConnected(context)) {
-                handleLostConnection();
-            }
-        }
-    };
-
-    private void handleLostConnection() {
-        if (isPlaying()) pause();
-        sendPlayingStatusBroadcast(false);
-        mediaSessionHandler.setPlaybackStatePaused();
-        mainThreadHandler.post(() -> {
-            new ToastBuilder(getApplicationContext())
-                .customView(LayoutInflater.from(getApplicationContext()).inflate(getResources().getLayout(R.layout.toast_lost_connection_container), null))
                 .duration(ApplicationConstants.LONG_TOAST_DURATION_SEC)
                 .build()
                 .show();
