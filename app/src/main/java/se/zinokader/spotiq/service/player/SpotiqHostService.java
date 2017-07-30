@@ -40,11 +40,12 @@ import javax.inject.Inject;
 
 import io.reactivex.Single;
 import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.disposables.Disposable;
+import se.zinokader.spotiq.BuildConfig;
 import se.zinokader.spotiq.R;
 import se.zinokader.spotiq.constant.ApplicationConstants;
 import se.zinokader.spotiq.constant.LogTag;
 import se.zinokader.spotiq.constant.ServiceConstants;
-import se.zinokader.spotiq.constant.SpotifyConstants;
 import se.zinokader.spotiq.model.ChildEvent;
 import se.zinokader.spotiq.repository.TracklistRepository;
 import se.zinokader.spotiq.service.authentication.SpotifyAuthenticationService;
@@ -63,6 +64,7 @@ public class SpotiqHostService extends Service implements ConnectionStateCallbac
     SpotifyAuthenticationService spotifyCommunicatorService;
 
     private CompositeDisposable subscriptions = new CompositeDisposable();
+    private Disposable autoPlayTask;
     private Handler mainThreadHandler = new Handler(Looper.getMainLooper());
 
     private Config playerConfig;
@@ -253,7 +255,7 @@ public class SpotiqHostService extends Service implements ConnectionStateCallbac
 
             playerConfig = new Config(SpotiqHostService.this,
                 spotifyCommunicatorService.getAuthenticator().getAccessToken(),
-                SpotifyConstants.CLIENT_ID);
+                BuildConfig.SPOTIFY_CLIENT_ID);
             playerConfig.useCache(false);
 
             spotifyPlayer = Spotify.getPlayer(playerConfig, SpotiqHostService.this, new SpotifyPlayer.InitializationObserver() {
@@ -373,12 +375,13 @@ public class SpotiqHostService extends Service implements ConnectionStateCallbac
 
         //setup auto playing the first track
         if (PreferenceUtil.isAutoPlayEnabled(this)) {
-            subscriptions.add(tracklistRepository.listenToTracklistChanges(partyTitle)
+            autoPlayTask = tracklistRepository.listenToTracklistChanges(partyTitle)
                 .subscribe(childEvent -> {
                     if (childEvent.getChangeType().equals(ChildEvent.Type.ADDED) && isTracklistEmpty) {
                         play();
                     }
-                }));
+                });
+            subscriptions.add(autoPlayTask);
         }
 
     }

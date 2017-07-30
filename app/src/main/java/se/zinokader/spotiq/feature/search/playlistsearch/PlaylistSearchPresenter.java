@@ -15,10 +15,12 @@ import kaaes.spotify.webapi.android.SpotifyService;
 import kaaes.spotify.webapi.android.models.Pager;
 import kaaes.spotify.webapi.android.models.PlaylistSimple;
 import kaaes.spotify.webapi.android.models.PlaylistTrack;
+import se.zinokader.spotiq.constant.FirebaseConstants;
 import se.zinokader.spotiq.constant.LogTag;
 import se.zinokader.spotiq.constant.SpotifyConstants;
 import se.zinokader.spotiq.feature.base.BasePresenter;
 import se.zinokader.spotiq.feature.search.preview.PreviewPlayer;
+import se.zinokader.spotiq.model.Party;
 import se.zinokader.spotiq.model.Song;
 import se.zinokader.spotiq.model.User;
 import se.zinokader.spotiq.repository.PartiesRepository;
@@ -135,26 +137,28 @@ public class PlaylistSearchPresenter extends BasePresenter<PlaylistSearchView> {
         searchOptions.put(SpotifyService.LIMIT, SpotifyConstants.PLAYLIST_TRACK_SEARCH_QUERY_RESPONSE_LIMIT);
         searchOptions.put(SpotifyService.OFFSET, 0);
 
-        findPlaylistTracksRecursively(playlist, searchOptions)
+        partiesRepository.getParty(partyTitle)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .map(playlistPager -> {
-                for (PlaylistTrack track : playlistPager.items) {
-                    if (track.is_local) {
-                        playlistPager.items.remove(track);
-                    }
-                }
-                return playlistPager;
-            })
-            .concatMap(playlistPager -> Observable.fromArray(TrackMapper.playlistTracksToSongs(playlistPager.items, user)))
-            .compose(this.deliverReplay())
-            .subscribe(searchDelivery -> searchDelivery.split(
-                (playlistSearchView, songs) -> {
-                    if (songs.isEmpty()) playlistSearchView.showMessage("Playlist is empty");
-                    playlistSearchView.updateSongs(songs);
-                },
-                (songSearchView, throwable) -> {
-                }));
+            .subscribe(partySnapshot -> {
+                Party dbParty = partySnapshot.child(FirebaseConstants.CHILD_PARTYINFO).getValue(Party.class);
+                searchOptions.put(SpotifyService.MARKET, dbParty.getHostMarket());
+
+                findPlaylistTracksRecursively(playlist, searchOptions)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .concatMap(playlistPager -> Observable.fromArray(TrackMapper.playlistTracksToSongs(playlistPager.items, user)))
+                    .compose(this.deliverReplay())
+                    .subscribe(searchDelivery -> searchDelivery.split(
+                        (playlistSearchView, songs) -> {
+                            if (songs.isEmpty()) playlistSearchView.showMessage("Playlist is empty");
+                            playlistSearchView.updateSongs(songs);
+                        },
+                        (songSearchView, throwable) -> {
+                            Log.d(LogTag.LOG_SEARCH, "Something went wrong on loading playlist songs");
+                            throwable.printStackTrace();
+                        }));
+            });
     }
 
     private Observable<Pager<PlaylistTrack>> findPlaylistTracksRecursively(PlaylistSimple playlist, Map<String, Object> searchOptions) {

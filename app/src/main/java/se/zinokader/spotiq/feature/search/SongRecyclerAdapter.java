@@ -11,6 +11,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,6 +20,7 @@ import io.reactivex.Observable;
 import io.reactivex.subjects.PublishSubject;
 import kaaes.spotify.webapi.android.models.ArtistSimple;
 import se.zinokader.spotiq.R;
+import se.zinokader.spotiq.constant.ApplicationConstants;
 import se.zinokader.spotiq.model.Song;
 import se.zinokader.spotiq.util.type.Empty;
 
@@ -68,7 +70,9 @@ public class SongRecyclerAdapter extends RecyclerView.Adapter<SongRecyclerAdapte
 
         Glide.with(context)
             .load(song.getAlbumArtUrl())
+            .diskCacheStrategy(DiskCacheStrategy.SOURCE)
             .fitCenter()
+            .override(ApplicationConstants.LOW_QUALITY_ALBUM_ART_DIMENSION, ApplicationConstants.LOW_QUALITY_ALBUM_ART_DIMENSION)
             .into(songHolder.albumArt);
         songHolder.songName.setText(song.getName());
         songHolder.artistsName.setText(artistsName);

@@ -17,6 +17,7 @@ import kaaes.spotify.webapi.android.models.UserPrivate;
 import retrofit.Callback;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
+import se.zinokader.spotiq.BuildConfig;
 import se.zinokader.spotiq.R;
 import se.zinokader.spotiq.constant.ApplicationConstants;
 import se.zinokader.spotiq.constant.LogTag;
@@ -38,9 +39,10 @@ public class SpotifyAuthenticationActivity extends AppCompatActivity implements 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_authentication);
         ((Injector) getApplication()).inject(this);
+        overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
 
         AuthenticationRequest authRequest = new AuthenticationRequest.Builder(
-            SpotifyConstants.CLIENT_ID,
+            BuildConfig.SPOTIFY_CLIENT_ID,
             AuthenticationResponse.Type.TOKEN,
             SpotifyConstants.REDIRECT_URI)
             .setScopes(SpotifyConstants.DEFAULT_USER_SCOPES)
@@ -54,7 +56,6 @@ public class SpotifyAuthenticationActivity extends AppCompatActivity implements 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
         super.onActivityResult(requestCode, resultCode, intent);
-
         if (requestCode == ApplicationConstants.LOGIN_INTENT_REQUEST_CODE) {
             AuthenticationResponse response = AuthenticationClient.getResponse(resultCode, intent);
             switch (response.getType()) {
@@ -64,8 +65,6 @@ public class SpotifyAuthenticationActivity extends AppCompatActivity implements 
                     //refresh our authentication token
                     spotifyCommunicatorService.getAuthenticator().setExpiryTimeStamp(response.getExpiresIn());
                     spotifyCommunicatorService.getAuthenticator().setAccessToken(response.getAccessToken());
-
-                    Log.d(LogTag.LOG_LOGIN, "ACCESS TOKEN: " + spotifyCommunicatorService.getAuthenticator().getAccessToken());
 
                     spotifyCommunicatorService.getWebApi().getMe(new Callback<UserPrivate>() {
                         @Override

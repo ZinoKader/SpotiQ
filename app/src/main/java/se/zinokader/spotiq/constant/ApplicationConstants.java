@@ -25,7 +25,8 @@ public class ApplicationConstants {
     public static final int DEFAULT_TRACKLIST_CROP_WIDTH = 600;
     public static final int DEFAULT_TRACKLIST_CROP_HEIGHT = 200;
     public static final int DEFAULT_TRACKLIST_BLUR_RADIUS = 100;
-    public static final int DEFAULT_ALBUM_ART_OVERRIDE_DIMENSION = 200;
+    public static final int LOW_QUALITY_ALBUM_ART_DIMENSION = 100;
+    public static final int MEDIUM_QUALITY_ALBUM_ART_DIMENSION = 200;
 
     /* Notification-related */
     public static final String MEDIA_NOTIFICATION_CHANNEL_ID = "media_notification_channel";

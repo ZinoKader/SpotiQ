@@ -143,6 +143,7 @@ public class LobbyPresenter extends BasePresenter<LobbyView> {
                     party.setCreatedNowTimeStamp();
                     party.setPartyVersionCode(VersionUtil.getCurrentAppVersionCode());
                     party.setHostSpotifyId(user.getUserId());
+                    party.setHostMarket(spotifyUser.country);
                     user.setJoinedNowTimeStamp();
                     user.setHasHostPrivileges();
                     return new UserPartyInformation(user, party);

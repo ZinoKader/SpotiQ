@@ -9,7 +9,15 @@
     <tab
         id="@+id/tab_party_members"
         icon="@drawable/ic_party_members"
-        title="Party"
+        title="Members"
         inActiveColor="#fafafa"
         activeColor="#fafafa"/>
+    <!--
+    <tab
+        id="@+id/tab_settings"
+        icon="@drawable/ic_settings"
+        title="Settings"
+        inActiveColor="#fafafa"
+        activeColor="#fafafa"/>
+        -->
 </tabs>

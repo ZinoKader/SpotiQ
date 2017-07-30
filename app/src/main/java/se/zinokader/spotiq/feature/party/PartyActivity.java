@@ -52,9 +52,8 @@ public class PartyActivity extends BaseActivity<PartyPresenter> implements Party
     private boolean displayHostControls = false;
     private List<String> shownSongAddedMessages = new ArrayList<>();
 
-    private Fragment selectedFragment;
     private SelectedTab selectedTab = SelectedTab.TRACKLIST_TAB;
-    private enum SelectedTab { TRACKLIST_TAB, PARTY_MEMBERS_TAB }
+    private enum SelectedTab { TRACKLIST_TAB, PARTY_MEMBERS_TAB, SETTINGS_TAB }
 
     private SpotiqHostService playerService;
     private boolean isPlayerServiceBound = false;
@@ -135,7 +134,9 @@ public class PartyActivity extends BaseActivity<PartyPresenter> implements Party
         });
 
         binding.bottomBar.setOnTabSelectListener(tabId -> {
+            Fragment selectedFragment;
             switch (tabId) {
+                default:
                 case R.id.tab_tracklist:
                     selectedFragment = TracklistFragment.newInstance(partyTitle);
                     selectedTab = SelectedTab.TRACKLIST_TAB;
@@ -145,6 +146,13 @@ public class PartyActivity extends BaseActivity<PartyPresenter> implements Party
                     selectedFragment = PartyMemberFragment.newInstance(partyTitle);
                     selectedTab = SelectedTab.PARTY_MEMBERS_TAB;
                     hideControls();
+                    break;
+                    /*
+                case R.id.tab_settings:
+                    selectedFragment = SettingsFragment.newInstance(partyTitle);
+                    selectedTab = SelectedTab.SETTINGS_TAB;
+                    hideControls();
+                    */
             }
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
             transaction.replace(R.id.fragmentHolder, selectedFragment);
@@ -154,10 +162,10 @@ public class PartyActivity extends BaseActivity<PartyPresenter> implements Party
         binding.bottomBar.setOnTabReselectListener(tabId -> {
             switch (tabId) {
                 case R.id.tab_tracklist:
-                    ((TracklistFragment) selectedFragment).scrollToTop();
+                    ((TracklistFragment) getSupportFragmentManager().findFragmentById(R.id.fragmentHolder)).scrollToTop();
                     break;
                 case R.id.tab_party_members:
-                    ((PartyMemberFragment) selectedFragment).scrollToTop();
+                    ((PartyMemberFragment) getSupportFragmentManager().findFragmentById(R.id.fragmentHolder)).scrollToTop();
             }
         });
 

@@ -5,8 +5,6 @@ public final class SpotifyConstants {
     private SpotifyConstants() {}
 
     /* Spotify Android SDK-related */
-    public static final String CLIENT_ID = "5646444c2abc4d8299ee3f2cb274f0b6";
-
     public static final String REDIRECT_URI = "spotiq://callback";
 
     private static final String SCOPE_USER_READ_PRIVATE = "user-read-private";

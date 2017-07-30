@@ -9,6 +9,7 @@ public class Party {
     private String password;
     private String hostSpotifyId;
     private String createdTimeStamp;
+    private String hostMarket;
     private int partyVersionCode;
 
     public Party() {}
@@ -44,6 +45,14 @@ public class Party {
 
     public void setCreatedNowTimeStamp() {
         this.createdTimeStamp = ZonedDateTime.now(ZoneOffset.UTC).toString();
+    }
+
+    public String getHostMarket() {
+        return hostMarket;
+    }
+
+    public void setHostMarket(String hostMarket) {
+        this.hostMarket = hostMarket;
     }
 
     public int getPartyVersionCode() {

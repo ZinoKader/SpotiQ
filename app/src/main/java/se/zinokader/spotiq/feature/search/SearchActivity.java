@@ -20,6 +20,7 @@ public class SearchActivity extends BaseActivity<BasePresenter> implements BaseV
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_search);
+        overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
         Bundle partyInfo = getIntent().getExtras();
 
         setVolumeControlStream(AudioManager.STREAM_MUSIC);

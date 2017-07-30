@@ -18,20 +18,23 @@ import se.zinokader.spotiq.R;
 import se.zinokader.spotiq.constant.ApplicationConstants;
 import se.zinokader.spotiq.constant.LogTag;
 import se.zinokader.spotiq.constant.SpotifyConstants;
-import se.zinokader.spotiq.databinding.ActivityStartupBinding;
+import se.zinokader.spotiq.databinding.ActivityLoginBinding;
 import se.zinokader.spotiq.feature.base.BaseActivity;
 import se.zinokader.spotiq.feature.lobby.LobbyActivity;
 
-@RequiresPresenter(StartupPresenter.class)
-public class StartupActivity extends BaseActivity<StartupPresenter> implements StartupView {
+@RequiresPresenter(LoginPresenter.class)
+public class LoginActivity extends BaseActivity<LoginPresenter> implements LoginView {
 
-    ActivityStartupBinding binding;
+    ActivityLoginBinding binding;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_startup);
-        binding.logInButton.setOnClickListener(c -> getPresenter().logIn());
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_login);
+        binding.logInButton.setOnClickListener(c -> {
+            startProgress();
+            getPresenter().logIn();
+        });
     }
 
     public void startProgress() {
@@ -59,7 +62,8 @@ public class StartupActivity extends BaseActivity<StartupPresenter> implements S
                 @Override
                 public void onAnimationEnd(Animator animation) {
                     super.onAnimationEnd(animation);
-                    startActivity(new Intent(getApplicationContext(), LobbyActivity.class));
+                    startActivity(new Intent(LoginActivity.this, LobbyActivity.class));
+                    overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
                     delayResetAnimatedChanges();
                 }
             });
@@ -118,10 +122,10 @@ public class StartupActivity extends BaseActivity<StartupPresenter> implements S
             getPresenter().logInFinished();
         }
         else if(resultCode == SpotifyConstants.RESULT_CODE_NO_PREMIUM) {
-            getPresenter().logInFailed(true);
+            getPresenter().logInFailed(false);
         }
         else {
-            getPresenter().logInFailed(false);
+            getPresenter().logInFailed(true);
         }
     }
 

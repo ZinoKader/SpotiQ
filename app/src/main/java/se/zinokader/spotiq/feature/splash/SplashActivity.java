@@ -15,7 +15,7 @@ import android.view.animation.OvershootInterpolator;
 import se.zinokader.spotiq.R;
 import se.zinokader.spotiq.constant.ApplicationConstants;
 import se.zinokader.spotiq.databinding.ActivitySplashBinding;
-import se.zinokader.spotiq.feature.login.StartupActivity;
+import se.zinokader.spotiq.feature.login.LoginActivity;
 
 public class SplashActivity extends AppCompatActivity {
 
@@ -43,7 +43,7 @@ public class SplashActivity extends AppCompatActivity {
             @Override
             public void onAnimationEnd(Animator animation) {
                 super.onAnimationEnd(animation);
-                Intent intent = new Intent(SplashActivity.this, StartupActivity.class);
+                Intent intent = new Intent(SplashActivity.this, LoginActivity.class);
                 startActivity(intent);
                 overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
                 finish();

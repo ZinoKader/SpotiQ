@@ -13,7 +13,7 @@ import se.zinokader.spotiq.repository.UserRepository;
 import se.zinokader.spotiq.util.type.Empty;
 
 
-public class StartupPresenter extends BasePresenter<StartupView> {
+public class LoginPresenter extends BasePresenter<LoginView> {
 
     @Inject
     UserRepository userRepository;
@@ -24,19 +24,18 @@ public class StartupPresenter extends BasePresenter<StartupView> {
             .observeOn(AndroidSchedulers.mainThread())
             .compose(this.deliverFirst())
             .subscribe(loginDelivery -> loginDelivery.split(
-                (startupView, didLogin) -> {
+                (loginView, didLogin) -> {
                     if (didLogin) {
-                        startupView.showMessage("Registering and authenticating user...");
+                        loginView.showMessage("Registering and authenticating user...");
                     } else {
-                        startupView.showMessage("Could not connect to SpotiQ servers");
+                        loginView.showMessage("Could not connect to SpotiQ servers");
                     }
-                    startupView.startProgress();
-                    Observable.just(ApplicationConstants.SHORT_ACTION_DELAY_SEC)
-                        .delay(ApplicationConstants.SHORT_ACTION_DELAY_SEC, TimeUnit.SECONDS)
-                        .subscribe(delay -> startupView.goToSpotifyAuthentication());
+                    Observable.just(new Empty())
+                        .delay(ApplicationConstants.MEDIUM_ACTION_DELAY_SEC, TimeUnit.SECONDS)
+                        .subscribe(delayFinished -> loginView.goToSpotifyAuthentication());
                 },
-                (startupView, throwable) -> {
-                    startupView.showMessage("Something went wrong, please try again");
+                (loginView, throwable) -> {
+                    loginView.showMessage("Something went wrong, please try again");
                 }));
     }
 
@@ -46,38 +45,38 @@ public class StartupPresenter extends BasePresenter<StartupView> {
             .delay(ApplicationConstants.SHORT_ACTION_DELAY_SEC, TimeUnit.SECONDS, AndroidSchedulers.mainThread())
             .compose(this.deliverFirst())
             .doOnNext(firstDelayFinishedDelivery -> firstDelayFinishedDelivery.split(
-                (startupView, empty) -> {
-                    startupView.finishProgress();
-                    startupView.showMessage("Successfully authenticated with Spotify");
+                (loginView, empty) -> {
+                    loginView.finishProgress();
+                    loginView.showMessage("Successfully authenticated with Spotify");
                 },
-                (startupView, throwable) -> {
+                (loginView, throwable) -> {
                 })
             )
-            .delay(ApplicationConstants.LONG_ACTION_DELAY_SEC, TimeUnit.SECONDS, AndroidSchedulers.mainThread())
+            .delay(ApplicationConstants.MEDIUM_ACTION_DELAY_SEC, TimeUnit.SECONDS, AndroidSchedulers.mainThread())
             .subscribe(delayFinishedDelivery -> delayFinishedDelivery.split(
-                (startupView, empty) -> {
-                    startupView.goToLobby();
+                (loginView, empty) -> {
+                    loginView.goToLobby();
                 },
-                (startupView, throwable) -> {
+                (loginView, throwable) -> {
                 }));
     }
 
-    void logInFailed(boolean noPremium) {
+    void logInFailed(boolean hasPremium) {
 
-        String errorMessage = noPremium
-            ? "You need a Spotify Premium account to log in"
-            : "Something went wrong on Spotify authentication";
+        String errorMessage = hasPremium
+            ? "Something went wrong on Spotify authentication"
+            : "You need a Spotify Premium account to log in";
 
         Observable.just(new Empty())
             .observeOn(AndroidSchedulers.mainThread())
             .delay(ApplicationConstants.SHORT_ACTION_DELAY_SEC, TimeUnit.SECONDS, AndroidSchedulers.mainThread())
             .compose(this.deliverFirst())
             .subscribe(delayFinishedDelivery -> delayFinishedDelivery.split(
-                (startupView, empty) -> {
-                    startupView.resetProgress();
-                    startupView.showMessage(errorMessage);
+                (loginView, empty) -> {
+                    loginView.resetProgress();
+                    loginView.showMessage(errorMessage);
                 },
-                (startupView, throwable) -> {
+                (loginView, throwable) -> {
                 }));
     }
 

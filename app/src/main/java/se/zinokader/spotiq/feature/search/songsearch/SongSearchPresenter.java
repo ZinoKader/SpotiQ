@@ -15,10 +15,12 @@ import io.reactivex.schedulers.Schedulers;
 import kaaes.spotify.webapi.android.SpotifyService;
 import kaaes.spotify.webapi.android.models.TracksPager;
 import se.zinokader.spotiq.constant.ApplicationConstants;
+import se.zinokader.spotiq.constant.FirebaseConstants;
 import se.zinokader.spotiq.constant.LogTag;
 import se.zinokader.spotiq.constant.SpotifyConstants;
 import se.zinokader.spotiq.feature.base.BasePresenter;
 import se.zinokader.spotiq.feature.search.preview.PreviewPlayer;
+import se.zinokader.spotiq.model.Party;
 import se.zinokader.spotiq.model.Song;
 import se.zinokader.spotiq.model.User;
 import se.zinokader.spotiq.repository.PartiesRepository;
@@ -130,18 +132,28 @@ public class SongSearchPresenter extends BasePresenter<SongSearchView> {
         searchOptions.put(SpotifyService.LIMIT, SpotifyConstants.TRACK_SEARCH_QUERY_RESPONSE_LIMIT);
         searchOptions.put(SpotifyService.OFFSET, 0);
 
-        searchTracksRecursively(query, searchOptions)
+        partiesRepository.getParty(partyTitle)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .concatMap(tracksPager -> Observable.fromArray(TrackMapper.tracksToSongs(tracksPager.tracks.items, user)))
-            .compose(this.deliverReplay())
-            .subscribe(searchDelivery -> searchDelivery.split(
-                (songSearchView, songs) -> {
-                    if (songs.isEmpty()) songSearchView.showMessage("No songs were found for the search query " + query);
-                    songSearchView.updateSearch(songs);
-                },
-                (songSearchView, throwable) -> {
-                }));
+            .subscribe(partySnapshot -> {
+                Party dbParty = partySnapshot.child(FirebaseConstants.CHILD_PARTYINFO).getValue(Party.class);
+                searchOptions.put(SpotifyService.MARKET, dbParty.getHostMarket());
+
+                searchTracksRecursively(query, searchOptions)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .concatMap(tracksPager -> Observable.fromArray(TrackMapper.tracksToSongs(tracksPager.tracks.items, user)))
+                    .compose(this.deliverFirst())
+                    .subscribe(searchDelivery -> searchDelivery.split(
+                        (songSearchView, songs) -> {
+                            if (songs.isEmpty()) songSearchView.showMessage("No songs were found for the search query " + query);
+                            songSearchView.updateSearch(songs);
+                        },
+                        (songSearchView, throwable) -> {
+                            Log.d(LogTag.LOG_SEARCH, "Something went wrong on searching for tracks");
+                            throwable.printStackTrace();
+                        }));
+            });
     }
 
     private Observable<TracksPager> searchTracksRecursively(String query, Map<String, Object> searchOptions) {
