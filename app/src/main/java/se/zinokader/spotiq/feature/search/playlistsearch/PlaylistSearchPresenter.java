@@ -3,7 +3,9 @@ package se.zinokader.spotiq.feature.search.playlistsearch;
 import android.os.Bundle;
 import android.util.Log;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -147,17 +149,27 @@ public class PlaylistSearchPresenter extends BasePresenter<PlaylistSearchView> {
                 findPlaylistTracksRecursively(playlist, searchOptions)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .concatMap(playlistPager -> Observable.fromArray(TrackMapper.playlistTracksToSongs(playlistPager.items, user)))
-                    .compose(this.deliverReplay())
-                    .subscribe(searchDelivery -> searchDelivery.split(
-                        (playlistSearchView, songs) -> {
-                            if (songs.isEmpty()) playlistSearchView.showMessage("Playlist is empty");
-                            playlistSearchView.updateSongs(songs);
-                        },
-                        (songSearchView, throwable) -> {
-                            Log.d(LogTag.LOG_SEARCH, "Something went wrong on loading playlist songs");
-                            throwable.printStackTrace();
-                        }));
+                    //filter out local and unplayable tracks
+                    .map(playlistPager -> {
+                        List<PlaylistTrack> filteredTracks = new ArrayList<>();
+                        filteredTracks.addAll(playlistPager.items);
+                        for (PlaylistTrack playlistTrack : playlistPager.items) {
+                            if (playlistTrack.is_local || !playlistTrack.track.is_playable) {
+                                filteredTracks.remove(playlistTrack);
+                            }
+                        }
+                        return filteredTracks;
+                    })
+                    .concatMap(filteredTracks -> Observable.fromArray(TrackMapper.playlistTracksToSongs(filteredTracks, user)))
+                    .subscribe(songs -> {
+                        if (getView() != null) {
+                            if (songs.isEmpty()) getView().showMessage("Playlist is empty");
+                            getView().updateSongs(songs);
+                        }
+                    }, throwable -> {
+                        Log.d(LogTag.LOG_SEARCH, "Something went wrong on loading playlist songs");
+                        throwable.printStackTrace();
+                    });
             });
     }
 

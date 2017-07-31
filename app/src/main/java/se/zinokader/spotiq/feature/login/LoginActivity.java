@@ -63,7 +63,6 @@ public class LoginActivity extends BaseActivity<LoginPresenter> implements Login
                 public void onAnimationEnd(Animator animation) {
                     super.onAnimationEnd(animation);
                     startActivity(new Intent(LoginActivity.this, LobbyActivity.class));
-                    overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
                     delayResetAnimatedChanges();
                 }
             });

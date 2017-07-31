@@ -28,7 +28,7 @@ public class TrackMapper {
         return songs;
     }
 
-    private static Song trackToSong(Track track, User user) {
+    public static Song trackToSong(Track track, User user) {
         return new Song(user.getUserId(), user.getUserName(), track.id, track.artists, track.album, track.duration_ms, track.name, track.preview_url);
     }
 

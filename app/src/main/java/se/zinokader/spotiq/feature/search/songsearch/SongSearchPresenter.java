@@ -143,16 +143,15 @@ public class SongSearchPresenter extends BasePresenter<SongSearchView> {
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .concatMap(tracksPager -> Observable.fromArray(TrackMapper.tracksToSongs(tracksPager.tracks.items, user)))
-                    .compose(this.deliverFirst())
-                    .subscribe(searchDelivery -> searchDelivery.split(
-                        (songSearchView, songs) -> {
-                            if (songs.isEmpty()) songSearchView.showMessage("No songs were found for the search query " + query);
-                            songSearchView.updateSearch(songs);
-                        },
-                        (songSearchView, throwable) -> {
-                            Log.d(LogTag.LOG_SEARCH, "Something went wrong on searching for tracks");
-                            throwable.printStackTrace();
-                        }));
+                    .subscribe(songs -> {
+                        if (getView() != null) {
+                            if (songs.isEmpty()) getView().showMessage("No songs were found for the search query " + query);
+                            getView().updateSearch(songs);
+                        }
+                    }, throwable -> {
+                        Log.d(LogTag.LOG_SEARCH, "Something went wrong on searching for tracks");
+                        throwable.printStackTrace();
+                    });
             });
     }
 

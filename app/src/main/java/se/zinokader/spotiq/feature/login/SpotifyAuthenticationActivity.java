@@ -39,7 +39,7 @@ public class SpotifyAuthenticationActivity extends AppCompatActivity implements 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_authentication);
         ((Injector) getApplication()).inject(this);
-        overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
+        overridePendingTransition(R.anim.fade_in, 0);
 
         AuthenticationRequest authRequest = new AuthenticationRequest.Builder(
             BuildConfig.SPOTIFY_CLIENT_ID,
@@ -51,6 +51,12 @@ public class SpotifyAuthenticationActivity extends AppCompatActivity implements 
         AuthenticationClient.openLoginActivity(this,
             ApplicationConstants.LOGIN_INTENT_REQUEST_CODE,
             authRequest);
+    }
+
+    @Override
+    public void finish() {
+        super.finish();
+        overridePendingTransition(R.anim.fade_in, 0);
     }
 
     @Override
@@ -96,7 +102,6 @@ public class SpotifyAuthenticationActivity extends AppCompatActivity implements 
             Log.d(LogTag.LOG_LOGIN, "Wrong request code for Spotify login");
             finish();
         }
-
     }
 
     @Override

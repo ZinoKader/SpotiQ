@@ -12,6 +12,7 @@ import com.github.andrewlord1990.snackbarbuilder.SnackbarBuilder;
 import nucleus5.factory.PresenterFactory;
 import nucleus5.presenter.Presenter;
 import nucleus5.view.NucleusAppCompatActivity;
+import se.zinokader.spotiq.R;
 import se.zinokader.spotiq.constant.ApplicationConstants;
 import se.zinokader.spotiq.service.authentication.SpotifyAuthenticationService;
 import se.zinokader.spotiq.util.di.Injector;
@@ -23,12 +24,19 @@ public abstract class BaseActivity<P extends Presenter> extends NucleusAppCompat
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
         final PresenterFactory<P> superFactory = super.getPresenterFactory();
         setPresenterFactory(superFactory == null ? null : (PresenterFactory<P>) () -> {
             P presenter = superFactory.createPresenter();
             ((Injector) getApplication()).inject(presenter);
             return presenter;
         });
+    }
+
+    @Override
+    public void finish() {
+        super.finish();
+        overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
     }
 
     @Override
