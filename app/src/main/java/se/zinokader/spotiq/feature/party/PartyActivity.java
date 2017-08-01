@@ -93,7 +93,7 @@ public class PartyActivity extends BaseActivity<PartyPresenter> implements Party
             if (!shownSongAddedMessages.contains(addedSong)) {
                 shownSongAddedMessages.add(addedSong);
                 if (LocalDateTime.now().isAfter(initializedTimeStamp.plusSeconds(ApplicationConstants.PARTY_MESSAGE_GRACE_PERIOD_SEC))) {
-                    new Handler().postDelayed(() -> showMessage(addedSong + " was added to the tracklist"), ApplicationConstants.DEFER_SNACKBAR_DELAY);
+                    new Handler().postDelayed(() -> showMessage("\"" + addedSong + "\"" + " has been queued"), ApplicationConstants.DEFER_SNACKBAR_DELAY);
                 }
             }
         }
@@ -102,10 +102,10 @@ public class PartyActivity extends BaseActivity<PartyPresenter> implements Party
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        supportPostponeEnterTransition();
         initializedTimeStamp = LocalDateTime.now();
         binding = DataBindingUtil.setContentView(this, R.layout.activity_party);
 
-        supportPostponeEnterTransition();
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
         Bundle partyInfo = getIntent().getExtras();
@@ -269,13 +269,13 @@ public class PartyActivity extends BaseActivity<PartyPresenter> implements Party
                 .listener(new RequestListener<String, GlideDrawable>() {
                     @Override
                     public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
-                        new Handler().postDelayed(() -> supportStartPostponedEnterTransition(), ApplicationConstants.ACTIVITY_TRANSITION_POSTPONE_DELAY_MS);
+                        supportStartPostponedEnterTransition();
                         return false;
                     }
 
                     @Override
                     public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
-                        new Handler().postDelayed(() -> supportStartPostponedEnterTransition(), ApplicationConstants.ACTIVITY_TRANSITION_POSTPONE_DELAY_MS);
+                        supportStartPostponedEnterTransition();
                         return false;
                     }
                 })

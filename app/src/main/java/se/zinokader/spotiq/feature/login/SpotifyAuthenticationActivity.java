@@ -56,7 +56,7 @@ public class SpotifyAuthenticationActivity extends AppCompatActivity implements 
     @Override
     public void finish() {
         super.finish();
-        overridePendingTransition(R.anim.fade_in, 0);
+        overridePendingTransition(R.anim.short_fade_in, R.anim.short_fade_out);
     }
 
     @Override

@@ -9,7 +9,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,16 +26,12 @@ import io.reactivex.schedulers.Schedulers;
 import jp.wasabeef.recyclerview.animators.FadeInDownAnimator;
 import se.zinokader.spotiq.R;
 import se.zinokader.spotiq.constant.ApplicationConstants;
-import se.zinokader.spotiq.constant.LogTag;
 import se.zinokader.spotiq.databinding.FragmentTracklistBinding;
 import se.zinokader.spotiq.model.Song;
 import se.zinokader.spotiq.repository.TracklistRepository;
 import se.zinokader.spotiq.util.di.Injector;
 import se.zinokader.spotiq.util.listener.FabListener;
 import se.zinokader.spotiq.util.view.DividerItemDecoration;
-import su.j2e.rvjoiner.JoinableAdapter;
-import su.j2e.rvjoiner.JoinableLayout;
-import su.j2e.rvjoiner.RvJoiner;
 
 public class TracklistFragment extends Fragment {
 
@@ -49,12 +44,7 @@ public class TracklistFragment extends Fragment {
 
     private CompositeDisposable subscriptions = new CompositeDisposable();
 
-    private RvJoiner recyclerViewJoiner = new RvJoiner(true);
     private FadeInDownAnimator itemAnimator = new FadeInDownAnimator();
-    private JoinableLayout emptyTracklistLayout = new JoinableLayout(R.layout.recyclerview_empty_placeholder_view);
-    private boolean emptyTracklistNoticeAttached = true;
-    private JoinableLayout upNextHeaderLayout = new JoinableLayout(R.layout.recyclerview_row_tracklist_upnext_header);
-    private boolean upNextHeaderAttached = false;
 
     private List<Song> songs = new ArrayList<>();
 
@@ -111,16 +101,14 @@ public class TracklistFragment extends Fragment {
             fabListener = (FabListener) context;
         }
         else {
-            throw new ClassCastException(context.getClass().getSimpleName()
-                + " must implement " + fabListener.getClass().getSimpleName());
+            throw new ClassCastException(context.getClass().getSimpleName() + " must implement " + fabListener.getClass().getSimpleName());
         }
         super.onAttach(context);
     }
 
-    @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_tracklist, container, false);
+    public View onCreateView(LayoutInflater inflater, ViewGroup parentContainer, Bundle savedInstanceState) {
+        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_tracklist, parentContainer, false);
 
         binding.tracklistRecyclerView.setOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
@@ -135,19 +123,12 @@ public class TracklistFragment extends Fragment {
             }
         });
 
-        binding.tracklistRecyclerView.addItemDecoration(new DividerItemDecoration(
-            getResources().getDrawable(R.drawable.track_list_divider), false, true));
         binding.tracklistRecyclerView.setLayoutManager(new LinearLayoutManager(inflater.getContext()));
-
-        JoinableAdapter nowPlayingJoinable = new JoinableAdapter(new NowPlayingRecyclerAdapter(songs), true);
-        JoinableAdapter upNextJoinable = new JoinableAdapter(new UpNextRecyclerAdapter(songs), true);
-
-        recyclerViewJoiner.add(emptyTracklistLayout, 0);
-        recyclerViewJoiner.add(nowPlayingJoinable);
-        recyclerViewJoiner.add(upNextJoinable);
-
+        binding.tracklistRecyclerView.setEmptyView(binding.tracklistEmptyView);
         binding.tracklistRecyclerView.setItemAnimator(itemAnimator);
-        binding.tracklistRecyclerView.setAdapter(recyclerViewJoiner.getAdapter());
+        binding.tracklistRecyclerView.addItemDecoration(new DividerItemDecoration(
+            getResources().getDrawable(R.drawable.track_list_padding_divider), true, true));
+        binding.tracklistRecyclerView.setAdapter(new TracklistRecyclerAdapter(songs));
 
         return binding.getRoot();
     }
@@ -157,63 +138,22 @@ public class TracklistFragment extends Fragment {
     }
 
     private void addSong(Song song) {
-
-        if (emptyTracklistNoticeAttached) {
-            recyclerViewJoiner.remove(emptyTracklistLayout);
-            emptyTracklistNoticeAttached = false;
-            recyclerViewJoiner.getAdapter().notifyItemRemoved(0);
-        }
-
         songs.add(song);
         int songPosition = getSongPosition(song);
-
-        if (songs.size() == 1) {
-            recyclerViewJoiner.getAdapter().notifyItemInserted(songPosition);
-        }
-        else if (songs.size() == 2 && !upNextHeaderAttached) {
-            recyclerViewJoiner.add(upNextHeaderLayout, 1);
-            upNextHeaderAttached = true;
-            recyclerViewJoiner.getAdapter().notifyItemRangeInserted(1, 2);
-        }
-        else {
-            recyclerViewJoiner.getAdapter().notifyItemInserted(songPosition + 1);
-        }
-
+        binding.tracklistRecyclerView.getAdapter().notifyItemInserted(songPosition);
         sendSongAddedBroadcast(song.getName());
     }
 
     private void removeSong(Song song) {
         int songPosition = getSongPosition(song);
-        if (songPosition == -1) {
-            Log.d(LogTag.LOG_PARTY, "Song could not be removed because it did not exist in the tracklist");
-            return;
-        }
         songs.remove(songPosition);
-
-        if (songs.size() == 1 && upNextHeaderAttached) {
-            recyclerViewJoiner.remove(upNextHeaderLayout);
-            upNextHeaderAttached = false;
-            recyclerViewJoiner.getAdapter().notifyItemRangeRemoved(songPosition, 2);
-        }
-        else if (songPosition == 0) {
-            recyclerViewJoiner.getAdapter().notifyItemRemoved(songPosition);
-        }
-        else {
-            recyclerViewJoiner.getAdapter().notifyItemRemoved(songPosition + 1);
-        }
-
-
-        if (songs.isEmpty() && !emptyTracklistNoticeAttached) {
-            recyclerViewJoiner.add(emptyTracklistLayout, 0);
-            emptyTracklistNoticeAttached = true;
-            recyclerViewJoiner.getAdapter().notifyItemInserted(0);
-        }
+        binding.tracklistRecyclerView.getAdapter().notifyItemRemoved(songPosition);
     }
 
     private int getSongPosition(Song song) {
-        for (int songPosition = 0; songPosition < songs.size(); songPosition++) {
-            if (song.getSongSpotifyId().equals(songs.get(songPosition).getSongSpotifyId())) {
-                return songPosition;
+        for (int position = 0; position < songs.size(); position++) {
+            if (song.getSongSpotifyId().equals(songs.get(position).getSongSpotifyId())) {
+                return position;
             }
         }
         return -1;

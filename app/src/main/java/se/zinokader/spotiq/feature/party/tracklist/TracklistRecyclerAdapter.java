@@ -28,29 +28,40 @@ import se.zinokader.spotiq.R;
 import se.zinokader.spotiq.constant.ApplicationConstants;
 import se.zinokader.spotiq.model.Song;
 
-public class UpNextRecyclerAdapter extends RecyclerView.Adapter<UpNextRecyclerAdapter.SongHolder> {
+public class TracklistRecyclerAdapter extends RecyclerView.Adapter<TracklistRecyclerAdapter.SongHolder> {
 
     private List<Song> songs;
+    private static final int POSITION_NOW_PLAYING = 0;
+    private static final int POSITION_UP_NEXT_WITH_HEADER = 1;
+    private static final int POSITION_UP_NEXT = 2;
 
-    UpNextRecyclerAdapter(List<Song> songs) {
+    TracklistRecyclerAdapter(List<Song> songs) {
         this.songs = songs;
-        setHasStableIds(true);
     }
 
     @Override
-    public SongHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
-        View inflatedView = LayoutInflater.from(viewGroup.getContext())
-            .inflate(R.layout.recyclerview_row_tracklist_upnext, viewGroup, false);
-        inflatedView.getLayoutParams().width = viewGroup.getWidth();
+    public SongHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        View inflatedView;
+        switch (viewType) {
+            case POSITION_NOW_PLAYING:
+                inflatedView = LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.recyclerview_row_tracklist_now_playing, parent, false);
+                break;
+            case POSITION_UP_NEXT_WITH_HEADER:
+                inflatedView = LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.recyclerview_row_tracklist_up_next_with_header, parent, false);
+                break;
+            default:
+            case POSITION_UP_NEXT:
+                inflatedView = LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.recyclerview_row_tracklist_up_next, parent, false);
+        }
+        inflatedView.getLayoutParams().width = parent.getWidth();
         return new SongHolder(inflatedView);
     }
 
     @Override
     public void onBindViewHolder(SongHolder songHolder, int position) {
-
-        if (position >= 0) {
-            position += 1;
-        }
 
         Song song = songs.get(position);
         Context context = songHolder.itemView.getContext();
@@ -112,13 +123,20 @@ public class UpNextRecyclerAdapter extends RecyclerView.Adapter<UpNextRecyclerAd
     }
 
     @Override
-    public int getItemCount() {
-        return songs.size() > 1 ? songs.size() - 1 : 0; //handle all items except the first one
+    public int getItemViewType(int position) {
+        switch (position) {
+            case 0:
+                return POSITION_NOW_PLAYING;
+            case 1:
+                return POSITION_UP_NEXT_WITH_HEADER;
+            default:
+                return POSITION_UP_NEXT;
+        }
     }
 
     @Override
-    public long getItemId(int position) {
-        return songs.get(position).getSongSpotifyId().hashCode();
+    public int getItemCount() {
+        return songs.size();
     }
 
     class SongHolder extends RecyclerView.ViewHolder {

@@ -26,7 +26,7 @@ public class SpotiqApplication extends Application implements Injector {
         FirebaseApp.initializeApp(this);
         FirebaseDatabase.getInstance().setPersistenceEnabled(true);
         AndroidThreeTen.init(this); //java 8 time api backport
-        
+
         appComponent = DaggerAppComponent.create();
         injector = new ComponentInjector<>(AppComponent.class, appComponent);
 

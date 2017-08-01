@@ -71,8 +71,6 @@ public class LobbyActivity extends BaseActivity<LobbyPresenter> implements Lobby
         startActivity(intent, transitionOptions.toBundle());
     }
 
-    private static final int DIALOG_ANIMATION_DURATION = 500;
-
     private enum DialogType {
         JOIN_DIALOG, CREATE_DIALOG
     }
@@ -154,7 +152,7 @@ public class LobbyActivity extends BaseActivity<LobbyPresenter> implements Lobby
                     x, y, binding.createPartyButton.getWidth() / 2, endRadius);
                 circularDialogReveal.setInterpolator(new AccelerateDecelerateInterpolator());
                 dialogRoot.setVisibility(View.VISIBLE);
-                circularDialogReveal.setDuration(DIALOG_ANIMATION_DURATION);
+                circularDialogReveal.setDuration(ApplicationConstants.DIALOG_ANIMATION_DURATION);
                 circularDialogReveal.start();
                 break;
             case CLOSE:
@@ -169,7 +167,7 @@ public class LobbyActivity extends BaseActivity<LobbyPresenter> implements Lobby
                         dialogRoot.setVisibility(View.INVISIBLE);
                     }
                 });
-                circularDialogClose.setDuration(DIALOG_ANIMATION_DURATION);
+                circularDialogClose.setDuration(ApplicationConstants.DIALOG_ANIMATION_DURATION);
                 circularDialogClose.start();
                 break;
         }

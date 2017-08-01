@@ -91,6 +91,7 @@ public class LoginActivity extends BaseActivity<LoginPresenter> implements Login
         circularRevealAnimation = ViewAnimationUtils.createCircularReveal(binding.root,
             x, y, startRadius, endRadius);
         circularRevealAnimation.setInterpolator(new AccelerateDecelerateInterpolator());
+        circularRevealAnimation.setDuration(ApplicationConstants.DIALOG_ANIMATION_DURATION);
 
         return circularRevealAnimation;
     }

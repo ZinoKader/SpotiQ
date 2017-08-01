@@ -532,4 +532,21 @@
     </android.support.constraint.ConstraintLayout>
 
 
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/paddingLayout"
+        android:visibility="invisible"
+        android:layout_width="365dp"
+        android:layout_height="120dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="24dp"
+        android:clipToPadding="false"
+        android:outlineProvider="bounds"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/trackViewHolder4">
+
+    </android.support.constraint.ConstraintLayout>
+
+
 </android.support.constraint.ConstraintLayout>

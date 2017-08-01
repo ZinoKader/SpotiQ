@@ -20,7 +20,7 @@
     <string name="navigating_to_party">Loading party</string>
 
     <!-- Search -->
-    <string name="search_hint">Search for music</string>
+    <string name="search_hint">Search for song titles</string>
     <string name="song_search_spotify_library_label">Search for music in the Spotify library</string>
     <string name="song_search_personal_playlists_label">Search for music in your personal playlists</string>
 

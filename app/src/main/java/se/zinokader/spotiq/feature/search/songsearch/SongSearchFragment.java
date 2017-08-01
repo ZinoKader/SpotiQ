@@ -103,10 +103,7 @@ public class SongSearchFragment extends BaseFragment<SongSearchPresenter> implem
         binding.songSearchRecyclerView.setHasFixedSize(true);
         binding.songSearchRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        binding.searchBar.openSearch();
-        binding.searchBar.setHomeButtonListener(() -> {
-            binding.searchBar.hideSuggestions();
-        });
+        binding.searchBar.setHomeButtonListener(() -> binding.searchBar.hideSuggestions());
         binding.searchBar.setSearchListener(new SimpleSearchListener() {
             @Override
             public void onSearchTermChanged(String query) {

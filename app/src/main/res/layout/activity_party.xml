@@ -7,6 +7,8 @@
         android:id="@+id/coordinatorContainer"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:clipChildren="false"
+        android:clipToPadding="false"
         android:fitsSystemWindows="true">
 
         <android.support.design.widget.AppBarLayout
@@ -15,6 +17,7 @@
             android:layout_height="wrap_content"
             android:layout_above="@id/fragmentHolder"
             android:clipChildren="false"
+            android:clipToPadding="false"
             android:fitsSystemWindows="false">
 
             <android.support.v7.widget.Toolbar
@@ -26,6 +29,7 @@
                 android:layout_marginTop="0dp"
                 android:background="@color/colorPrimary"
                 android:clipChildren="false"
+                android:clipToPadding="false"
                 android:elevation="15dp"
                 app:contentInsetStart="0dp"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -37,7 +41,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:background="@color/colorPrimary"
-                    android:clipChildren="false">
+                    android:clipChildren="false"
+                    android:clipToPadding="false">
 
                     <TextView
                         android:id="@+id/partyTitle"

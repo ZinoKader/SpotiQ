@@ -142,7 +142,7 @@ public class SongSearchPresenter extends BasePresenter<SongSearchView> {
                 searchTracksRecursively(query, searchOptions)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .concatMap(tracksPager -> Observable.fromArray(TrackMapper.tracksToSongs(tracksPager.tracks.items, user)))
+                    .map(tracksPager -> TrackMapper.tracksToSongs(tracksPager.tracks.items, user))
                     .subscribe(songs -> {
                         if (getView() != null) {
                             if (songs.isEmpty()) getView().showMessage("No songs were found for the search query " + query);

@@ -160,7 +160,7 @@ public class PlaylistSearchPresenter extends BasePresenter<PlaylistSearchView> {
                         }
                         return filteredTracks;
                     })
-                    .concatMap(filteredTracks -> Observable.fromArray(TrackMapper.playlistTracksToSongs(filteredTracks, user)))
+                    .map(filteredTracks -> TrackMapper.playlistTracksToSongs(filteredTracks, user))
                     .subscribe(songs -> {
                         if (getView() != null) {
                             if (songs.isEmpty()) getView().showMessage("Playlist is empty");
