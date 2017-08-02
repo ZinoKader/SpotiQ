@@ -27,12 +27,14 @@ public class LoginPresenter extends BasePresenter<LoginView> {
                 (loginView, didLogin) -> {
                     if (didLogin) {
                         loginView.showMessage("Registering and authenticating user...");
-                    } else {
-                        loginView.showMessage("Could not connect to SpotiQ servers");
+                        Observable.just(new Empty())
+                            .delay(ApplicationConstants.MEDIUM_ACTION_DELAY_SEC, TimeUnit.SECONDS)
+                            .subscribe(delayFinished -> loginView.goToSpotifyAuthentication());
                     }
-                    Observable.just(new Empty())
-                        .delay(ApplicationConstants.MEDIUM_ACTION_DELAY_SEC, TimeUnit.SECONDS)
-                        .subscribe(delayFinished -> loginView.goToSpotifyAuthentication());
+                    else {
+                        loginView.showMessage("Could not connect to SpotiQ servers");
+                        loginView.resetProgress();
+                    }
                 },
                 (loginView, throwable) -> {
                     loginView.showMessage("Something went wrong, please try again");
