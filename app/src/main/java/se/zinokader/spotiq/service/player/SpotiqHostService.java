@@ -78,9 +78,9 @@ public class SpotiqHostService extends Service implements ConnectionStateCallbac
     private MediaSessionHandler mediaSessionHandler;
     private static final int ONGOING_NOTIFICATION_ID = 821;
 
-    private IBinder binder = new PlayerServiceBinder();
+    private IBinder binder = new HostServiceBinder();
 
-    public class PlayerServiceBinder extends Binder {
+    public class HostServiceBinder extends Binder {
         public SpotiqHostService getService() {
             return SpotiqHostService.this;
         }
@@ -116,7 +116,7 @@ public class SpotiqHostService extends Service implements ConnectionStateCallbac
     @Override
     public boolean onUnbind(Intent intent) {
         if (!changingConfiguration) {
-            Log.d(LogTag.LOG_PLAYER_SERVICE, "Starting player service in foreground");
+            Log.d(LogTag.LOG_HOST_SERVICE, "Starting player service in foreground");
             inForeground = true;
             updatePlayerNotification();
         }
@@ -127,17 +127,22 @@ public class SpotiqHostService extends Service implements ConnectionStateCallbac
     public void onCreate() {
         ((Injector) getApplicationContext()).inject(this);
         mediaSessionHandler = new MediaSessionHandler(this);
-        Log.d(LogTag.LOG_PLAYER_SERVICE, "SpotiQ Player service created");
+        Log.d(LogTag.LOG_HOST_SERVICE, "SpotiQ Host service created");
     }
 
     @Override
     public void onDestroy() {
-        Log.d(LogTag.LOG_PLAYER_SERVICE, "SpotiQ Player service destroyed");
+        Log.d(LogTag.LOG_HOST_SERVICE, "SpotiQ Host service destroyed");
         stopForeground(true);
         mediaSessionHandler.releaseSessions();
         subscriptions.clear();
         if (connectionReceiver != null) {
-            unregisterReceiver(connectionReceiver);
+            try {
+                unregisterReceiver(connectionReceiver);
+            }
+            catch (IllegalArgumentException e) {
+                Log.d(LogTag.LOG_HOST_SERVICE, "Connection receiver was not registered on unregistration");
+            }
         }
         if (spotifyPlayer != null) {
             try {
@@ -163,40 +168,41 @@ public class SpotiqHostService extends Service implements ConnectionStateCallbac
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.d(LogTag.LOG_PLAYER_SERVICE, "Player service initialization started");
+        Log.d(LogTag.LOG_HOST_SERVICE, "Host service initialization started");
+
+        if (intent == null || intent.getAction() == null) {
+            Log.d(LogTag.LOG_HOST_SERVICE, "Host service could not be initialized - Received empty party title");
+            stopSelf();
+            return START_NOT_STICKY;
+        }
 
         switch (intent.getAction()) {
             case ServiceConstants.ACTION_INIT:
                 partyTitle = intent.getStringExtra(ApplicationConstants.PARTY_NAME_EXTRA);
                 if (partyTitle.isEmpty()) {
-                    Log.d(LogTag.LOG_PLAYER_SERVICE, "Player service could not be initialized - Received empty party title");
+                    Log.d(LogTag.LOG_HOST_SERVICE, "Host service could not be initialized - Received empty party title");
                     stopSelf();
                     break;
                 }
                 initPlayer().subscribe(didInit -> {
-                    Log.d(LogTag.LOG_PLAYER_SERVICE, "Player initialization status: " + didInit);
+                    Log.d(LogTag.LOG_HOST_SERVICE, "Host initialization status: " + didInit);
                     if (!didInit) {
                         stopSelf();
                         return;
                     }
                     registerReceiver(connectionReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
+                    setupServiceSettings();
                 });
-                setupServiceSettings();
                 break;
             case ServiceConstants.ACTION_PLAY_PAUSE:
                 if (spotifyPlayer == null) {
-                    Log.d(LogTag.LOG_PLAYER_SERVICE, "SpotifyPlayer was null - stopping service");
+                    Log.d(LogTag.LOG_HOST_SERVICE, "SpotifyPlayer was null - stopping service");
                     stopSelf();
-                    break;
+                    return START_NOT_STICKY;
                 }
-                if (isPlaying()) {
-                    pause();
-                }
-                else {
-                    play();
-                }
+                musicAction();
+                break;
         }
-
         return START_STICKY;
     }
 
@@ -229,14 +235,16 @@ public class SpotiqHostService extends Service implements ConnectionStateCallbac
                         startForeground(ONGOING_NOTIFICATION_ID, playerNotification);
                     }
                 });
-        } else {
+        }
+        else {
             title = "Hosting party " + partyTitle;
             description = "Player is idle";
             Notification playerNotification;
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 playerNotification = NotificationUtil.buildPlayerNotification(SpotiqHostService.this,
                     mediaSessionHandler.getMediaSession(), title, description, largeIcon);
-            } else {
+            }
+            else {
                 playerNotification = NotificationUtil.buildPlayerNotificationCompat(SpotiqHostService.this,
                     mediaSessionHandler.getMediaSessionCompat(), title, description, largeIcon);
             }
@@ -267,7 +275,7 @@ public class SpotiqHostService extends Service implements ConnectionStateCallbac
                         @Override
                         public void onSuccess() {
                             subscriber.onSuccess(true);
-                            Log.d(LogTag.LOG_PLAYER_SERVICE, "Set Spotify Player custom playback bitrate successfully");
+                            Log.d(LogTag.LOG_HOST_SERVICE, "Set Spotify Player custom playback bitrate successfully");
                             sendPlayingStatusBroadcast(false); //make sure all listeners are up to sync with an inititally paused status
                             mediaSessionHandler.setSessionActive();
                         }
@@ -275,7 +283,7 @@ public class SpotiqHostService extends Service implements ConnectionStateCallbac
                         @Override
                         public void onError(Error error) {
                             subscriber.onError(new PlayerInitializationException(error.name()));
-                            Log.d(LogTag.LOG_PLAYER_SERVICE, "Failed to set Spotify Player playback bitrate. Cause: " + error.toString());
+                            Log.d(LogTag.LOG_HOST_SERVICE, "Failed to set Spotify Player playback bitrate. Cause: " + error.toString());
 
                         }
                     }, PlaybackBitrate.BITRATE_HIGH);
@@ -285,7 +293,7 @@ public class SpotiqHostService extends Service implements ConnectionStateCallbac
                 @Override
                 public void onError(Throwable throwable) {
                     subscriber.onError(throwable);
-                    Log.d(LogTag.LOG_PLAYER_SERVICE, "Could not initialize Spotify Player: " + throwable.getMessage());
+                    Log.d(LogTag.LOG_HOST_SERVICE, "Could not initialize Spotify Player: " + throwable.getMessage());
                     stopSelf();
                 }
 
@@ -297,7 +305,16 @@ public class SpotiqHostService extends Service implements ConnectionStateCallbac
         return !(spotifyPlayer == null || spotifyPlayer.getPlaybackState() == null) && spotifyPlayer.getPlaybackState().isPlaying;
     }
 
-    public void play() {
+    public void musicAction() {
+        if (isPlaying()) {
+            pause();
+        }
+        else {
+            play();
+        }
+    }
+
+    private void play() {
         if (!NetworkUtil.isConnected(this)) {
             handleLostConnection();
             return;
@@ -310,16 +327,16 @@ public class SpotiqHostService extends Service implements ConnectionStateCallbac
         }
     }
 
-    public void pause() {
+    private void pause() {
         spotifyPlayer.pause(new Player.OperationCallback() {
             @Override
             public void onSuccess() {
-                Log.d(LogTag.LOG_PLAYER_SERVICE, "Paused music successfully");
+                Log.d(LogTag.LOG_HOST_SERVICE, "Paused music successfully");
             }
 
             @Override
             public void onError(Error error) {
-                Log.d(LogTag.LOG_PLAYER_SERVICE, "Failed to pause music");
+                Log.d(LogTag.LOG_HOST_SERVICE, "Failed to pause music");
             }
         });
     }
@@ -328,12 +345,12 @@ public class SpotiqHostService extends Service implements ConnectionStateCallbac
         spotifyPlayer.resume(new Player.OperationCallback() {
             @Override
             public void onSuccess() {
-                Log.d(LogTag.LOG_PLAYER_SERVICE, "Resumed music successfully");
+                Log.d(LogTag.LOG_HOST_SERVICE, "Resumed music successfully");
             }
 
             @Override
             public void onError(Error error) {
-                Log.d(LogTag.LOG_PLAYER_SERVICE, "Failed to resume music");
+                Log.d(LogTag.LOG_HOST_SERVICE, "Failed to resume music");
             }
         });
     }
@@ -344,18 +361,18 @@ public class SpotiqHostService extends Service implements ConnectionStateCallbac
                 spotifyPlayer.playUri(new Player.OperationCallback() {
                     @Override
                     public void onSuccess() {
-                        Log.d(LogTag.LOG_PLAYER_SERVICE, "Playing next song in tracklist");
+                        Log.d(LogTag.LOG_HOST_SERVICE, "Playing next song in tracklist");
                         isTracklistEmpty = false;
                     }
 
                     @Override
                     public void onError(Error error) {
-                        Log.d(LogTag.LOG_PLAYER_SERVICE, "Failed to play next song in tracklist: " + error.name());
+                        Log.d(LogTag.LOG_HOST_SERVICE, "Failed to play next song in tracklist: " + error.name());
                         sendPlayingStatusBroadcast(false);
                     }
                 }, song.getSongUri(), 0, 0);
             }, throwable -> {
-                Log.d(LogTag.LOG_PLAYER_SERVICE, "Could not play next song: " + throwable.getMessage());
+                Log.d(LogTag.LOG_HOST_SERVICE, "Could not play next song: " + throwable.getMessage());
                 sendPlayingStatusBroadcast(false);
                 if (throwable instanceof EmptyTracklistException) {
                     isTracklistEmpty = true;
@@ -364,7 +381,6 @@ public class SpotiqHostService extends Service implements ConnectionStateCallbac
     }
 
     private void setupServiceSettings() {
-
         //synchronize tracklist status
         tracklistRepository.getFirstSong(partyTitle)
             .subscribe((song, throwable) -> {
@@ -383,7 +399,6 @@ public class SpotiqHostService extends Service implements ConnectionStateCallbac
                 });
             subscriptions.add(autoPlayTask);
         }
-
     }
 
     private void handlePlaybackEnd() {
@@ -393,7 +408,7 @@ public class SpotiqHostService extends Service implements ConnectionStateCallbac
                 if (wasRemoved) playNext();
             }, throwable -> {
                 if (throwable instanceof EmptyTracklistException) {
-                    Log.d(LogTag.LOG_PLAYER_SERVICE, "Tracklist empty, next song not played");
+                    Log.d(LogTag.LOG_HOST_SERVICE, "Tracklist empty, next song not played");
                     isTracklistEmpty = true;
                 }
             });
@@ -420,7 +435,7 @@ public class SpotiqHostService extends Service implements ConnectionStateCallbac
 
     @Override
     public void onPlaybackEvent(PlayerEvent playerEvent) {
-        Log.d(LogTag.LOG_PLAYER_SERVICE, "Playback event: " + playerEvent.name());
+        Log.d(LogTag.LOG_HOST_SERVICE, "Playback event: " + playerEvent.name());
         switch (playerEvent) {
             case kSpPlaybackNotifyLostPermission:
                 showLostPlaybackPermissionToast();
@@ -463,7 +478,7 @@ public class SpotiqHostService extends Service implements ConnectionStateCallbac
 
     @Override
     public void onPlaybackError(Error error) {
-        Log.d(LogTag.LOG_PLAYER_SERVICE, "Spotify playback error: " + error.toString());
+        Log.d(LogTag.LOG_HOST_SERVICE, "Spotify playback error: " + error.toString());
         handlePlaybackError();
     }
 
@@ -478,7 +493,7 @@ public class SpotiqHostService extends Service implements ConnectionStateCallbac
 
     @Override
     public void onLoginFailed(Error error) {
-        Log.d(LogTag.LOG_PLAYER_SERVICE, "Spotify login failed: " + error.toString());
+        Log.d(LogTag.LOG_HOST_SERVICE, "Spotify login failed: " + error.toString());
         /*
         switch (error) {
             case kSpErrorNeedsPremium:
@@ -494,7 +509,7 @@ public class SpotiqHostService extends Service implements ConnectionStateCallbac
 
     @Override
     public void onConnectionMessage(String message) {
-        Log.d(LogTag.LOG_PLAYER_SERVICE, "Spotify connection message: " + message);
+        Log.d(LogTag.LOG_HOST_SERVICE, "Spotify connection message: " + message);
     }
 
 }

@@ -9,6 +9,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +18,7 @@ import io.reactivex.Observable;
 import io.reactivex.subjects.PublishSubject;
 import kaaes.spotify.webapi.android.models.PlaylistSimple;
 import se.zinokader.spotiq.R;
+import se.zinokader.spotiq.constant.ApplicationConstants;
 import se.zinokader.spotiq.model.User;
 
 public class PlaylistSearchRecyclerAdapter extends RecyclerView.Adapter<PlaylistSearchRecyclerAdapter.PlaylistHolder> {
@@ -41,8 +43,14 @@ public class PlaylistSearchRecyclerAdapter extends RecyclerView.Adapter<Playlist
 
         playlistHolder.itemView.setOnClickListener(view -> onClickSubject.onNext(playlist));
 
+        String playlistImageUrl = playlist.images.isEmpty()
+            ? ApplicationConstants.PLAYLIST_IMAGE_PLACEHOLDER_URL
+            : playlist.images.get(0).url;
+
         Glide.with(context)
-            .load(playlist.images.get(0).url)
+            .load(playlistImageUrl)
+            .diskCacheStrategy(DiskCacheStrategy.SOURCE)
+            .placeholder(R.drawable.image_playlist_placeholder)
             .fitCenter()
             .into(playlistHolder.playlistArt);
         playlistHolder.playlistName.setText(playlist.name);

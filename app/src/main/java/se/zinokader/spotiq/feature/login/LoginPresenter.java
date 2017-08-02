@@ -37,7 +37,7 @@ public class LoginPresenter extends BasePresenter<LoginView> {
                     }
                 },
                 (loginView, throwable) -> {
-                    loginView.showMessage("Something went wrong, please try again");
+                    loginView.showMessage("Login failed, please try again");
                 }));
     }
 
@@ -52,6 +52,7 @@ public class LoginPresenter extends BasePresenter<LoginView> {
                     loginView.showMessage("Successfully authenticated with Spotify");
                 },
                 (loginView, throwable) -> {
+                    loginView.showMessage("Login failed, please try again");
                 })
             )
             .delay(ApplicationConstants.MEDIUM_ACTION_DELAY_SEC, TimeUnit.SECONDS, AndroidSchedulers.mainThread())
@@ -60,6 +61,7 @@ public class LoginPresenter extends BasePresenter<LoginView> {
                     loginView.goToLobby();
                 },
                 (loginView, throwable) -> {
+                    loginView.showMessage("Login failed, please try again");
                 }));
     }
 
@@ -79,6 +81,7 @@ public class LoginPresenter extends BasePresenter<LoginView> {
                     loginView.showMessage(errorMessage);
                 },
                 (loginView, throwable) -> {
+                    loginView.showMessage("Login failed, please try again");
                 }));
     }
 

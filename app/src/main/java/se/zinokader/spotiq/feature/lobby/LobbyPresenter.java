@@ -51,15 +51,16 @@ public class LobbyPresenter extends BasePresenter<LobbyView> {
         restartableLatestCache(LOAD_USER_RESTARTABLE_ID,
             () -> spotifyRepository.getMe(spotifyCommunicatorService.getWebApi())
                 .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread()),
+                .observeOn(AndroidSchedulers.mainThread())
+                .retry(ApplicationConstants.DEFAULT_REQUEST_RETRY_TIMES),
             (lobbyView, userPrivate) -> {
                 User user = new User(userPrivate.id, userPrivate.display_name, userPrivate.images);
                 lobbyView.setUserDetails(user.getUserName(), user.getUserImageUrl());
-            }, (lobbyView, throwable) -> Log.d(LogTag.LOG_LOBBY, "Error when getting user Spotify data"));
+            }, (lobbyView, throwable) -> {
+                Log.d(LogTag.LOG_LOBBY, "Error when getting user Spotify data");
+            });
 
-        if (savedState == null) {
-            start(LOAD_USER_RESTARTABLE_ID);
-        }
+        start(LOAD_USER_RESTARTABLE_ID);
     }
 
     void joinParty(String partyTitle, String partyPassword) {
@@ -116,10 +117,10 @@ public class LobbyPresenter extends BasePresenter<LobbyView> {
                         lobbyView.showMessage("Invalid password");
                     }
                     else if (exception instanceof PartyVersionHigherException) {
-                        lobbyView.showMessage("This party was created with a newer version of the app - update SpotiQ to join this party!");
+                        lobbyView.showMessage("This party was created with a newer version of SpotiQ");
                     }
                     else if(exception instanceof PartyVersionLowerException) {
-                        lobbyView.showMessage("This party was created with an older version of the app - create a new one to jam!");
+                        lobbyView.showMessage("This party was created with an older version of SpotiQ");
                     }
                     else {
                         lobbyView.showMessage("Something went wrong when joining the party");

@@ -39,7 +39,7 @@ public class SpotifyAuthenticationActivity extends AppCompatActivity implements 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_authentication);
         ((Injector) getApplication()).inject(this);
-        overridePendingTransition(R.anim.fade_in, 0);
+        overridePendingTransition(R.anim.short_fade_in, R.anim.short_fade_out);
 
         AuthenticationRequest authRequest = new AuthenticationRequest.Builder(
             BuildConfig.SPOTIFY_CLIENT_ID,

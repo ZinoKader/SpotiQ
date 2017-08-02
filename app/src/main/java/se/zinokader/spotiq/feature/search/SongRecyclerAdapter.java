@@ -71,6 +71,7 @@ public class SongRecyclerAdapter extends RecyclerView.Adapter<SongRecyclerAdapte
         Glide.with(context)
             .load(song.getAlbumArtUrl())
             .diskCacheStrategy(DiskCacheStrategy.SOURCE)
+            .placeholder(R.drawable.image_album_placeholder)
             .fitCenter()
             .override(ApplicationConstants.LOW_QUALITY_ALBUM_ART_DIMENSION, ApplicationConstants.LOW_QUALITY_ALBUM_ART_DIMENSION)
             .into(songHolder.albumArt);

@@ -55,27 +55,27 @@ public class PartyActivity extends BaseActivity<PartyPresenter> implements Party
     private SelectedTab selectedTab = SelectedTab.TRACKLIST_TAB;
     private enum SelectedTab { TRACKLIST_TAB, PARTY_MEMBERS_TAB, SETTINGS_TAB }
 
-    private SpotiqHostService playerService;
-    private boolean isPlayerServiceBound = false;
+    private SpotiqHostService hostService;
+    private boolean isHostServiceBound = false;
 
-    private ServiceConnection playerServiceConnection = new ServiceConnection() {
+    private ServiceConnection hostServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder serviceBinder) {
-            isPlayerServiceBound = true;
-            SpotiqHostService.PlayerServiceBinder playerServiceBinder =
-                (SpotiqHostService.PlayerServiceBinder) serviceBinder;
-            playerService = playerServiceBinder.getService();
+            isHostServiceBound = true;
+            SpotiqHostService.HostServiceBinder hostServiceBinder =
+                (SpotiqHostService.HostServiceBinder) serviceBinder;
+            hostService = hostServiceBinder.getService();
         }
 
         @Override
         public void onServiceDisconnected(ComponentName componentName) {
-            isPlayerServiceBound = false;
+            isHostServiceBound = false;
         }
     };
 
-    private void bindPlayerService() {
-        Intent playerServiceIntent = new Intent(this, SpotiqHostService.class);
-        bindService(playerServiceIntent, playerServiceConnection, Context.BIND_AUTO_CREATE);
+    private void bindHostService() {
+        Intent hostServiceIntent = new Intent(this, SpotiqHostService.class);
+        bindService(hostServiceIntent, hostServiceConnection, Context.BIND_AUTO_CREATE);
     }
 
     private BroadcastReceiver playingStatusReceiver = new BroadcastReceiver() {
@@ -171,12 +171,7 @@ public class PartyActivity extends BaseActivity<PartyPresenter> implements Party
 
         binding.playPauseFab.setOnMusicFabClickListener(view -> {
             debouncePlayButton();
-            if (playerService.isPlaying()) {
-                playerService.pause();
-            }
-            else {
-                playerService.play();
-            }
+            hostService.musicAction();
         });
     }
 
@@ -193,7 +188,7 @@ public class PartyActivity extends BaseActivity<PartyPresenter> implements Party
         super.onResume();
         super.startForegroundTokenRenewalService();
         if (hostProvilegesLoaded) {
-            bindPlayerService();
+            bindHostService();
         }
     }
 
@@ -207,15 +202,15 @@ public class PartyActivity extends BaseActivity<PartyPresenter> implements Party
     protected void onStart() {
         super.onStart();
         if (hostProvilegesLoaded) {
-            bindPlayerService();
+            bindHostService();
         }
     }
 
     @Override
     protected void onStop() {
-        if (isPlayerServiceBound) {
-            unbindService(playerServiceConnection);
-            isPlayerServiceBound = false;
+        if (isHostServiceBound) {
+            unbindService(hostServiceConnection);
+            isHostServiceBound = false;
         }
         super.onStop();
     }
@@ -235,7 +230,7 @@ public class PartyActivity extends BaseActivity<PartyPresenter> implements Party
     }
 
     /**
-     * Set the play/pause button state accordingly to the player service's playing status
+     * Set the play/pause button state accordingly to the host service's playing status
      * Delayed to allow the button to play the animation from user input before synchronizing with
      * actual playing status result
      */
@@ -289,11 +284,11 @@ public class PartyActivity extends BaseActivity<PartyPresenter> implements Party
         if (!hostProvilegesLoaded) {
             displayHostControls = true;
             binding.playPauseFab.setVisibility(View.VISIBLE);
-            bindPlayerService();
-            Intent playerServiceIntent = new Intent(this, SpotiqHostService.class);
-            playerServiceIntent.setAction(ServiceConstants.ACTION_INIT);
-            playerServiceIntent.putExtra(ApplicationConstants.PARTY_NAME_EXTRA, partyTitle);
-            startService(playerServiceIntent);
+            bindHostService();
+            Intent hostServiceIntent = new Intent(this, SpotiqHostService.class);
+            hostServiceIntent.setAction(ServiceConstants.ACTION_INIT);
+            hostServiceIntent.putExtra(ApplicationConstants.PARTY_NAME_EXTRA, partyTitle);
+            startService(hostServiceIntent);
             hostProvilegesLoaded = true;
         }
     }

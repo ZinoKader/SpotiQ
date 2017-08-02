@@ -5,7 +5,6 @@ import android.os.Build;
 
 import com.crashlytics.android.Crashlytics;
 import com.google.firebase.FirebaseApp;
-import com.google.firebase.database.FirebaseDatabase;
 import com.jakewharton.threetenabp.AndroidThreeTen;
 
 import io.fabric.sdk.android.Fabric;
@@ -24,7 +23,6 @@ public class SpotiqApplication extends Application implements Injector {
         super.onCreate();
         Fabric.with(this, new Crashlytics());
         FirebaseApp.initializeApp(this);
-        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
         AndroidThreeTen.init(this); //java 8 time api backport
 
         appComponent = DaggerAppComponent.create();

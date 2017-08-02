@@ -11,6 +11,7 @@ public class ApplicationConstants {
     /* Time and timing-related */
     public static final int DEFER_SNACKBAR_DELAY = 1000;
     public static final int REQUEST_RETRY_DELAY_SEC = 3;
+    public static final int DEFAULT_REQUEST_RETRY_TIMES = 10;
     public static final int SHORT_VIBRATION_DURATION_MS = 30;
     public static final int SHORT_ACTION_DELAY_SEC = 1;
     public static final int MEDIUM_ACTION_DELAY_SEC = 2;
@@ -20,6 +21,7 @@ public class ApplicationConstants {
     /* Image-related */
     //Placeholders
     public static final String ALBUM_ART_PLACEHOLDER_URL = "https://www.zinokader.se/img/spotiq-album-placeholder.png";
+    public static final String PLAYLIST_IMAGE_PLACEHOLDER_URL = "https://www.zinokader.se/img/spotiq-playlist-placeholder.png";
     public static final String PROFILE_IMAGE_PLACEHOLDER_URL = "https://www.zinokader.se/img/spotiq-profile-placeholder.png";
     //Dimensions
     public static final int DEFAULT_TRACKLIST_CROP_WIDTH = 600;

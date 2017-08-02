@@ -25,10 +25,8 @@
 
         <org.cryse.widget.persistentsearch.PersistentSearchView
             android:id="@+id/searchBar"
-            android:layout_width="match_parent"
+            android:layout_width="385dp"
             android:layout_height="wrap_content"
-            android:paddingStart="15dp"
-            android:paddingEnd="15dp"
             android:elevation="4dp"
             app:persistentSV_searchTextColor="@color/colorPrimaryDark"
             app:persistentSV_editTextColor="@color/colorPrimaryDark"
