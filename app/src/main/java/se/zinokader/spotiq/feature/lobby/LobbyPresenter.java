@@ -70,36 +70,27 @@ public class LobbyPresenter extends BasePresenter<LobbyView> {
             partiesRepository.getParty(party.getTitle()),
             spotifyRepository.getMe(spotifyCommunicatorService.getWebApi()),
             (dbPartySnapshot, spotifyUser) -> {
-                if (dbPartySnapshot.exists()) {
-                    User user = new User(spotifyUser.id, spotifyUser.display_name, spotifyUser.images);
-                    user.setJoinedNowTimeStamp();
-                    boolean userAlreadyExists = dbPartySnapshot.child(FirebaseConstants.CHILD_USERS).hasChild(user.getUserId());
-                    Party dbParty = dbPartySnapshot.child(FirebaseConstants.CHILD_PARTYINFO).getValue(Party.class);
-
-                    if (dbParty.getPartyVersionCode() > VersionUtil.getCurrentAppVersionCode()) {
-                        throw new PartyVersionHigherException();
-                    }
-                    else if (dbParty.getPartyVersionCode() < VersionUtil.getCurrentAppVersionCode()) {
-                        throw new PartyVersionLowerException();
-                    }
-
-                    return new UserPartyInformation(user, userAlreadyExists, dbParty);
+                if (!dbPartySnapshot.exists()) throw new PartyDoesNotExistException();
+                Party dbParty = dbPartySnapshot.child(FirebaseConstants.CHILD_PARTYINFO).getValue(Party.class);
+                if (dbParty.getPartyVersionCode() > VersionUtil.getCurrentAppVersionCode()) {
+                    throw new PartyVersionHigherException();
                 }
-                else {
-                    throw new PartyDoesNotExistException();
+                else if (dbParty.getPartyVersionCode() < VersionUtil.getCurrentAppVersionCode()) {
+                    throw new PartyVersionLowerException();
                 }
+                User user = new User(spotifyUser.id, spotifyUser.display_name, spotifyUser.images);
+                user.setJoinedNowTimeStamp();
+                boolean userAlreadyExists = dbPartySnapshot.child(FirebaseConstants.CHILD_USERS).hasChild(user.getUserId());
+                return new UserPartyInformation(user, userAlreadyExists, dbParty);
+
             })
             .flatMap(userPartyInformation -> {
-                if (userPartyInformation.getParty().getPassword().equals(partyPassword)) {
-                    if (userPartyInformation.userAlreadyExists()) {
-                        return Observable.just(true);
-                    }
-                    else {
-                        return partiesRepository.addUserToParty(userPartyInformation.getParty().getTitle(), userPartyInformation.getUser());
-                    }
+                if (!userPartyInformation.getParty().getPassword().equals(partyPassword)) throw new PartyWrongPasswordException();
+                if (userPartyInformation.userAlreadyExists()) {
+                    return Observable.just(true);
                 }
                 else {
-                    throw new PartyWrongPasswordException();
+                    return partiesRepository.addUserToParty(userPartyInformation.getParty().getTitle(), userPartyInformation.getUser());
                 }
             })
             .subscribeOn(Schedulers.io())
@@ -139,16 +130,14 @@ public class LobbyPresenter extends BasePresenter<LobbyView> {
                 if (dbParty.exists()) {
                     throw new PartyExistsException();
                 }
-                else {
-                    User user = new User(spotifyUser.id, spotifyUser.display_name, spotifyUser.images);
-                    party.setCreatedNowTimeStamp();
-                    party.setPartyVersionCode(VersionUtil.getCurrentAppVersionCode());
-                    party.setHostSpotifyId(user.getUserId());
-                    party.setHostMarket(spotifyUser.country);
-                    user.setJoinedNowTimeStamp();
-                    user.setHasHostPrivileges();
-                    return new UserPartyInformation(user, party);
-                }
+                User user = new User(spotifyUser.id, spotifyUser.display_name, spotifyUser.images);
+                party.setCreatedNowTimeStamp();
+                party.setPartyVersionCode(VersionUtil.getCurrentAppVersionCode());
+                party.setHostSpotifyId(user.getUserId());
+                party.setHostMarket(spotifyUser.country);
+                user.setJoinedNowTimeStamp();
+                user.setHasHostPrivileges();
+                return new UserPartyInformation(user, party);
             })
             .flatMap(userPartyInformation -> Observable.zip(
                 partiesRepository.createNewParty(userPartyInformation.getParty()),
