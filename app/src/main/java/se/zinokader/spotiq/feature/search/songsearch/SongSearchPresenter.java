@@ -6,6 +6,7 @@ import android.util.Log;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
@@ -63,13 +64,18 @@ public class SongSearchPresenter extends BasePresenter<SongSearchView> {
         restartableLatestCache(LOAD_USER_RESTARTABLE_ID,
             () -> spotifyRepository.getMe(spotifyCommunicatorService.getWebApi())
                 .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread()),
+                .observeOn(AndroidSchedulers.mainThread())
+                .retryWhen(throwable -> throwable.delay(ApplicationConstants.REQUEST_RETRY_DELAY_SEC, TimeUnit.SECONDS)),
             (songSearchView, userPrivate) -> {
                 user = new User(userPrivate.id, userPrivate.display_name, userPrivate.images);
                 //load personalized search suggestions
-                spotifyRepository.getMyTopTracks(spotifyCommunicatorService.getWebApi())
+                Map<String, Object> searchOptions = new HashMap<>();
+                searchOptions.put(SpotifyService.LIMIT, SpotifyConstants.TOP_TRACKS_QUERY_RESPONSE_LIMIT);
+                searchOptions.put(SpotifyService.TIME_RANGE, SpotifyConstants.TIME_RANGE_SHORT);
+                spotifyRepository.getMyTopTracks(searchOptions, spotifyCommunicatorService.getWebApi())
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
+                    .retryWhen(throwable -> throwable.delay(ApplicationConstants.REQUEST_RETRY_DELAY_SEC, TimeUnit.SECONDS))
                     .subscribe(tracks -> {
                         List<Song> songSuggestions = TrackMapper.tracksToSongs(tracks, user);
                         SongSearchSuggestionsBuilder suggestionsBuilder =
@@ -168,7 +174,7 @@ public class SongSearchPresenter extends BasePresenter<SongSearchView> {
                     return Observable.just(tracksPager).concatWith(searchTracksRecursively(query, searchOptions));
                 }
             })
-            .doOnError(throwable -> Log.d(LogTag.LOG_SEARCH, "Something went wrong on search: " + throwable.getMessage()));
+            .doOnError(throwable -> Log.d(LogTag.LOG_SEARCH, "Something went wrong on tracks search recursion: " + throwable.getMessage()));
     }
 
 }

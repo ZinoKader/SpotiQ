@@ -32,8 +32,8 @@ public class SpotifyRepository {
         }));
     }
 
-    public Observable<List<Track>> getMyTopTracks(SpotifyService spotifyService) {
-        return Observable.create(subscriber -> spotifyService.getTopTracks(new Callback<Pager<Track>>() {
+    public Observable<List<Track>> getMyTopTracks(Map<String, Object> searchOptions, SpotifyService spotifyService) {
+        return Observable.create(subscriber -> spotifyService.getTopTracks(searchOptions, new Callback<Pager<Track>>() {
             @Override
             public void success(Pager<Track> trackPager, Response response) {
                 subscriber.onNext(trackPager.items);
@@ -47,11 +47,11 @@ public class SpotifyRepository {
         }));
     }
 
-    public Observable<List<PlaylistSimple>> getMyPlaylists(SpotifyService spotifyService) {
-        return Observable.create(subscriber -> spotifyService.getMyPlaylists(new Callback<Pager<PlaylistSimple>>() {
+    public Observable<Pager<PlaylistSimple>> getMyPlaylists(Map<String, Object> searchOptions, SpotifyService spotifyService) {
+        return Observable.create(subscriber -> spotifyService.getMyPlaylists(searchOptions, new Callback<Pager<PlaylistSimple>>() {
             @Override
             public void success(Pager<PlaylistSimple> playlistSimplePager, Response response) {
-                subscriber.onNext(playlistSimplePager.items);
+                subscriber.onNext(playlistSimplePager);
                 subscriber.onComplete();
             }
 

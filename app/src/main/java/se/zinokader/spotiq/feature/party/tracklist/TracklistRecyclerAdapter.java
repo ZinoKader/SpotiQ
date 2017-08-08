@@ -56,7 +56,6 @@ public class TracklistRecyclerAdapter extends RecyclerView.Adapter<TracklistRecy
                 inflatedView = LayoutInflater.from(parent.getContext())
                     .inflate(R.layout.recyclerview_row_tracklist_up_next, parent, false);
         }
-        inflatedView.getLayoutParams().width = parent.getWidth();
         return new SongHolder(inflatedView);
     }
 
@@ -88,6 +87,7 @@ public class TracklistRecyclerAdapter extends RecyclerView.Adapter<TracklistRecy
 
         Glide.with(songHolder.itemView.getContext())
             .load(song.getAlbumArtUrl())
+            .fitCenter()
             .diskCacheStrategy(DiskCacheStrategy.SOURCE)
             .placeholder(R.drawable.image_album_placeholder)
             .bitmapTransform(songHolder.blurTransformation, songHolder.cropTransformation, songHolder.colorFilterTransformation)

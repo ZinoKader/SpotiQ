@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
@@ -17,6 +18,7 @@ import kaaes.spotify.webapi.android.SpotifyService;
 import kaaes.spotify.webapi.android.models.Pager;
 import kaaes.spotify.webapi.android.models.PlaylistSimple;
 import kaaes.spotify.webapi.android.models.PlaylistTrack;
+import se.zinokader.spotiq.constant.ApplicationConstants;
 import se.zinokader.spotiq.constant.FirebaseConstants;
 import se.zinokader.spotiq.constant.LogTag;
 import se.zinokader.spotiq.constant.SpotifyConstants;
@@ -62,29 +64,26 @@ public class PlaylistSearchPresenter extends BasePresenter<PlaylistSearchView> {
 
         songPreviewPlayer = new PreviewPlayer();
 
-        //load user
         restartableLatestCache(LOAD_USER_RESTARTABLE_ID,
             () -> spotifyRepository.getMe(spotifyCommunicatorService.getWebApi())
                 .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread()),
+                .observeOn(AndroidSchedulers.mainThread())
+                .retryWhen(throwable -> throwable.delay(ApplicationConstants.REQUEST_RETRY_DELAY_SEC, TimeUnit.SECONDS)),
             (lobbyView, userPrivate) -> {
                 user = new User(userPrivate.id, userPrivate.display_name, userPrivate.images);
             },
             (lobbyView, throwable) -> {
                 Log.d(LogTag.LOG_SEARCH, "Error when getting user Spotify data");
-                throwable.printStackTrace();
             });
 
-        restartableLatestCache(LOAD_PLAYLISTS_RESTARTABLE_ID,
-            () -> spotifyRepository.getMyPlaylists(spotifyCommunicatorService.getWebApi())
-                .subscribeOn(Schedulers.io())
+        restartableReplay(LOAD_PLAYLISTS_RESTARTABLE_ID,
+            () -> getUserPlaylists()
                 .observeOn(AndroidSchedulers.mainThread()),
-            (playlistSearchView, playlists) -> {
-                playlistSearchView.updatePlaylists(playlists);
+            (playlistSearchView, playlistSimplePager) -> {
+                playlistSearchView.updatePlaylists(playlistSimplePager.items);
             },
             (playlistSearchView, throwable) -> {
-                Log.d(LogTag.LOG_SEARCH, "Error when getting playlist data");
-                throwable.printStackTrace();
+                Log.d(LogTag.LOG_SEARCH, "Error when getting user Spotify data");
             });
 
         if (savedState == null) {
@@ -134,6 +133,23 @@ public class PlaylistSearchPresenter extends BasePresenter<PlaylistSearchView> {
                 }));
     }
 
+    private Observable<Pager<PlaylistSimple>> getUserPlaylists() {
+        return Observable.create(subscriber -> {
+            Map<String, Object> searchOptions = new HashMap<>();
+            searchOptions.put(SpotifyService.LIMIT, SpotifyConstants.PLAYLIST_SEARCH_QUERY_RESPONSE_LIMIT);
+            searchOptions.put(SpotifyService.OFFSET, 0);
+
+            findPlaylistsRecursively(searchOptions)
+                .subscribeOn(Schedulers.io())
+                .retryWhen(throwable -> throwable.delay(ApplicationConstants.REQUEST_RETRY_DELAY_SEC, TimeUnit.SECONDS))
+                .subscribe(playlistPager -> {
+                    subscriber.onNext(playlistPager);
+                }, throwable -> {
+                    Log.d(LogTag.LOG_SEARCH, "Error when getting playlist data");
+                });
+        });
+    }
+
     void loadPlaylistSongs(PlaylistSimple playlist) {
         Map<String, Object> searchOptions = new HashMap<>();
         searchOptions.put(SpotifyService.LIMIT, SpotifyConstants.PLAYLIST_TRACK_SEARCH_QUERY_RESPONSE_LIMIT);
@@ -173,6 +189,22 @@ public class PlaylistSearchPresenter extends BasePresenter<PlaylistSearchView> {
             });
     }
 
+    private Observable<Pager<PlaylistSimple>> findPlaylistsRecursively(Map<String, Object> searchOptions) {
+        int lastOffset = (int) searchOptions.get(SpotifyService.OFFSET);
+        return spotifyRepository.getMyPlaylists(searchOptions, spotifyCommunicatorService.getWebApi())
+            .concatMap(playlistPager -> {
+                if (lastOffset + playlistPager.limit >= SpotifyConstants.PLAYLIST_SEARCH_TOTAL_ITEMS_LIMIT
+                    || lastOffset + playlistPager.limit >= playlistPager.total) {
+                    return Observable.just(playlistPager);
+                }
+                else {
+                    searchOptions.put(SpotifyService.OFFSET, lastOffset + playlistPager.limit);
+                    return Observable.just(playlistPager).concatWith(findPlaylistsRecursively(searchOptions));
+                }
+            })
+            .doOnError(throwable -> Log.d(LogTag.LOG_SEARCH, "Something went wrong on playlist recursion: " + throwable.getMessage()));
+    }
+
     private Observable<Pager<PlaylistTrack>> findPlaylistTracksRecursively(PlaylistSimple playlist, Map<String, Object> searchOptions) {
         int lastOffset = (int) searchOptions.get(SpotifyService.OFFSET);
         return spotifyRepository.getPlaylistTracks(playlist.owner.id, playlist.id, searchOptions, spotifyCommunicatorService.getWebApi())
@@ -186,7 +218,7 @@ public class PlaylistSearchPresenter extends BasePresenter<PlaylistSearchView> {
                     return Observable.just(playlistPager).concatWith(findPlaylistTracksRecursively(playlist, searchOptions));
                 }
             })
-            .doOnError(throwable -> Log.d(LogTag.LOG_SEARCH, "Something went wrong on search: " + throwable.getMessage()));
+            .doOnError(throwable -> Log.d(LogTag.LOG_SEARCH, "Something went wrong on playlist tracks recursion: " + throwable.getMessage()));
     }
 
 }

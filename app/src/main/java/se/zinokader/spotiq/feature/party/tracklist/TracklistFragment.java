@@ -1,6 +1,5 @@
 package se.zinokader.spotiq.feature.party.tracklist;
 
-import android.content.Context;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
@@ -8,7 +7,6 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -96,32 +94,8 @@ public class TracklistFragment extends Fragment {
     }
 
     @Override
-    public void onAttach(Context context) {
-        if (context instanceof FabListener) {
-            fabListener = (FabListener) context;
-        }
-        else {
-            throw new ClassCastException(context.getClass().getSimpleName() + " must implement " + fabListener.getClass().getSimpleName());
-        }
-        super.onAttach(context);
-    }
-
-    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup parentContainer, Bundle savedInstanceState) {
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_tracklist, parentContainer, false);
-
-        binding.tracklistRecyclerView.setOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-                if (dy > 0) {
-                    fabListener.hideControls();
-                }
-                else {
-                    fabListener.showControls();
-                }
-                super.onScrolled(recyclerView, dx, dy);
-            }
-        });
 
         binding.tracklistRecyclerView.setLayoutManager(new LinearLayoutManager(inflater.getContext()));
         binding.tracklistRecyclerView.setEmptyView(binding.tracklistEmptyView);

@@ -68,7 +68,9 @@ public class PlaylistSearchRecyclerAdapter extends RecyclerView.Adapter<Playlist
     }
 
     void updatePlaylists(List<PlaylistSimple> playlists) {
-        this.playlists = playlists;
+        if (!this.playlists.containsAll(playlists)) {
+            this.playlists.addAll(playlists);
+        }
     }
 
     Observable<PlaylistSimple> observeClicks() {

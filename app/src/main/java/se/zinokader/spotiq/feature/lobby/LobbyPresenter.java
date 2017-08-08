@@ -52,7 +52,7 @@ public class LobbyPresenter extends BasePresenter<LobbyView> {
             () -> spotifyRepository.getMe(spotifyCommunicatorService.getWebApi())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .retry(ApplicationConstants.DEFAULT_REQUEST_RETRY_TIMES),
+                .retryWhen(throwable -> throwable.delay(ApplicationConstants.REQUEST_RETRY_DELAY_SEC, TimeUnit.SECONDS)),
             (lobbyView, userPrivate) -> {
                 User user = new User(userPrivate.id, userPrivate.display_name, userPrivate.images);
                 lobbyView.setUserDetails(user.getUserName(), user.getUserImageUrl());
