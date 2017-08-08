@@ -23,7 +23,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/dialogGuideline"
-        app:layout_constraintGuide_percent="0.06"
+        app:layout_constraintGuide_percent="0.15"
         android:orientation="horizontal" />
 
     <TextView
@@ -48,7 +48,7 @@
         android:layout_marginTop="16dp"
         android:hint="@string/party_title"
         android:inputType="textNoSuggestions"
-        android:textAlignment="center"
+        android:imeOptions="flagNoExtractUi"
         app:layout_constraintEnd_toStartOf="@+id/partyPassword"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
@@ -67,7 +67,7 @@
         android:layout_marginTop="16dp"
         android:hint="@string/password"
         android:inputType="textPassword"
-        android:textAlignment="center"
+        android:imeOptions="flagNoExtractUi"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toEndOf="@+id/partyTitle"

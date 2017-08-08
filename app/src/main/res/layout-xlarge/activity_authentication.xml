@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/root"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <android.support.constraint.Guideline
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/logoGuideline"
+            app:layout_constraintGuide_percent="0.1"
+            android:orientation="horizontal" />
+
+        <ImageView
+            android:id="@+id/spotiqLogo"
+            android:layout_width="wrap_content"
+            android:layout_height="100dp"
+            android:src="@drawable/image_spotiq_logo"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/logoGuideline" />
+
+
+    </android.support.constraint.ConstraintLayout>
+</layout>
