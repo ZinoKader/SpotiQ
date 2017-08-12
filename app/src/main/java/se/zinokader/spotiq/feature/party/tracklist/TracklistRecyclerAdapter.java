@@ -10,7 +10,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
@@ -88,7 +87,6 @@ public class TracklistRecyclerAdapter extends RecyclerView.Adapter<TracklistRecy
         Glide.with(songHolder.itemView.getContext())
             .load(song.getAlbumArtUrl())
             .fitCenter()
-            .diskCacheStrategy(DiskCacheStrategy.SOURCE)
             .placeholder(R.drawable.image_album_placeholder)
             .bitmapTransform(songHolder.blurTransformation, songHolder.cropTransformation, songHolder.colorFilterTransformation)
             .into(new SimpleTarget<GlideDrawable>() {
@@ -100,7 +98,6 @@ public class TracklistRecyclerAdapter extends RecyclerView.Adapter<TracklistRecy
 
         Glide.with(context)
             .load(song.getAlbumArtUrl())
-            .diskCacheStrategy(DiskCacheStrategy.SOURCE)
             .placeholder(R.drawable.image_album_placeholder)
             .fitCenter()
             .into(songHolder.albumArt);
