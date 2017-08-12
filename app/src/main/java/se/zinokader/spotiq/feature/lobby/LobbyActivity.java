@@ -16,6 +16,7 @@ import android.view.Window;
 import android.view.animation.AccelerateDecelerateInterpolator;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.rengwuxian.materialedittext.MaterialEditText;
 
 import nucleus5.factory.RequiresPresenter;
@@ -56,6 +57,7 @@ public class LobbyActivity extends BaseActivity<LobbyPresenter> implements Lobby
         binding.userName.setText(userName);
         Glide.with(this)
             .load(userImageUrl)
+            .diskCacheStrategy(DiskCacheStrategy.ALL)
             .placeholder(R.drawable.image_profile_placeholder)
             .dontAnimate()
             .dontTransform()

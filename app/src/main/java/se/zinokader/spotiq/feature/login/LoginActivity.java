@@ -37,6 +37,12 @@ public class LoginActivity extends BaseActivity<LoginPresenter> implements Login
         });
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        binding.logInButton.dispose();
+    }
+
     public void startProgress() {
         binding.logInButton.startAnimation();
     }

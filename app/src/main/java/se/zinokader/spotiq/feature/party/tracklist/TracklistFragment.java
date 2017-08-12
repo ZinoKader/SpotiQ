@@ -28,7 +28,6 @@ import se.zinokader.spotiq.databinding.FragmentTracklistBinding;
 import se.zinokader.spotiq.model.Song;
 import se.zinokader.spotiq.repository.TracklistRepository;
 import se.zinokader.spotiq.util.di.Injector;
-import se.zinokader.spotiq.util.listener.FabListener;
 import se.zinokader.spotiq.util.view.DividerItemDecoration;
 
 public class TracklistFragment extends Fragment {
@@ -37,8 +36,6 @@ public class TracklistFragment extends Fragment {
 
     @Inject
     TracklistRepository tracklistRepository;
-
-    private FabListener fabListener;
 
     private CompositeDisposable subscriptions = new CompositeDisposable();
 

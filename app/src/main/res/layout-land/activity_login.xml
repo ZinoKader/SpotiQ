@@ -50,6 +50,7 @@
             android:textSize="18sp"
             android:textStyle="bold"
             app:initialCornerAngle="6dp"
+            app:finalCornerAngle="100dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="@+id/buttonGuideline"

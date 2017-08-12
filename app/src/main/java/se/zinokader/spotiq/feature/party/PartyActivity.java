@@ -19,9 +19,7 @@ import android.support.v7.app.AlertDialog;
 import android.view.View;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.resource.drawable.GlideDrawable;
-import com.bumptech.glide.request.RequestListener;
-import com.bumptech.glide.request.target.Target;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 
 import org.threeten.bp.LocalDateTime;
 
@@ -39,21 +37,16 @@ import se.zinokader.spotiq.feature.party.tracklist.TracklistFragment;
 import se.zinokader.spotiq.feature.search.SearchActivity;
 import se.zinokader.spotiq.service.player.SpotiqHostService;
 import se.zinokader.spotiq.util.ShortcutUtil;
-import se.zinokader.spotiq.util.listener.FabListener;
 
 @RequiresPresenter(PartyPresenter.class)
-public class PartyActivity extends BaseActivity<PartyPresenter> implements PartyView, FabListener {
+public class PartyActivity extends BaseActivity<PartyPresenter> implements PartyView {
 
     ActivityPartyBinding binding;
     private String partyTitle;
     private LocalDateTime initializedTimeStamp;
     private boolean userDetailsLoaded = false;
     private boolean hostProvilegesLoaded = false;
-    private boolean displayHostControls = false;
     private List<String> shownSongAddedMessages = new ArrayList<>();
-
-    private SelectedTab selectedTab = SelectedTab.TRACKLIST_TAB;
-    private enum SelectedTab { TRACKLIST_TAB, PARTY_MEMBERS_TAB, SETTINGS_TAB }
 
     private SpotiqHostService hostService;
     private boolean isHostServiceBound = false;
@@ -102,7 +95,6 @@ public class PartyActivity extends BaseActivity<PartyPresenter> implements Party
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        supportPostponeEnterTransition();
         initializedTimeStamp = LocalDateTime.now();
         binding = DataBindingUtil.setContentView(this, R.layout.activity_party);
 
@@ -139,20 +131,10 @@ public class PartyActivity extends BaseActivity<PartyPresenter> implements Party
                 default:
                 case R.id.tab_tracklist:
                     selectedFragment = TracklistFragment.newInstance(partyTitle);
-                    selectedTab = SelectedTab.TRACKLIST_TAB;
-                    showControls();
                     break;
                 case R.id.tab_party_members:
                     selectedFragment = PartyMemberFragment.newInstance(partyTitle);
-                    selectedTab = SelectedTab.PARTY_MEMBERS_TAB;
-                    hideControls();
                     break;
-                    /*
-                case R.id.tab_settings:
-                    selectedFragment = SettingsFragment.newInstance(partyTitle);
-                    selectedTab = SelectedTab.SETTINGS_TAB;
-                    hideControls();
-                    */
             }
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
             transaction.replace(R.id.fragmentHolder, selectedFragment);
@@ -215,20 +197,6 @@ public class PartyActivity extends BaseActivity<PartyPresenter> implements Party
         super.onStop();
     }
 
-    @Override
-    public void showControls() {
-        if (!binding.searchFab.isShown() && selectedTab.equals(SelectedTab.TRACKLIST_TAB)) {
-            binding.searchFab.show();
-            if (displayHostControls) binding.playPauseFab.show();
-        }
-    }
-
-    @Override
-    public void hideControls() {
-        binding.searchFab.hide();
-        binding.playPauseFab.hide();
-    }
-
     /**
      * Set the play/pause button state accordingly to the host service's playing status
      * Delayed to allow the button to play the animation from user input before synchronizing with
@@ -258,22 +226,10 @@ public class PartyActivity extends BaseActivity<PartyPresenter> implements Party
             binding.userName.setText(userName);
             Glide.with(this)
                 .load(userImageUrl)
+                .diskCacheStrategy(DiskCacheStrategy.ALL)
                 .placeholder(R.drawable.image_profile_placeholder)
                 .dontAnimate()
                 .dontTransform()
-                .listener(new RequestListener<String, GlideDrawable>() {
-                    @Override
-                    public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
-                        supportStartPostponedEnterTransition();
-                        return false;
-                    }
-
-                    @Override
-                    public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
-                        supportStartPostponedEnterTransition();
-                        return false;
-                    }
-                })
                 .into(binding.userImage);
             userDetailsLoaded = true;
         }
@@ -282,7 +238,6 @@ public class PartyActivity extends BaseActivity<PartyPresenter> implements Party
     @Override
     public void setHostPrivileges() {
         if (!hostProvilegesLoaded) {
-            displayHostControls = true;
             binding.playPauseFab.setVisibility(View.VISIBLE);
             bindHostService();
             Intent hostServiceIntent = new Intent(this, SpotiqHostService.class);

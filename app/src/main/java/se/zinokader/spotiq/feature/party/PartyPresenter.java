@@ -66,11 +66,6 @@ public class PartyPresenter extends BasePresenter<PartyView> {
         state.putBoolean(ApplicationConstants.MEMBER_TYPE_MESSAGE_EXTRA, memberTypeMessageShown);
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-    }
-
     void setPartyTitle(String partyTitle) {
         this.partyTitle = partyTitle;
     }
