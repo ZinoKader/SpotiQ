@@ -1,11 +1,9 @@
 package se.zinokader.spotiq.feature.party.tracklist;
 
-import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -28,7 +26,7 @@ import se.zinokader.spotiq.databinding.FragmentTracklistBinding;
 import se.zinokader.spotiq.model.Song;
 import se.zinokader.spotiq.repository.TracklistRepository;
 import se.zinokader.spotiq.util.di.Injector;
-import se.zinokader.spotiq.util.view.DividerItemDecoration;
+import se.zinokader.spotiq.util.view.CustomDividerItemDecoration;
 
 public class TracklistFragment extends Fragment {
 
@@ -97,7 +95,7 @@ public class TracklistFragment extends Fragment {
         binding.tracklistRecyclerView.setLayoutManager(new LinearLayoutManager(inflater.getContext()));
         binding.tracklistRecyclerView.setEmptyView(binding.tracklistEmptyView);
         binding.tracklistRecyclerView.setItemAnimator(itemAnimator);
-        binding.tracklistRecyclerView.addItemDecoration(new DividerItemDecoration(
+        binding.tracklistRecyclerView.addItemDecoration(new CustomDividerItemDecoration(
             getResources().getDrawable(R.drawable.track_list_padding_divider), true, true));
         binding.tracklistRecyclerView.setAdapter(new TracklistRecyclerAdapter(songs));
 
@@ -112,7 +110,6 @@ public class TracklistFragment extends Fragment {
         songs.add(song);
         int songPosition = getSongPosition(song);
         binding.tracklistRecyclerView.getAdapter().notifyItemInserted(songPosition);
-        sendSongAddedBroadcast(song.getName());
     }
 
     private void removeSong(Song song) {
@@ -128,12 +125,6 @@ public class TracklistFragment extends Fragment {
             }
         }
         return -1;
-    }
-
-    private void sendSongAddedBroadcast(String addedSong) {
-        Intent songAddedIntent = new Intent(ApplicationConstants.SONG_ADDED_BROADCAST_NAME);
-        songAddedIntent.putExtra(ApplicationConstants.SONG_ADDED_EXTRA, addedSong);
-        LocalBroadcastManager.getInstance(getContext()).sendBroadcast(songAddedIntent);
     }
 
 }

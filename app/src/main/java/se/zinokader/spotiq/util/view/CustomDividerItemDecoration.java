@@ -10,7 +10,7 @@ import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.view.View;
 
-public class DividerItemDecoration extends RecyclerView.ItemDecoration {
+public class CustomDividerItemDecoration extends RecyclerView.ItemDecoration {
 
     private Drawable mDivider;
     private boolean mShowFirstDivider = false;
@@ -18,37 +18,37 @@ public class DividerItemDecoration extends RecyclerView.ItemDecoration {
 
     int mOrientation = -1;
 
-    public DividerItemDecoration(Context context, AttributeSet attrs) {
+    public CustomDividerItemDecoration(Context context, AttributeSet attrs) {
         final TypedArray a = context
             .obtainStyledAttributes(attrs, new int[]{android.R.attr.listDivider});
         mDivider = a.getDrawable(0);
         a.recycle();
     }
 
-    public DividerItemDecoration(Context context, AttributeSet attrs, boolean showFirstDivider,
-                                 boolean showLastDivider) {
+    public CustomDividerItemDecoration(Context context, AttributeSet attrs, boolean showFirstDivider,
+                                       boolean showLastDivider) {
         this(context, attrs);
         mShowFirstDivider = showFirstDivider;
         mShowLastDivider = showLastDivider;
     }
 
-    public DividerItemDecoration(Context context, int resId) {
+    public CustomDividerItemDecoration(Context context, int resId) {
         mDivider = ContextCompat.getDrawable(context, resId);
     }
 
-    public DividerItemDecoration(Context context, int resId, boolean showFirstDivider,
-                                 boolean showLastDivider) {
+    public CustomDividerItemDecoration(Context context, int resId, boolean showFirstDivider,
+                                       boolean showLastDivider) {
         this(context, resId);
         mShowFirstDivider = showFirstDivider;
         mShowLastDivider = showLastDivider;
     }
 
-    public DividerItemDecoration(Drawable divider) {
+    public CustomDividerItemDecoration(Drawable divider) {
         mDivider = divider;
     }
 
-    public DividerItemDecoration(Drawable divider, boolean showFirstDivider,
-                                 boolean showLastDivider) {
+    public CustomDividerItemDecoration(Drawable divider, boolean showFirstDivider,
+                                       boolean showLastDivider) {
         this(divider);
         mShowFirstDivider = showFirstDivider;
         mShowLastDivider = showLastDivider;
@@ -145,7 +145,7 @@ public class DividerItemDecoration extends RecyclerView.ItemDecoration {
                 mOrientation = layoutManager.getOrientation();
             } else {
                 throw new IllegalStateException(
-                    "DividerItemDecoration can only be used with a LinearLayoutManager.");
+                    "CustomDividerItemDecoration can only be used with a LinearLayoutManager.");
             }
         }
         return mOrientation;

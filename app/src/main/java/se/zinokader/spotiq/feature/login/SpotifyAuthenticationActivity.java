@@ -86,19 +86,31 @@ public class SpotifyAuthenticationActivity extends AppCompatActivity implements 
 
                         @Override
                         public void failure(RetrofitError error) {
-                            setResult(SpotifyConstants.RESULT_CODE_ERROR);
+                            setResult(SpotifyConstants.RESULT_CODE_CONNECTION_FAILURE);
                             finish();
                         }
                     });
                     break;
-                default:
+                case CODE:
+                    setResult(SpotifyConstants.RESULT_CODE_SPOTIFY_CODE);
+                    finish();
+                case EMPTY:
+                    setResult(SpotifyConstants.RESULT_CODE_EMPTY);
+                    finish();
+                case ERROR:
                     setResult(SpotifyConstants.RESULT_CODE_ERROR);
+                    finish();
+                case UNKNOWN:
+                    setResult(SpotifyConstants.RESULT_CODE_UNKNOWN);
+                    finish();
+                default:
+                    setResult(SpotifyConstants.RESULT_CODE_WRONG_REQUEST_CODE);
                     Log.d(LogTag.LOG_LOGIN, "Something went wrong on login");
                     finish();
             }
         }
         else {
-            setResult(SpotifyConstants.RESULT_CODE_ERROR);
+            setResult(SpotifyConstants.RESULT_CODE_WRONG_REQUEST_CODE);
             Log.d(LogTag.LOG_LOGIN, "Wrong request code for Spotify login");
             finish();
         }

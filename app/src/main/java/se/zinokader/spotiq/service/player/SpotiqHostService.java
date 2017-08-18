@@ -116,7 +116,7 @@ public class SpotiqHostService extends Service implements ConnectionStateCallbac
     @Override
     public boolean onUnbind(Intent intent) {
         if (!changingConfiguration) {
-            Log.d(LogTag.LOG_HOST_SERVICE, "Starting player service in foreground");
+            Log.d(LogTag.LOG_HOST_SERVICE, "Starting host service in foreground");
             inForeground = true;
             updatePlayerNotification();
         }
@@ -171,7 +171,7 @@ public class SpotiqHostService extends Service implements ConnectionStateCallbac
         Log.d(LogTag.LOG_HOST_SERVICE, "Host service initialization started");
 
         if (intent == null || intent.getAction() == null) {
-            Log.d(LogTag.LOG_HOST_SERVICE, "Host service could not be initialized - Received empty party title");
+            Log.d(LogTag.LOG_HOST_SERVICE, "Start command intent was null, killing service");
             stopSelf();
             return START_NOT_STICKY;
         }
@@ -474,6 +474,10 @@ public class SpotiqHostService extends Service implements ConnectionStateCallbac
                 .build()
                 .show();
         });
+    }
+
+    public boolean isPartyInformationMissing() {
+        return partyTitle == null;
     }
 
     @Override

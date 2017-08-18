@@ -5,15 +5,12 @@ import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.support.annotation.Nullable;
-import android.support.design.widget.Snackbar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
-
-import com.github.andrewlord1990.snackbarbuilder.SnackbarBuilder;
 
 import java.util.List;
 
@@ -25,7 +22,7 @@ import se.zinokader.spotiq.R;
 import se.zinokader.spotiq.constant.ApplicationConstants;
 import se.zinokader.spotiq.databinding.FragmentPlaylistSearchBinding;
 import se.zinokader.spotiq.feature.base.BaseFragment;
-import se.zinokader.spotiq.feature.base.BaseView;
+import se.zinokader.spotiq.feature.search.SearchFragmentParent;
 import se.zinokader.spotiq.feature.search.SongRecyclerAdapter;
 import se.zinokader.spotiq.model.Song;
 
@@ -34,11 +31,14 @@ public class PlaylistSearchFragment extends BaseFragment<PlaylistSearchPresenter
 
     FragmentPlaylistSearchBinding binding;
 
+    private SearchFragmentParent searchFragmentParent;
     private PlaylistSearchRecyclerAdapter playlistSearchRecyclerAdapter;
     private AlphaInAnimationAdapter animatedPlaylistAdapter;
     private SongRecyclerAdapter songRecylerAdapter;
     private AlphaInAnimationAdapter animatedSongAdapter;
     private Vibrator vibrator;
+
+    private boolean isPlaylistSelected = false;
 
     public static PlaylistSearchFragment newInstance(String partyTitle) {
         PlaylistSearchFragment playlistSearchFragment = new PlaylistSearchFragment();
@@ -51,6 +51,7 @@ public class PlaylistSearchFragment extends BaseFragment<PlaylistSearchPresenter
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        searchFragmentParent = (SearchFragmentParent) getContext();
         vibrator = (Vibrator) getContext().getSystemService(Context.VIBRATOR_SERVICE);
     }
 
@@ -105,18 +106,20 @@ public class PlaylistSearchFragment extends BaseFragment<PlaylistSearchPresenter
                 binding.contentRecyclerView.setAdapter(animatedSongAdapter);
                 songRecylerAdapter.clearResults();
                 getPresenter().loadPlaylistSongs(playlist);
+                isPlaylistSelected = true;
             });
 
+        //go back to playlist view on back button press
         binding.playlistBackButton.setOnClickListener(view -> {
             binding.contentRecyclerView.setAdapter(animatedPlaylistAdapter);
             binding.playlistBar.setVisibility(View.GONE);
             binding.searchTypeLabel.setVisibility(View.VISIBLE);
-            getPresenter().request(PlaylistSearchPresenter.LOAD_PLAYLISTS_RESTARTABLE_ID);
+            isPlaylistSelected = false;
         });
 
         songRecylerAdapter.observeClicks()
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(this::showConfirmSongRequest);
+            .subscribe(song -> searchFragmentParent.addRequest(song));
 
         songRecylerAdapter.observeLongClicks()
             .observeOn(AndroidSchedulers.mainThread())
@@ -145,17 +148,6 @@ public class PlaylistSearchFragment extends BaseFragment<PlaylistSearchPresenter
         });
     }
 
-    public void showConfirmSongRequest(Song song) {
-        new SnackbarBuilder(((BaseView) getActivity()).getRootView())
-            .duration(Snackbar.LENGTH_LONG)
-            .message("Confirm song request")
-            .actionText("Queue song")
-            .actionTextColor(getResources().getColor(R.color.colorAccent))
-            .actionClickListener(confirmed -> getPresenter().requestSong(song))
-            .build()
-            .show();
-    }
-
     @Override
     public void updatePlaylists(List<PlaylistSimple> playlists) {
         playlistSearchRecyclerAdapter.updatePlaylists(playlists);
@@ -166,5 +158,18 @@ public class PlaylistSearchFragment extends BaseFragment<PlaylistSearchPresenter
     public void updateSongs(List<Song> songs) {
         songRecylerAdapter.updateSongs(songs);
         songRecylerAdapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public boolean onBackPressed() {
+        //consume back button press when inside a playlist's tracklist and this fragment is visible
+        if (isPlaylistSelected && getUserVisibleHint()) {
+            binding.contentRecyclerView.setAdapter(animatedPlaylistAdapter);
+            binding.playlistBar.setVisibility(View.GONE);
+            binding.searchTypeLabel.setVisibility(View.VISIBLE);
+            isPlaylistSelected = false;
+            return true;
+        }
+        return super.onBackPressed();
     }
 }

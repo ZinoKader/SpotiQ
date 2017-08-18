@@ -63,11 +63,11 @@ public class PartiesRepository {
             .addOnFailureListener(subscriber::onError));
     }
 
-    public void incrementUserSongRequestCount(String partyTitle, User user) {
+    public void incrementUserSongRequestCount(String partyTitle, String userId) {
         databaseReference
             .child(partyTitle)
             .child(FirebaseConstants.CHILD_USERS)
-            .child(user.getUserId())
+            .child(userId)
             .child(FirebaseConstants.CHILD_USERS_SONGS_REQUESTED)
             .runTransaction(new Transaction.Handler() {
                 @Override

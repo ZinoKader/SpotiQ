@@ -20,11 +20,9 @@ import android.view.View;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-
-import org.threeten.bp.LocalDateTime;
-
-import java.util.ArrayList;
-import java.util.List;
+import com.bumptech.glide.load.resource.drawable.GlideDrawable;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
 
 import nucleus5.factory.RequiresPresenter;
 import se.zinokader.spotiq.R;
@@ -43,10 +41,8 @@ public class PartyActivity extends BaseActivity<PartyPresenter> implements Party
 
     ActivityPartyBinding binding;
     private String partyTitle;
-    private LocalDateTime initializedTimeStamp;
     private boolean userDetailsLoaded = false;
     private boolean hostProvilegesLoaded = false;
-    private List<String> shownSongAddedMessages = new ArrayList<>();
 
     private SpotiqHostService hostService;
     private boolean isHostServiceBound = false;
@@ -58,6 +54,11 @@ public class PartyActivity extends BaseActivity<PartyPresenter> implements Party
             SpotiqHostService.HostServiceBinder hostServiceBinder =
                 (SpotiqHostService.HostServiceBinder) serviceBinder;
             hostService = hostServiceBinder.getService();
+            //restart service if service was corrupted
+            if (hostService.isPartyInformationMissing()) {
+                hostService.stopSelf();
+                startHostService();
+            }
         }
 
         @Override
@@ -79,23 +80,10 @@ public class PartyActivity extends BaseActivity<PartyPresenter> implements Party
         }
     };
 
-    private BroadcastReceiver songAddedReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String addedSong = intent.getStringExtra(ApplicationConstants.SONG_ADDED_EXTRA);
-            if (!shownSongAddedMessages.contains(addedSong)) {
-                shownSongAddedMessages.add(addedSong);
-                if (LocalDateTime.now().isAfter(initializedTimeStamp.plusSeconds(ApplicationConstants.PARTY_MESSAGE_GRACE_PERIOD_SEC))) {
-                    new Handler().postDelayed(() -> showMessage("\"" + addedSong + "\"" + " has been queued"), ApplicationConstants.DEFER_SNACKBAR_DELAY);
-                }
-            }
-        }
-    };
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        initializedTimeStamp = LocalDateTime.now();
+        supportPostponeEnterTransition();
         binding = DataBindingUtil.setContentView(this, R.layout.activity_party);
 
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
@@ -112,9 +100,6 @@ public class PartyActivity extends BaseActivity<PartyPresenter> implements Party
 
         LocalBroadcastManager.getInstance(this).registerReceiver(
             playingStatusReceiver, new IntentFilter(ServiceConstants.PLAYING_STATUS_BROADCAST_NAME));
-
-        LocalBroadcastManager.getInstance(this).registerReceiver(
-            songAddedReceiver, new IntentFilter(ApplicationConstants.SONG_ADDED_BROADCAST_NAME));
 
         binding.partyTitle.setText(partyTitle);
         binding.searchTransitionSheet.setFab(binding.searchFab);
@@ -230,6 +215,19 @@ public class PartyActivity extends BaseActivity<PartyPresenter> implements Party
                 .placeholder(R.drawable.image_profile_placeholder)
                 .dontAnimate()
                 .dontTransform()
+                .listener(new RequestListener<String, GlideDrawable>() {
+                    @Override
+                    public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
+                        supportStartPostponedEnterTransition();
+                        return false;
+                    }
+
+                    @Override
+                    public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
+                        supportStartPostponedEnterTransition();
+                        return false;
+                    }
+                })
                 .into(binding.userImage);
             userDetailsLoaded = true;
         }
@@ -240,12 +238,20 @@ public class PartyActivity extends BaseActivity<PartyPresenter> implements Party
         if (!hostProvilegesLoaded) {
             binding.playPauseFab.setVisibility(View.VISIBLE);
             bindHostService();
-            Intent hostServiceIntent = new Intent(this, SpotiqHostService.class);
-            hostServiceIntent.setAction(ServiceConstants.ACTION_INIT);
-            hostServiceIntent.putExtra(ApplicationConstants.PARTY_NAME_EXTRA, partyTitle);
-            startService(hostServiceIntent);
+            startHostService();
             hostProvilegesLoaded = true;
         }
+    }
+
+    private void startHostService() {
+        Intent hostServiceIntent = new Intent(this, SpotiqHostService.class);
+        hostServiceIntent.setAction(ServiceConstants.ACTION_INIT);
+        hostServiceIntent.putExtra(ApplicationConstants.PARTY_NAME_EXTRA, partyTitle);
+        startService(hostServiceIntent);
+    }
+
+    private void stopHostService() {
+        stopService(new Intent(this, SpotiqHostService.class));
     }
 
     @Override
@@ -255,9 +261,7 @@ public class PartyActivity extends BaseActivity<PartyPresenter> implements Party
             .setMessage("Are you sure you want to exit the party?")
             .setPositiveButton("Yes", (dialogInterface, i) -> {
                 dialogInterface.dismiss();
-                if (hostProvilegesLoaded) {
-                    stopService(new Intent(this, SpotiqHostService.class));
-                }
+                if (hostProvilegesLoaded) stopHostService();
                 super.onBackPressed();
             })
             .setNegativeButton("No", (dialogInterface, i) -> dialogInterface.dismiss())

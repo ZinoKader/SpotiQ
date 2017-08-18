@@ -28,7 +28,7 @@ import se.zinokader.spotiq.model.User;
 import se.zinokader.spotiq.repository.PartiesRepository;
 import se.zinokader.spotiq.util.comparator.PartyMemberComparator;
 import se.zinokader.spotiq.util.di.Injector;
-import se.zinokader.spotiq.util.view.DividerItemDecoration;
+import se.zinokader.spotiq.util.view.CustomDividerItemDecoration;
 
 public class PartyMemberFragment extends Fragment {
 
@@ -93,7 +93,7 @@ public class PartyMemberFragment extends Fragment {
 
         partyMemberRecyclerAdapter = new PartyMemberRecyclerAdapter(partyMembers);
         binding.membersRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        binding.membersRecyclerView.addItemDecoration(new DividerItemDecoration(getContext()
+        binding.membersRecyclerView.addItemDecoration(new CustomDividerItemDecoration(getContext()
             .getDrawable(R.drawable.search_list_divider),false, false));
 
         AlphaInAnimationAdapter animatedAdapter =

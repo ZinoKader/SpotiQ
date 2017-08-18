@@ -23,6 +23,17 @@
     <string name="search_hint">Search for song titles</string>
     <string name="song_search_spotify_library_label">Search for music in the Spotify library</string>
     <string name="song_search_personal_playlists_label">Search for music in your personal playlists</string>
+    <string name="selected_songs_hint_label">Pull up to view selected songs</string>
+    <plurals name="selected_songs_amount_label">
+        <item quantity="one">Selected %d song</item>
+        <item quantity="other">Selected %d songs</item>
+    </plurals>
+    <plurals name="playlist_tracks_amount_label">
+        <item quantity="zero">no tracks</item>
+        <item quantity="one">1 track</item>
+        <item quantity="other">%d tracks</item>
+    </plurals>
+
 
     <!-- Transition names -->
     <string name="profile_image_transition">profileImageTransition</string>

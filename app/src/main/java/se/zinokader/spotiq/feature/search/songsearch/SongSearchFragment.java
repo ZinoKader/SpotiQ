@@ -5,15 +5,12 @@ import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.support.annotation.Nullable;
-import android.support.design.widget.Snackbar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
-
-import com.github.andrewlord1990.snackbarbuilder.SnackbarBuilder;
 
 import org.cryse.widget.persistentsearch.SimpleSearchListener;
 
@@ -26,7 +23,7 @@ import se.zinokader.spotiq.R;
 import se.zinokader.spotiq.constant.ApplicationConstants;
 import se.zinokader.spotiq.databinding.FragmentSongSearchBinding;
 import se.zinokader.spotiq.feature.base.BaseFragment;
-import se.zinokader.spotiq.feature.base.BaseView;
+import se.zinokader.spotiq.feature.search.SearchFragmentParent;
 import se.zinokader.spotiq.feature.search.SongRecyclerAdapter;
 import se.zinokader.spotiq.model.Song;
 import se.zinokader.spotiq.util.listener.Debouncer;
@@ -36,6 +33,7 @@ public class SongSearchFragment extends BaseFragment<SongSearchPresenter> implem
 
     FragmentSongSearchBinding binding;
 
+    private SearchFragmentParent searchFragmentParent;
     private SongRecyclerAdapter songRecyclerAdapter;
     private Vibrator vibrator;
     private Debouncer debouncer = new Debouncer();
@@ -51,6 +49,7 @@ public class SongSearchFragment extends BaseFragment<SongSearchPresenter> implem
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        searchFragmentParent = (SearchFragmentParent) getContext();
         vibrator = (Vibrator) getContext().getSystemService(Context.VIBRATOR_SERVICE);
     }
 
@@ -71,7 +70,7 @@ public class SongSearchFragment extends BaseFragment<SongSearchPresenter> implem
 
         songRecyclerAdapter.observeClicks()
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(this::showConfirmSongRequest);
+            .subscribe(song -> searchFragmentParent.addRequest(song));
 
         songRecyclerAdapter.observeLongClicks()
             .observeOn(AndroidSchedulers.mainThread())
@@ -124,17 +123,6 @@ public class SongSearchFragment extends BaseFragment<SongSearchPresenter> implem
 
         binding.songSearchRecyclerView.setAdapter(animatedAdapter);
         return binding.getRoot();
-    }
-
-    public void showConfirmSongRequest(Song song) {
-        new SnackbarBuilder(((BaseView) getActivity()).getRootView())
-            .duration(Snackbar.LENGTH_LONG)
-            .message("Confirm song request")
-            .actionText("Queue song")
-            .actionTextColor(getResources().getColor(R.color.colorAccent))
-            .actionClickListener(confirmed -> getPresenter().requestSong(song))
-            .build()
-            .show();
     }
 
     @Override

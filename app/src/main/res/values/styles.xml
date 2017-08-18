@@ -27,8 +27,8 @@
     </style>
 
     <style name="AppThemeToolBarSearch" parent="AppThemeToolBar">
-        <item name="android:textCursorDrawable">@null</item>
-        <item name="colorControlActivated">@color/colorAccent</item>
+        <item name="android:textCursorDrawable">@color/colorAccent</item>
+        <item name="android:colorControlActivated">@color/colorAccent</item>
     </style>
 
     <style name="FullScreenDialogStyle" parent="AppThemeNoActionBar">

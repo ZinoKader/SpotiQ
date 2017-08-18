@@ -25,7 +25,6 @@ import se.zinokader.spotiq.constant.SpotifyConstants;
 import se.zinokader.spotiq.feature.base.BasePresenter;
 import se.zinokader.spotiq.feature.search.preview.PreviewPlayer;
 import se.zinokader.spotiq.model.Party;
-import se.zinokader.spotiq.model.Song;
 import se.zinokader.spotiq.model.User;
 import se.zinokader.spotiq.repository.PartiesRepository;
 import se.zinokader.spotiq.repository.SpotifyRepository;
@@ -78,6 +77,7 @@ public class PlaylistSearchPresenter extends BasePresenter<PlaylistSearchView> {
 
         restartableReplay(LOAD_PLAYLISTS_RESTARTABLE_ID,
             () -> getUserPlaylists()
+                .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread()),
             (playlistSearchView, playlistSimplePager) -> {
                 playlistSearchView.updatePlaylists(playlistSimplePager.items);
@@ -104,33 +104,6 @@ public class PlaylistSearchPresenter extends BasePresenter<PlaylistSearchView> {
 
     void stopPreview() {
         songPreviewPlayer.stopPreview();
-    }
-
-    void requestSong(Song song) {
-        tracklistRepository.checkSongInDbPlaylist(song, partyTitle)
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .compose(this.deliverFirst())
-            .subscribe(songExistsDelivery -> songExistsDelivery.split(
-                (songSearchView, songExists) -> {
-                    if (songExists) {
-                        songSearchView.showMessage("This song is already queued up in the tracklist");
-                    }
-                    else {
-                        tracklistRepository.addSong(song, partyTitle).subscribe(addedWithSuccess -> {
-                            if (addedWithSuccess) {
-                                partiesRepository.incrementUserSongRequestCount(partyTitle, user);
-                                songSearchView.finishWithSuccess("Song added to the tracklist!");
-                            }
-                            else {
-                                songSearchView.showMessage("Something went wrong when adding the song, try again");
-                            }
-                        });
-                    }
-                },
-                (songSearchView, throwable) -> {
-                    Log.d(LogTag.LOG_SEARCH, "Something went wrong when informing the user of song addition status");
-                }));
     }
 
     private Observable<Pager<PlaylistSimple>> getUserPlaylists() {

@@ -28,7 +28,6 @@ public class PartyPresenter extends BasePresenter<PartyView> {
     SpotifyRepository spotifyRepository;
 
     private String partyTitle;
-    private boolean memberTypeMessageShown = false;
 
     static final int LOAD_USER_RESTARTABLE_ID = 9814;
 
@@ -38,7 +37,6 @@ public class PartyPresenter extends BasePresenter<PartyView> {
 
         if (savedState != null) {
             partyTitle = savedState.getString(ApplicationConstants.PARTY_NAME_EXTRA);
-            memberTypeMessageShown = savedState.getBoolean(ApplicationConstants.MEMBER_TYPE_MESSAGE_EXTRA);
         }
 
         //listen to user changes
@@ -63,7 +61,6 @@ public class PartyPresenter extends BasePresenter<PartyView> {
     protected void onSave(@NonNull Bundle state) {
         super.onSave(state);
         state.putString(ApplicationConstants.PARTY_NAME_EXTRA, partyTitle);
-        state.putBoolean(ApplicationConstants.MEMBER_TYPE_MESSAGE_EXTRA, memberTypeMessageShown);
     }
 
     void setPartyTitle(String partyTitle) {
@@ -79,12 +76,7 @@ public class PartyPresenter extends BasePresenter<PartyView> {
             .subscribe(resultDelivery -> resultDelivery.split((partyView, userIsHost) -> {
                 if (userIsHost) {
                     partyView.setHostPrivileges();
-                    if (!memberTypeMessageShown) partyView.showMessage("Connected as a party host");
                 }
-                else {
-                    if (!memberTypeMessageShown) partyView.showMessage("Connected as a party member");
-                }
-                memberTypeMessageShown = true;
             }, (partyView, throwable) -> {
                 partyView.showMessage("Could not load host priviliges, retrying...");
             }));

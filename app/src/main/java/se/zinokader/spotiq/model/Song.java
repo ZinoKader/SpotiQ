@@ -1,5 +1,8 @@
 package se.zinokader.spotiq.model;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.google.firebase.database.Exclude;
 
 import java.util.List;
@@ -9,7 +12,7 @@ import kaaes.spotify.webapi.android.models.ArtistSimple;
 import se.zinokader.spotiq.constant.ApplicationConstants;
 
 
-public class Song {
+public class Song implements Parcelable {
 
     private String addedBySpotifyId;
     private String addedByUserName;
@@ -81,4 +84,49 @@ public class Song {
             ? ApplicationConstants.ALBUM_ART_PLACEHOLDER_URL
             : album.images.get(0).url;
     }
+
+    @Exclude
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Exclude
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(this.addedBySpotifyId);
+        dest.writeString(this.addedByUserName);
+        dest.writeString(this.songSpotifyId);
+        dest.writeParcelable(this.album, flags);
+        dest.writeTypedList(this.artists);
+        dest.writeLong(this.durationMs);
+        dest.writeString(this.name);
+        dest.writeString(this.previewUrl);
+    }
+
+    protected Song(Parcel in) {
+        this.addedBySpotifyId = in.readString();
+        this.addedByUserName = in.readString();
+        this.songSpotifyId = in.readString();
+        this.album = in.readParcelable(AlbumSimple.class.getClassLoader());
+        this.artists = in.createTypedArrayList(ArtistSimple.CREATOR);
+        this.durationMs = in.readLong();
+        this.name = in.readString();
+        this.previewUrl = in.readString();
+    }
+
+    @Exclude
+    public static final Parcelable.Creator<Song> CREATOR = new Parcelable.Creator<Song>() {
+        @Exclude
+        @Override
+        public Song createFromParcel(Parcel source) {
+            return new Song(source);
+        }
+
+        @Exclude
+        @Override
+        public Song[] newArray(int size) {
+            return new Song[size];
+        }
+    };
 }

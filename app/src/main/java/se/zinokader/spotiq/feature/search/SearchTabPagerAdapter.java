@@ -32,6 +32,19 @@ public class SearchTabPagerAdapter extends FragmentStatePagerAdapter {
         }
     }
 
+
+    @Override
+    public CharSequence getPageTitle(int position) {
+        switch (position) {
+            case 0:
+                return "Playlists";
+            case 1:
+                return "Search";
+            default:
+                return null;
+        }
+    }
+
     @Override
     public int getCount() {
         return tabCount;

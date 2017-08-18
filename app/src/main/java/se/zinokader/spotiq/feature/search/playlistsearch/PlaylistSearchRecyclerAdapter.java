@@ -55,7 +55,8 @@ public class PlaylistSearchRecyclerAdapter extends RecyclerView.Adapter<Playlist
             .into(playlistHolder.playlistArt);
         playlistHolder.playlistName.setText(playlist.name);
         playlistHolder.playlistCreatorName.setText(playlistCreator.getUserName());
-        playlistHolder.songCount.setText(playlist.tracks.total + " tracks");
+        playlistHolder.songCount.setText(context.getResources().getQuantityString(
+            R.plurals.playlist_tracks_amount_label, playlist.tracks.total, playlist.tracks.total));
     }
 
     @Override
@@ -68,8 +69,10 @@ public class PlaylistSearchRecyclerAdapter extends RecyclerView.Adapter<Playlist
     }
 
     void updatePlaylists(List<PlaylistSimple> playlists) {
-        if (!this.playlists.containsAll(playlists)) {
-            this.playlists.addAll(playlists);
+        for (PlaylistSimple playlist : playlists) {
+            if (!this.playlists.contains(playlist)) {
+                this.playlists.add(playlist);
+            }
         }
     }
 

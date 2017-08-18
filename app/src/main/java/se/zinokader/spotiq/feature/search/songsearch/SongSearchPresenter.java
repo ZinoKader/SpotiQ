@@ -26,7 +26,6 @@ import se.zinokader.spotiq.model.Song;
 import se.zinokader.spotiq.model.User;
 import se.zinokader.spotiq.repository.PartiesRepository;
 import se.zinokader.spotiq.repository.SpotifyRepository;
-import se.zinokader.spotiq.repository.TracklistRepository;
 import se.zinokader.spotiq.service.authentication.SpotifyAuthenticationService;
 import se.zinokader.spotiq.util.mapper.TrackMapper;
 
@@ -37,9 +36,6 @@ public class SongSearchPresenter extends BasePresenter<SongSearchView> {
 
     @Inject
     PartiesRepository partiesRepository;
-
-    @Inject
-    TracklistRepository tracklistRepository;
 
     @Inject
     SpotifyRepository spotifyRepository;
@@ -104,33 +100,6 @@ public class SongSearchPresenter extends BasePresenter<SongSearchView> {
 
     void stopPreview() {
         songPreviewPlayer.stopPreview();
-    }
-
-    void requestSong(Song song) {
-        tracklistRepository.checkSongInDbPlaylist(song, partyTitle)
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .compose(this.deliverFirst())
-            .subscribe(songExistsDelivery -> songExistsDelivery.split(
-                (songSearchView, songExists) -> {
-                    if (songExists) {
-                        songSearchView.showMessage("This song is already queued up in the tracklist");
-                    }
-                    else {
-                        tracklistRepository.addSong(song, partyTitle).subscribe(addedWithSuccess -> {
-                            if (addedWithSuccess) {
-                                partiesRepository.incrementUserSongRequestCount(partyTitle, user);
-                                songSearchView.finishWithSuccess("Song added to the tracklist!");
-                            }
-                            else {
-                                songSearchView.showMessage("Something went wrong when adding the song, try again");
-                            }
-                        });
-                    }
-                },
-                (songSearchView, throwable) -> {
-                    Log.d(LogTag.LOG_SEARCH, "Something went wrong when informing the user of song addition status");
-                }));
     }
 
     void searchTracks(String query) {

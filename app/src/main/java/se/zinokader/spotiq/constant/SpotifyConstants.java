@@ -17,9 +17,15 @@ public final class SpotifyConstants {
         SCOPE_PLAYLIST_READ_PRIVATE,
         SCOPE_USER_TOP_READ };
 
+    public static final int RESULT_CODE_EMPTY = 0;
     public static final int RESULT_CODE_AUTHENTICATED = 100;
-    public static final int RESULT_CODE_ERROR = 200;
+    public static final int RESULT_CODE_WRONG_REQUEST_CODE = 200;
     public static final int RESULT_CODE_NO_PREMIUM = 300;
+    public static final int RESULT_CODE_CONNECTION_FAILURE = 400;
+    public static final int RESULT_CODE_SPOTIFY_CODE = 500;
+    public static final int RESULT_CODE_ERROR = 600;
+    public static final int RESULT_CODE_UNKNOWN = 700;
+
 
     /* Spotify Web API-related */
     public static final int TOP_TRACKS_QUERY_RESPONSE_LIMIT = 50;

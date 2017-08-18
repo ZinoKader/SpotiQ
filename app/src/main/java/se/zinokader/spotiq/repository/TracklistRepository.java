@@ -1,5 +1,6 @@
 package se.zinokader.spotiq.repository;
 
+import android.support.v4.util.Pair;
 import android.util.Log;
 
 import com.google.firebase.database.ChildEventListener;
@@ -24,7 +25,7 @@ public class TracklistRepository {
         this.databaseReference = databaseReference;
     }
 
-    public Observable<Boolean> checkSongInDbPlaylist(Song song, String partyTitle) {
+    public Observable<Pair<Song, Boolean>> checkSongInDbPlaylist(Song song, String partyTitle) {
         return Observable.create(subscriber -> databaseReference
             .child(partyTitle)
             .child(FirebaseConstants.CHILD_TRACKLIST)
@@ -35,12 +36,12 @@ public class TracklistRepository {
                         Song dbSong = songSnapshot.getValue(Song.class);
                         if (dbSong == null) continue;
                         if (song.getSongSpotifyId().equals(dbSong.getSongSpotifyId())) {
-                            subscriber.onNext(true);
+                            subscriber.onNext(new Pair<>(song, true));
                             subscriber.onComplete();
                             break;
                         }
                     }
-                    subscriber.onNext(false);
+                    subscriber.onNext(new Pair<>(song, false));
                     subscriber.onComplete();
                 }
 
@@ -53,13 +54,13 @@ public class TracklistRepository {
             }));
     }
 
-    public Single<Boolean> addSong(Song song, String partyTitle) {
-        return Single.create(subscriber -> databaseReference
+    public Observable<Boolean> addSong(Song song, String partyTitle) {
+        return Observable.create(subscriber -> databaseReference
             .child(partyTitle)
             .child(FirebaseConstants.CHILD_TRACKLIST)
             .push() //push is timestamp-based, items are chronologically ordered
             .setValue(song)
-            .addOnCompleteListener(task -> subscriber.onSuccess(task.isSuccessful()))
+            .addOnCompleteListener(task -> subscriber.onNext(task.isSuccessful()))
             .addOnFailureListener(subscriber::onError));
     }
 

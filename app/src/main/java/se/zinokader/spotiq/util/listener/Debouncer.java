@@ -17,7 +17,7 @@ public class Debouncer {
         startTimer(delayMs);
     }
 
-    private void startTimer(final long updateIntervalMs) {
+    private void startTimer(long updateIntervalMs) {
         debounceTimer = new CountDownTimer(updateIntervalMs, updateIntervalMs) {
             @Override
             public void onTick(long millisUntilFinished) {

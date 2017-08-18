@@ -32,6 +32,10 @@ public abstract class BaseFragment<P extends Presenter> extends NucleusSupportFr
         super.onPause();
     }
 
+    public boolean onBackPressed() {
+        return false;
+    }
+
     public void showMessage(String message) {
         if (snackbarShowing) {
             deferMessage(message);

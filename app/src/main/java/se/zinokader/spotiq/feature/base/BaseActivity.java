@@ -5,9 +5,12 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.Fragment;
 import android.view.inputmethod.InputMethodManager;
 
 import com.github.andrewlord1990.snackbarbuilder.SnackbarBuilder;
+
+import java.util.List;
 
 import nucleus5.factory.PresenterFactory;
 import nucleus5.presenter.Presenter;
@@ -43,6 +46,25 @@ public abstract class BaseActivity<P extends Presenter> extends NucleusAppCompat
     public void onPause() {
         hideKeyboard();
         super.onPause();
+    }
+
+
+    @Override
+    public void onBackPressed() {
+        List<Fragment> fragmentList = getSupportFragmentManager().getFragments();
+        boolean handled = false;
+        for (Fragment fragment : fragmentList) {
+            if (fragment instanceof BaseFragment) {
+                handled = ((BaseFragment) fragment).onBackPressed();
+                if (handled) {
+                    break;
+                }
+            }
+        }
+
+        if(!handled) {
+            super.onBackPressed();
+        }
     }
 
     public void showMessage(String message) {

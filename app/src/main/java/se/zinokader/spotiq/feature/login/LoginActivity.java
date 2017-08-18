@@ -124,10 +124,13 @@ public class LoginActivity extends BaseActivity<LoginPresenter> implements Login
             return;
         }
 
+        //TODO: Remove (debug only)
+        //showMessage("Result code: " + resultCode);
+
         if (resultCode == SpotifyConstants.RESULT_CODE_AUTHENTICATED) {
             getPresenter().logInFinished();
         }
-        else if(resultCode == SpotifyConstants.RESULT_CODE_NO_PREMIUM) {
+        else if (resultCode == SpotifyConstants.RESULT_CODE_NO_PREMIUM) {
             getPresenter().logInFailed(false);
         }
         else {
