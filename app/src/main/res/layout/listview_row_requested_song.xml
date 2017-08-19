@@ -55,7 +55,7 @@
             android:ellipsize="end"
             android:fontFamily="@font/roboto_light"
             android:maxLines="1"
-            android:maxWidth="110dp"
+            android:maxWidth="90dp"
             android:shadowColor="@color/colorMaterialGray"
             android:textAlignment="viewStart"
             android:textColor="@color/colorMaterialWhite"
@@ -86,7 +86,7 @@
             android:ellipsize="end"
             android:fontFamily="@font/roboto_light"
             android:maxLines="1"
-            android:maxWidth="110dp"
+            android:maxWidth="90dp"
             android:shadowColor="@color/colorMaterialGray"
             android:textAlignment="viewStart"
             android:textColor="@color/colorMaterialWhite"
@@ -94,6 +94,18 @@
             android:textStyle="normal"
             app:layout_constraintStart_toEndOf="@+id/separator"
             app:layout_constraintTop_toBottomOf="@+id/songName" />
+
+        <ImageButton
+            android:id="@+id/closeButton"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:layout_marginEnd="15dp"
+            android:background="?selectableItemBackground"
+            android:src="@drawable/ic_close"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintTop_toTopOf="parent" />
 
     </android.support.constraint.ConstraintLayout>
 

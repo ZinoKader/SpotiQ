@@ -15,6 +15,8 @@ import com.rw.keyboardlistener.KeyboardUtils;
 
 import java.util.ArrayList;
 
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.subjects.PublishSubject;
 import nucleus5.factory.RequiresPresenter;
 import se.zinokader.spotiq.R;
 import se.zinokader.spotiq.constant.ApplicationConstants;
@@ -28,7 +30,10 @@ public class SearchActivity extends BaseActivity<SearchPresenter> implements Sea
     ActivitySearchBinding binding;
     private BottomSheetBehavior bottomSheetBehavior;
     private SongRequestArrayAdapter songRequestArrayAdapter;
+    private PublishSubject<Song> removeFromRequestsPublisher = PublishSubject.create();
     private ArrayList<Song> songRequests;
+
+    private CompositeDisposable subscriptions = new CompositeDisposable();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -79,7 +84,11 @@ public class SearchActivity extends BaseActivity<SearchPresenter> implements Sea
 
         //bottom sheet listview setup
         songRequestArrayAdapter = new SongRequestArrayAdapter(this, songRequests);
+        songRequestArrayAdapter.setRemovalPublisher(removeFromRequestsPublisher);
         binding.bottomSheetContent.requestedSongsListView.setAdapter(songRequestArrayAdapter);
+
+        //bottom sheet listview request removal-listener
+        subscriptions.add(removeFromRequestsPublisher.subscribe(this::removeRequest));
 
         //handle hiding/showing bottom sheet on keyboard show/dismiss
         KeyboardUtils.addKeyboardToggleListener(this, isShowing -> {
@@ -94,6 +103,12 @@ public class SearchActivity extends BaseActivity<SearchPresenter> implements Sea
                 binding.addFab.setVisibility(View.VISIBLE);
             }
         });
+    }
+
+    @Override
+    protected void onDestroy() {
+        subscriptions.clear();
+        super.onDestroy();
     }
 
     @Override

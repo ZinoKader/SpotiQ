@@ -81,24 +81,26 @@ public class SearchPresenter extends BasePresenter<SearchView> {
     }
 
     void queueRequestedSongs() {
-        Observable.fromIterable(songRequests)
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .concatMap(song -> tracklistRepository.checkSongInDbPlaylist(song, partyTitle))
-            .filter(songBooleanPair -> {
-                Boolean songExistsInDb = songBooleanPair.second;
-                return !songExistsInDb;
-            })
-            .concatMapEager(songBooleanPair -> tracklistRepository.addSong(songBooleanPair.first, partyTitle))
-            .subscribe(isSongAdded -> {
-                if (isSongAdded) {
-                    spotifyRepository.getMe(spotifyCommunicatorService.getWebApi())
-                        .subscribeOn(Schedulers.io())
-                        .subscribe(userPrivate -> partiesRepository.incrementUserSongRequestCount(partyTitle, userPrivate.id));
-                }
-            });
+        if (!songRequests.isEmpty()) {
+            Observable.fromIterable(songRequests)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .concatMap(song -> tracklistRepository.checkSongInDbPlaylist(song, partyTitle))
+                .filter(songBooleanPair -> {
+                    Boolean songExistsInDb = songBooleanPair.second;
+                    return !songExistsInDb;
+                })
+                .concatMapEager(songBooleanPair -> tracklistRepository.addSong(songBooleanPair.first, partyTitle))
+                .subscribe(isSongAdded -> {
+                    if (isSongAdded) {
+                        spotifyRepository.getMe(spotifyCommunicatorService.getWebApi())
+                            .subscribeOn(Schedulers.io())
+                            .subscribe(userPrivate -> partiesRepository.incrementUserSongRequestCount(partyTitle, userPrivate.id));
+                    }
+                });
 
-        if (getView() != null) getView().finishRequest();
+            if (getView() != null) getView().finishRequest();
+        }
     }
 
 
