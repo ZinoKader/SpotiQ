@@ -2,7 +2,6 @@ package se.zinokader.spotiq.feature.search;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
-import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -18,10 +17,10 @@ import java.util.List;
 
 import io.reactivex.Observable;
 import io.reactivex.subjects.PublishSubject;
-import kaaes.spotify.webapi.android.models.ArtistSimple;
 import se.zinokader.spotiq.R;
 import se.zinokader.spotiq.constant.ApplicationConstants;
 import se.zinokader.spotiq.model.Song;
+import se.zinokader.spotiq.util.mapper.ArtistMapper;
 import se.zinokader.spotiq.util.type.Empty;
 
 public class SongRecyclerAdapter extends RecyclerView.Adapter<SongRecyclerAdapter.SongHolder> {
@@ -61,12 +60,7 @@ public class SongRecyclerAdapter extends RecyclerView.Adapter<SongRecyclerAdapte
             return true;
         });
 
-        List<String> artists = new ArrayList<>();
-        for (ArtistSimple artist : song.getArtists()) {
-            artists.add(artist.name);
-        }
-
-        String artistsName = TextUtils.join(", ", artists);
+        String artistsName = ArtistMapper.joinArtistNames(song.getArtists());
 
         Glide.with(context)
             .load(song.getAlbumArtUrl())

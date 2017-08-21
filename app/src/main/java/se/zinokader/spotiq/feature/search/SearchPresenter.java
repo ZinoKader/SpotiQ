@@ -17,6 +17,7 @@ import se.zinokader.spotiq.repository.PartiesRepository;
 import se.zinokader.spotiq.repository.SpotifyRepository;
 import se.zinokader.spotiq.repository.TracklistRepository;
 import se.zinokader.spotiq.service.authentication.SpotifyAuthenticationService;
+import se.zinokader.spotiq.util.comparator.SongComparator;
 
 public class SearchPresenter extends BasePresenter<SearchView> {
 
@@ -63,11 +64,9 @@ public class SearchPresenter extends BasePresenter<SearchView> {
     }
 
     void addRequest(Song song) {
-        for (Song requestedSong : songRequests) {
-            if (requestedSong.getSongSpotifyId().equals(song.getSongSpotifyId())) {
-                if (getView() != null) getView().showMessage("\"" + song.getName() + "\"" + " already selected");
-                return;
-            }
+        if (SongComparator.contains(song, songRequests)) {
+            if (getView() != null) getView().showMessage("\"" + song.getName() + "\"" + " already selected");
+            return;
         }
         songRequests.add(song);
         if (getView() != null) getView().updateRequestList(songRequests);

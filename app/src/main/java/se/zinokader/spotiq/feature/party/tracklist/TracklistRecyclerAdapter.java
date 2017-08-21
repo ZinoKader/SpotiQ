@@ -2,7 +2,6 @@ package se.zinokader.spotiq.feature.party.tracklist;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
-import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,7 +13,6 @@ import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
@@ -22,10 +20,10 @@ import java.util.concurrent.TimeUnit;
 import jp.wasabeef.glide.transformations.BlurTransformation;
 import jp.wasabeef.glide.transformations.ColorFilterTransformation;
 import jp.wasabeef.glide.transformations.CropTransformation;
-import kaaes.spotify.webapi.android.models.ArtistSimple;
 import se.zinokader.spotiq.R;
 import se.zinokader.spotiq.constant.ApplicationConstants;
 import se.zinokader.spotiq.model.Song;
+import se.zinokader.spotiq.util.mapper.ArtistMapper;
 
 public class TracklistRecyclerAdapter extends RecyclerView.Adapter<TracklistRecyclerAdapter.SongHolder> {
 
@@ -64,12 +62,7 @@ public class TracklistRecyclerAdapter extends RecyclerView.Adapter<TracklistRecy
         Song song = songs.get(position);
         Context context = songHolder.itemView.getContext();
 
-        List<String> artists = new ArrayList<>();
-        for (ArtistSimple artist : song.getArtists()) {
-            artists.add(artist.name);
-        }
-
-        String artistsName = TextUtils.join(", ", artists);
+        String artistsName = ArtistMapper.joinArtistNames(song.getArtists());
 
         String runTimeText = String.format(Locale.getDefault(),
             "%d minutes, %d seconds",

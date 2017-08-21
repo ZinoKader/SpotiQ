@@ -3,7 +3,6 @@ package se.zinokader.spotiq.feature.search;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,14 +14,13 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import io.reactivex.subjects.PublishSubject;
-import kaaes.spotify.webapi.android.models.ArtistSimple;
 import se.zinokader.spotiq.R;
 import se.zinokader.spotiq.constant.ApplicationConstants;
 import se.zinokader.spotiq.model.Song;
+import se.zinokader.spotiq.util.mapper.ArtistMapper;
 
 public class SongRequestArrayAdapter extends ArrayAdapter<Song> {
 
@@ -43,11 +41,7 @@ public class SongRequestArrayAdapter extends ArrayAdapter<Song> {
             convertView = LayoutInflater.from(getContext()).inflate(R.layout.listview_row_requested_song, parent, false);
         }
 
-        List<String> artists = new ArrayList<>();
-        for (ArtistSimple artist : song.getArtists()) {
-            artists.add(artist.name);
-        }
-        String artistsJoined = TextUtils.join(", ", artists);
+        String artistsJoined = ArtistMapper.joinArtistNames(song.getArtists());
 
         ImageView albumArt = convertView.findViewById(R.id.albumArt);
         TextView songName = convertView.findViewById(R.id.songName);

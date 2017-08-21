@@ -8,6 +8,8 @@ import se.zinokader.spotiq.model.User;
 
 public class PartyMemberComparator {
 
+    private PartyMemberComparator() {}
+
     public static ByJoinedTimeComparator getByJoinedTimeComparator() {
         return new ByJoinedTimeComparator();
     }

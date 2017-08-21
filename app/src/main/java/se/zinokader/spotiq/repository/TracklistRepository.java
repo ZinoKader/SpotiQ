@@ -15,6 +15,7 @@ import se.zinokader.spotiq.constant.FirebaseConstants;
 import se.zinokader.spotiq.constant.LogTag;
 import se.zinokader.spotiq.model.ChildEvent;
 import se.zinokader.spotiq.model.Song;
+import se.zinokader.spotiq.util.comparator.SongComparator;
 import se.zinokader.spotiq.util.exception.EmptyTracklistException;
 
 public class TracklistRepository {
@@ -35,7 +36,7 @@ public class TracklistRepository {
                     for (DataSnapshot songSnapshot : dataSnapshot.getChildren()) {
                         Song dbSong = songSnapshot.getValue(Song.class);
                         if (dbSong == null) continue;
-                        if (song.getSongSpotifyId().equals(dbSong.getSongSpotifyId())) {
+                        if (SongComparator.isEqual(song, dbSong)) {
                             subscriber.onNext(new Pair<>(song, true));
                             subscriber.onComplete();
                             break;
